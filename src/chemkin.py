@@ -156,7 +156,7 @@ class ReactionSystem():
             k = [k]*len(self.reactant_coefficients[0])
         if (len(self.reactant_coefficients) != len(concs)
             or len(self.reactant_coefficients) == 0
-            or len(self.reactant_coefficients[0]) != len(k):
+            or len(self.reactant_coefficients[0]) != len(k)):
             raise  ValueError("Invalid input parameters.")
         progress = k # Initialize progress rates with reaction rate coefficients
         for jdx, rj in enumerate(progress):
