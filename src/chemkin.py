@@ -11,9 +11,9 @@ import numpy as np
 
 class ElementaryReaction():
     
-    def __init__(self,reaction_properties):
+    def __init__(self, reaction_properties):
         self.reaction_properties = reaction_properties
-        self.rate_type =  self.reaction_properties['rate_type']
+        self.rate_type = self.reaction_properties['rate_type']
         self.rate_params = self.reaction_properties['rate_params']
         self.reactants = self.reaction_properties['reactants']
         self.products = self.reaction_properties['products']
@@ -35,7 +35,8 @@ class ElementaryReaction():
                 self.E = self.rate_params['E']
                 rate_coeff = self._k_arrhenius(T)
         else:
-            raise ValueError('No value for `type of rate passed`. Pass a value to get the reaction coeff')
+            raise ValueError('No value for `type of rate passed`. '
+                             'Pass a value to get the reaction coeff')
         return rate_coeff
         
 
@@ -65,7 +66,8 @@ class ElementaryReaction():
         5.0
         """
         if self.k < 0:
-            raise ValueError("Negative reaction rate cannot be negative. Check the value. ")
+            raise ValueError("Negative reaction rate cannot be negative. "
+                             "Check the value. ")
 
         return self.k
 
@@ -152,12 +154,15 @@ class ReactionSystem():
         k = self.get_rate_coefficients(temperature)
         if type(k) is float:
             k = [k]*len(self.reactant_coefficients[0])
-        if len(self.reactant_coefficients) != len(concs) or len(self.reactant_coefficients)==0 or len(self.reactant_coefficients[0])!=len(k):
+        if (len(self.reactant_coefficients) != len(concs)
+            or len(self.reactant_coefficients) == 0
+            or len(self.reactant_coefficients[0]) != len(k):
             raise  ValueError("Invalid input parameters.")
         progress = k # Initialize progress rates with reaction rate coefficients
         for jdx, rj in enumerate(progress):
             if rj < 0:
-                raise ValueError("k = {0:18.16e}:  Negative reaction rate coefficients are prohibited!".format(rj))
+                raise ValueError("k = {0:18.16e}:  Negative reaction "
+                                 "rate coefficients are prohibited!".format(rj))
             for idx, xi in enumerate(concs):
                 nu_ij = self.reactant_coefficients[idx,jdx]
                 if xi  < 0.0:
