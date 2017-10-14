@@ -1,4 +1,3 @@
-import numpy as np
 
 
 def calculate_progress_rate(concentrations, reactant_coeffs, reaction_coeffs):
@@ -294,14 +293,20 @@ class ReactionSystem():
     """
 
     """
-    def __init__(elementary_reactions):
+    def __init__(self, elementary_reactions, species):
+        self.elementary_reactions = elementary_reactions
+        self.species = species
+        self.reactant_coefficients = []
+        self.product_coefficients = []
         pass
 
     def __repr__():
         pass
 
     def calculate_reaction_coefficients(temperature):
-        pass
+        coefficients = [er.get_k(temperature) for er
+                        in self.elementary_reactions]
+        return coefficients
 
     def calculate_progress_rate():
         pass
@@ -312,6 +317,14 @@ class ReactionSystem():
     def get_species():
         pass
 
+    def build_reactant_coefficient_matrix():
+        mat = np.zeros([len(self.species), len(self.elementary_reactions)])
+        for i,reaction in enumerate(self.elementary_reactions):
+            dict_ = reaction.get_reactant_coefficients()
+            for j,species in self.species:
+                mat[i,j] = dict_.get(species, 0)
+            
+
 
 class XMLReader():
     """
@@ -320,22 +333,51 @@ class XMLReader():
     """
     def __init__(self, xml_file):
         self.xml_file = xml_file
-        
-    
+        xml_tree = ET.parse(xml_file)
+        self.root = xml_tree.getroot()
 
-        
-    def build_reaction_system():
-        # return ReactionSystem()
-        pass
-    
+    def _parse_reaction(self, reaction_elt):
+        """Collect individual reaction properties in a dictionary."""
+        properties = {}
+        prop = reaction_elt.attrib
 
-    def __repr__():
-        pass
+        return attributes
+
+    def _get_species(self):
+        """Return the species involved in the reaction."""
+        try:
+            phase_elt = self.root.find('phase')
+            species_array_elt = phase_elt.find('speciesArray')
+            species_text = species_array_elt.text
+        except AttributeError:
+            raise LookupError("Element root>phase>speciesArray")
+        species = species_text.split()
+        return species
+
+    def get_reaction_systems(self):
+        """
+        """
+        species = self._get_species()
+        reaction_systems = []
+        for reaction_data in self.root.findAll('reactionData'):
+            elementary_reactions = []
+            for reaction in reaction_data.findAll('reaction'):
+                reaction_properties = self._parse_reaction(reaction)
+                elementary_reaction = ElementaryReaction(reaction_properties)
+                elementary_reactions.append(elementary_reaction)
+            reaction_system = ReactionSystem(elementary_reactions, species)
+            reaction_systems.append(reaction_system)
+
+        return reaction_systems    
+
+    def __repr__(self):
+        return "XMLReader(%s)" % self.xml_file
 
 
 
 if __name__ == "__main__":
     reader = XMLReader(xml_file)
     reaction_system = reader.build_reaction_system()
-    print ("rates: ", reaction_system.calculate_reaction_rate())
+    print ("rates: ", reaction_system.calculate_reaction_rate(T=234))
+    print ("rates: ", reaction_system.calculate_reaction_rate(T=400))
 
