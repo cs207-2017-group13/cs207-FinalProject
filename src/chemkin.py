@@ -24,96 +24,96 @@ class ElementaryReaction():
     def get_products(self):
         return self.products
       
-    def calculate_rate_coefficients(self, T):
-        self. T = T
-        if self.reaction_type:
-            if self.reaction_type.lower() == 'constant':
-                self.k = self.reaction_params['k']
-                reaction_coeff = self._constant_rate(self)
+    def calculate_rate_coefficient(self, T):
+        if self.rate_type:
+            if self.rate_type.lower() == 'constant':
+                self.k = self.rate_params['k']
+                rate_coeff = self._constant_rate()
             else:
-                self.A = self.reaction_params['A']
-                self.b = self.reaction_params['b']
-                self.E = self.reaction_params['E']
-                reaction_coeff = self._k_arrhenius(self)              
+                self.A = self.rate_params['A']
+                self.b = self.rate_params['b']
+                self.E = self.rate_params['E']
+                rate_coeff = self._k_arrhenius(T)
         else:
             raise ValueError('No value for `type of rate passed`. Pass a value to get the reaction coeff')
+        return rate_coeff
         
 
     def _constant_rate(self, k = 1.0):
-    """Return a constant reaction rate coefficient.
+        """Return a constant reaction rate coefficient.
 
-    In zeroth-order reactions, k = constant.
+        In zeroth-order reactions, k = constant.
 
-    INPUTS:
-    =======
-    k: float, default value = 1.0
-       Constant reaction rate coefficient
+        INPUTS:
+        =======
+        k: float, default value = 1.0
+           Constant reaction rate coefficient
 
-    RETURNS:
-    ========
-    k: float
-       Constant reaction rate coefficient
+        RETURNS:
+        ========
+        k: float
+           Constant reaction rate coefficient
 
-    Notes
-    -----
-    Although it would be sensible if input is numeric, no exceptions
-    will be raised if this is not the case.
+        Notes
+        -----
+        Although it would be sensible if input is numeric, no exceptions
+        will be raised if this is not the case.
 
-    EXAMPLES:
-    =========
-    >>> k_const(5.0)
-    5.0
-    """
-    if self.k < 0:
-        raise ValueError("Negative reaction rate cannot be negative. Check the value. ")
-        
-    return self.k
+        EXAMPLES:
+        =========
+        >>> k_const(5.0)
+        5.0
+        """
+        if self.k < 0:
+            raise ValueError("Negative reaction rate cannot be negative. Check the value. ")
+
+        return self.k
 
 
-    def _k_arrhenius(self):
-    """Return a reaction rate coefficient according to the Arrhenius equation.
-    
-    The Arrhenius equation relates the rate constant, k, of a chemical
-    reaction to parameters A (pre-exponential factor), E (activation
-    energy), T (absolute temperature), and b (exponential indicating
-    temperature-dependence of pre-exponential factor)::
+    def _k_arrhenius(self, temperature, R=8.314):
+        """Return a reaction rate coefficient according to the Arrhenius equation.
 
-        k = A T^b exp[ -E / (RT) ]
+        The Arrhenius equation relates the rate constant, k, of a chemical
+        reaction to parameters A (pre-exponential factor), E (activation
+        energy), T (absolute temperature), and b (exponential indicating
+        temperature-dependence of pre-exponential factor)::
 
-    When ``b = 0``, the above formula corresponds to the Arrhenius equation.  
-    A nonzero value for b gives the modified Arrhenius equation.
-    
-    INPUTS:
-    =======
-    A: float
-       Arrhenius prefactor, Must be positive
-    b: float,
-       Modified Arrhenius parameter, default value = 0.0
-    E: float
-       Activation energy
-    T: float
-       Temperature, Must be positive
-    R: float, default value = 8.314
-       Ideal gas constant
-    
-    RETURNS:
-    ========
-    k: float
-       Modified Arrhenius reaction rate coefficient
-    
-    EXAMPLES:
-    =========
-    >>> k_mod_arr(2.0, -0.5, 3.0, 100.0)
-    0.19927962618542916
-    """
-    if self.A < 0.0:
-        raise ValueError("`A` must be positive.")
+            k = A T^b exp[ -E / (RT) ]
 
-    if self.T < 0.0:
-        raise ValueError("`T` in Kelvin scale  must be positive." )
-   
-    k_arrhenius = (self.A * (np.power(self.T,self.b))) * np.exp(-self.E / (R * self.T))
-    return k_arrhenius
+        When ``b = 0``, the above formula corresponds to the Arrhenius equation.  
+        A nonzero value for b gives the modified Arrhenius equation.
+
+        INPUTS:
+        =======
+        A: float
+           Arrhenius prefactor, Must be positive
+        b: float,
+           Modified Arrhenius parameter, default value = 0.0
+        E: float
+           Activation energy
+        T: float
+           Temperature, Must be positive
+        R: float, default value = 8.314
+           Ideal gas constant
+
+        RETURNS:
+        ========
+        k: float
+           Modified Arrhenius reaction rate coefficient
+
+        EXAMPLES:
+        =========
+        >>> k_mod_arr(2.0, -0.5, 3.0, 100.0)
+        0.19927962618542916
+        """
+        if self.A < 0.0:
+            raise ValueError("`A` must be positive.")
+
+        if temperature < 0.0:
+            raise ValueError("`T` in Kelvin scale  must be positive." )
+
+        k_arrhenius = (self.A * temperature ** self.b) * np.exp(-self.E / (R * temperature))
+        return k_arrhenius
 
 
 class ReactionSystem():
@@ -127,10 +127,10 @@ class ReactionSystem():
         self.product_coefficients = self.build_product_coefficient_matrix()
 
 
-    def __repr__():
-        print("Species: ", self.species, "\n",
-              "Stoichiometric coefficients of reactants: ", self.reactant_coefficients, "\n",
-              "Stoichiometric coefficients of products: ", self.product_coefficients, "\n")
+    # def __repr__(self):
+    #     print("Species: ", self.species, "\n",
+    #           "Stoichiometric coefficients of reactants: ", self.reactant_coefficients, "\n",
+    #           "Stoichiometric coefficients of products: ", self.product_coefficients, "\n")
 
 
     def calculate_progress_rate(self, concs, temperature):
@@ -191,7 +191,7 @@ class ReactionSystem():
         rj = self.calculate_progress_rate(concs, temperature)
         return np.dot(nu, rj)
 
-    def get_rate_coefficients(temperature):
+    def get_rate_coefficients(self, temperature):
         """Calculate reaction rate coefficients
         
         INPUTS:
@@ -204,11 +204,11 @@ class ReactionSystem():
         f: numpy array of floats
            reaction rate ooefficients
         """
-        coefficients = [er.calculate_rate_coefficients(temperature) for er
+        coefficients = [er.calculate_rate_coefficient(temperature) for er
                         in self.elementary_reactions]
         return coefficients
 
-    def build_reactant_coefficient_matrix():
+    def build_reactant_coefficient_matrix(self):
         """Build a reactant coefficients matrix for the reaction system
 
         RETURNS:
@@ -219,12 +219,12 @@ class ReactionSystem():
         mat = np.zeros([len(self.species), len(self.elementary_reactions)])
         for i, reaction in enumerate(self.elementary_reactions):
             dict_react = reaction.get_reactants()
-            for j,species in self.species:
+            for j,species in enumerate(self.species):
                 mat[j,i] = dict_react.get(species, 0)
 
         return mat
 
-    def build_product_coefficient_matrix():
+    def build_product_coefficient_matrix(self):
         """Build a product coefficients matrix for the reaction system
 
         RETURNS:
@@ -235,7 +235,7 @@ class ReactionSystem():
         mat = np.zeros([len(self.species), len(self.elementary_reactions)])
         for i, reaction in enumerate(self.elementary_reactions):
             dict_prod = reaction.get_products()
-            for j,species in self.species:
+            for j,species in enumerate(self.species):
                 mat[j,i] = dict_prod.get(species, 0)
         return mat
 
@@ -294,9 +294,9 @@ class XMLReader():
         """
         species = self._get_species()
         reaction_systems = []
-        for reaction_data in self.root.findAll('reactionData'):
+        for reaction_data in self.root.findall('reactionData'):
             elementary_reactions = []
-            for reaction in reaction_data.findAll('reaction'):
+            for reaction in reaction_data.findall('reaction'):
                 reaction_properties = self._parse_reaction(reaction)
                 if reaction_properties['type'] != "Elementary":
                     raise NotImplementedError
