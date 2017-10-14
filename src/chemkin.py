@@ -39,7 +39,7 @@ class ReactionSystem():
                   size: num_reactions
                   progress rate of each reaction
         """
-        k = self.calculate_reaction_coefficients(temperature)
+        k = self.get_rate_coefficients(temperature)
         if type(k) is float:
             k = [k]*len(self.reactant_coefficients[0])
         if len(self.reactant_coefficients) != len(concs) or len(self.reactant_coefficients)==0 or len(self.reactant_coefficients[0])!=len(k):
@@ -81,7 +81,7 @@ class ReactionSystem():
         rj = self.calculate_progress_rate(concs, temperature)
         return np.dot(nu, rj)
 
-    def calculate_reaction_coefficients(temperature):
+    def get_rate_coefficients(temperature):
         """Calculate reaction rate coefficients
         
         INPUTS:
@@ -94,7 +94,7 @@ class ReactionSystem():
         f: numpy array of floats
            reaction rate ooefficients
         """
-        coefficients = [er.get_k(temperature) for er
+        coefficients = [er.calculate_rate_coefficients(temperature) for er
                         in self.elementary_reactions]
         return coefficients
 
@@ -108,7 +108,7 @@ class ReactionSystem():
         """
         mat = np.zeros([len(self.species), len(self.elementary_reactions)])
         for i, reaction in enumerate(self.elementary_reactions):
-            dict_react = reaction.get_reactant_coefficients()
+            dict_react = reaction.get_reactants()
             for j,species in self.species:
                 mat[j,i] = dict_react.get(species, 0)
 
@@ -124,7 +124,7 @@ class ReactionSystem():
         """
         mat = np.zeros([len(self.species), len(self.elementary_reactions)])
         for i, reaction in enumerate(self.elementary_reactions):
-            dict_prod = reaction.get_product_coefficients()
+            dict_prod = reaction.get_products()
             for j,species in self.species:
                 mat[j,i] = dict_prod.get(species, 0)
         return mat
