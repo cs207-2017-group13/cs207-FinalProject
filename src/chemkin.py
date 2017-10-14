@@ -10,129 +10,181 @@ class ReactionSystem():
     """
 
     """
-    def __init__(self, elementary_reactions):
-        
-
-        self.k = elementary_reactions.get_k()
-        react_coeff = elementary_reactions.get_react()
+    def __init__(self, elementary_reactions, species):
+        self.elementary_reactions = elementary_reactions
+        self.species = species
+        self.reactant_coefficients = self.build_reactant_coefficient_matrix()
+        self.product_coefficients = self.build_product_coefficient_matrix()
 
 
     def __repr__():
-        print("Reaction rate coefficients: ", k, "\n",
-              "Species: ", self.get_species(), "\n",
-              "Conentration of Species: ", self.concs, "\n",
-              "stoichiometric coefficients: ", self.nu_react, "\n",
-              )
+        print("Species: ", self.species, "\n",
+              "Stoichiometric coefficients of reactants: ", self.reactant_coefficients, "\n",
+              "Stoichiometric coefficients of products: ", self.product_coefficients, "\n")
 
 
-    def calculate_progress_rate(self, nu_react, concs):
+    def calculate_progress_rate(self, concs, temperature):
         """Returns the progress rate of a system of irreversible, elementary reactions
 
         INPUTS:
         =======
-        nu_react: numpy array of floats, 
-                  size: num_species X num_reactions
-                  stoichiometric coefficients for the reaction
-        k:        array of floats
-                  Reaction rate coefficient for the reaction
         concs:    numpy array of floats 
                   concentration of species
+        temperature: numpy array of floats
+                     temperatures of the elementary reactions
 
         RETURNS:
         ========
-        omega: numpy array of floats
-               size: num_reactions
-               progress rate of each reaction
-
-        EXAMPLES:
-        =========
-        >>> calculate_progress_rate(np.array([[2.0, 1.0], [1.0, 0.0], [0.0, 1.0]]), np.array([2.0, 1.0, 1.0]), 10.0)
-        array([ 40.,  20.])
+        progress: numpy array of floats
+                  size: num_reactions
+                  progress rate of each reaction
         """
-        if type(self.k) is float:
-            self.k = [self.k]*len(nu_react[0])
-        if len(nu_react) != len(concs) or len(nu_react)==0 or len(nu_react[0])!=len(self.k):
+        k = self.calculate_reaction_coefficients(temperature)
+        if type(k) is float:
+            k = [k]*len(self.reactant_coefficients[0])
+        if len(self.reactant_coefficients) != len(concs) or len(self.reactant_coefficients)==0 or len(self.reactant_coefficients[0])!=len(k):
             raise  ValueError("Invalid input parameters.")
-        progress = self.k # Initialize progress rates with reaction rate coefficients
+        progress = k # Initialize progress rates with reaction rate coefficients
         for jdx, rj in enumerate(progress):
             if rj < 0:
                 raise ValueError("k = {0:18.16e}:  Negative reaction rate coefficients are prohibited!".format(rj))
             for idx, xi in enumerate(concs):
-                nu_ij = nu_react[idx,jdx]
+                nu_ij = self.reactant_coefficients[idx,jdx]
                 if xi  < 0.0:
                     raise ValueError("x{0} = {1:18.16e}:  Negative concentrations are prohibited!".format(idx, xi))
                 if nu_ij < 0:
                     raise ValueError("nu_{0}{1} = {2}:  Negative stoichiometric coefficients are prohibited!".format(idx, jdx, nu_ij))
                 
                 progress[jdx] *= xi**nu_ij
-        return progress      
+        return progress   
 
-    def calculate_reaction_rate(self, nu_react, nu_prod, concs):
+
+    def calculate_reaction_rate(self, concs, temperature):
         """Returns the reaction rate of a system of irreversible, elementary reactions
         
         INPUTS:
         =======
-        nu_react: numpy array of floats, 
-                  size: num_species X num_reactions
-                  stoichiometric coefficients for the reactants
-        nu_prod:  numpy array of floats, 
-                  size: num_species X num_reactions
-                  stoichiometric coefficients for the products
         concs:    numpy array of floats 
                   concentration of species
+        temperature: numpy array of floats
+                     temperatures of the elementary reactions
 
         RETURNS:
         ========
         f: numpy array of floats
            size: num_species
            reaction rate of each specie
-        
-        EXAMPLES:
-        =========
-        >>> nu_react = np.array([[1.0, 0.0], [2.0, 0.0], [0.0, 2.0]])
-        >>> nu_prod = np.array([[0.0, 1.0], [0.0, 2.0], [1.0, 0.0]])
-        >>> r = np.array([ 40.,  20.])
-        >>> calculate_reaction_rate(nu_react, nu_prod, r)
-        array([-20., -40.,   0.])
         """
-        if len(nu_react)==0 or len(nu_react)!=len(nu_prod) or len(nu_react[0])!=len(nu_prod[0]):
+        if self.reactant_coefficients.shape != self.product_coefficients.shape:
             raise  ValueError("Invalid input parameters.")
-        nu = nu_prod - nu_react
-        rj = self.calculate_progress_rate(nu_react, concs)
+        nu = self.product_coefficients - self.reactant_coefficients
+        rj = self.calculate_progress_rate(concs, temperature)
         return np.dot(nu, rj)
 
-    def get_species():
-        pass
-
-
-
-class ElementaryReaction():
     def calculate_reaction_coefficients(temperature):
-        pass
+        """Calculate reaction rate coefficients
+        
+        INPUTS:
+        =======
+        temperature: numpy array of floats
+                     temperatures of the elementary reactions
 
+        RETURNS:
+        ========
+        f: numpy array of floats
+           reaction rate ooefficients
+        """
+        coefficients = [er.get_k(temperature) for er
+                        in self.elementary_reactions]
+        return coefficients
 
+    def build_reactant_coefficient_matrix():
+        """Build a reactant coefficients matrix for the reaction system
+
+        RETURNS:
+        ========
+        f: numpy array of floats
+           reactant coefficients matrix
+        """
+        mat = np.zeros([len(self.species), len(self.elementary_reactions)])
+        for i, reaction in enumerate(self.elementary_reactions):
+            dict_react = reaction.get_reactant_coefficients()
+            for j,species in self.species:
+                mat[j,i] = dict_react.get(species, 0)
+
+        return mat
+
+    def build_product_coefficient_matrix():
+        """Build a product coefficients matrix for the reaction system
+
+        RETURNS:
+        ========
+        f: numpy array of floats
+           product coefficients matrix
+        """
+        mat = np.zeros([len(self.species), len(self.elementary_reactions)])
+        for i, reaction in enumerate(self.elementary_reactions):
+            dict_prod = reaction.get_product_coefficients()
+            for j,species in self.species:
+                mat[j,i] = dict_prod.get(species, 0)
+        return mat
+
+            
 
 
 class XMLReader():
     """
-    # XMLReader will eventually create a ReactionSystem    
+    # XMLReader will eventually create a ReactionSystem
 
     """
-    def __init__(xml_file):
-        pass
+    def __init__(self, xml_file):
+        self.xml_file = xml_file
+        xml_tree = ET.parse(xml_file)
+        self.root = xml_tree.getroot()
 
-    def build_reaction_system():
-        # return ReactionSystem()
-        pass
-    
+    def _parse_reaction(self, reaction_elt):
+        """Collect individual reaction properties in a dictionary."""
+        properties = {}
+        prop = reaction_elt.attrib
 
-    def __repr__():
-        pass
+        return attributes
+
+    def _get_species(self):
+        """Return the species involved in the reaction."""
+        try:
+            phase_elt = self.root.find('phase')
+            species_array_elt = phase_elt.find('speciesArray')
+            species_text = species_array_elt.text
+        except AttributeError:
+            raise LookupError("Element root>phase>speciesArray")
+        species = species_text.split()
+        return species
+
+    def get_reaction_systems(self):
+        """
+        """
+        species = self._get_species()
+        reaction_systems = []
+        for reaction_data in self.root.findAll('reactionData'):
+            elementary_reactions = []
+            for reaction in reaction_data.findAll('reaction'):
+                reaction_properties = self._parse_reaction(reaction)
+                elementary_reaction = ElementaryReaction(reaction_properties)
+                elementary_reactions.append(elementary_reaction)
+            reaction_system = ReactionSystem(elementary_reactions, species)
+            reaction_systems.append(reaction_system)
+
+        return reaction_systems    
+
+    def __repr__(self):
+        return "XMLReader(%s)" % self.xml_file
 
 
 
 if __name__ == "__main__":
     reader = XMLReader(xml_file)
     reaction_system = reader.build_reaction_system()
-    print ("rates: ", reaction_system.calculate_reaction_rate())
+    print ("rates: ", reaction_system.calculate_reaction_rate(T=234))
+    print ("rates: ", reaction_system.calculate_reaction_rate(T=400))
+
 
