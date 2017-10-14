@@ -197,8 +197,6 @@ class ReactionSystem():
         k = self.get_rate_coefficients(temperature)
         if type(k) is float:
             k = [k]*len(self.reactant_coefficients[0])
-        if len(self.reactant_coefficients) != len(concs) or len(self.reactant_coefficients)==0 or len(self.reactant_coefficients[0])!=len(k):
-            raise  ValueError("Invalid input parameters.")
         progress = k # Initialize progress rates with reaction rate coefficients
         for jdx, rj in enumerate(progress):
             if rj < 0:
@@ -239,8 +237,6 @@ class ReactionSystem():
         array([  3.90053626e+01,  -3.90053626e+01,   3.90058427e+01,
                 -3.90056027e+01,  -2.40029412e-04])
         """
-        if self.reactant_coefficients.shape != self.product_coefficients.shape:
-            raise  ValueError("Invalid input parameters.")
         nu = self.product_coefficients - self.reactant_coefficients
         rj = self.calculate_progress_rate(concs, temperature)
         return np.dot(nu, rj)
@@ -397,10 +393,8 @@ class XMLReader():
 
 
 
-# if __name__ == "__main__":
-    # reader = XMLReader(xml_file)
-    # reaction_system = reader.build_reaction_system()
-    # print ("rates: ", reaction_system.calculate_reaction_rate(T=234))
-    # print ("rates: ", reaction_system.calculate_reaction_rate(T=400))
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
 
 
