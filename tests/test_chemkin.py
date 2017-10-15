@@ -108,6 +108,5 @@ def test_neg_concentration():
 def test_reaction_rate():
 	reader = chemkin.XMLReader("tests/test_data1.xml")
 	reaction_system = reader.get_reaction_systems()
-	result = [ 1107.64488776, -1107.64488776,  1112.77674128, -1110.21081452, -2.56592676]
-	assert reaction_system[0].calculate_reaction_rate([3., 1., 2., 3., 1.], 425) == result
+	assert reaction_system[0].calculate_reaction_rate([3., 1., 2., 3., 1.], 425) == [ 1107.64488776, -1107.64488776,  1112.77674128, -1110.21081452, -2.56592676]
     
