@@ -1,47 +1,139 @@
-
-
-import sys
-import numbers
-
 import xml.etree.ElementTree as ET
 import numpy as np
-
-
-
-
+import numbers
 class ElementaryReaction():
     
     def __init__(self, reaction_properties):
+        """
+        EXAMPLES:
+        =========
+        >>> elementary_reaction = ElementaryReaction({'equation' : 'H + O2  [=] OH + O' ,
+        ...                     'id' : 'reaction01', 'products' : {'O' : '1' , 'OH' : '1'}, 
+        ...                     'rate_params' : {'A' : 3520000.0, 'E' : 71400.0 , 'b' : -0.7 }, 
+        ...                     'rate_type' : 'Arrhenius' , 'reactants' : {'H' : '1' , 'O2' : '1'} , 
+        ...                     'reversible': 'no', 'type' : ' Elementary'})
+        
+        >>> elementary_reaction = ElementaryReaction({'equation' : 'H + O2  [=] OH + O' ,
+        ...                     'id' : 'reaction01', 'products' : {'O' : '1' , 'OH' : '1'}, 
+        ...                     'rate_params' : {'A' : 3520000.0, 'E' : 71400.0 , 'b' : -0.7 }, 
+        ...                     'rate_type' : 'Arrhenius' , 'reactants' : {'H' : '1' , 'O2' : '1'} , 
+        ...                     'reversible': 'yes', 'type' : ' Elementary'})
+        Traceback (most recent call last):
+        ...
+        NotImplementedError: The library only deals with irreversible reactions.You have given a reversible reaction.
+        """
         self.reaction_properties = reaction_properties
         self.rate_type = self.reaction_properties['rate_type']
         self.rate_params = self.reaction_properties['rate_params']
         self.reactants = self.reaction_properties['reactants']
         self.products = self.reaction_properties['products']
+        self.reversible = True if self.reaction_properties['reversible'] == 'yes' else False
+        if self.reversible: raise NotImplementedError('The library only deals with irreversible reactions.'
+                                        'You have given a reversible reaction.') 
+
+        
         
     def get_reactants(self):
+        """
+        Returns a dictionary with reactants as key 
+        and the stoichiometric coeff as value for each elementary reaction.
+
+        INPUTS:
+        =======
+        None
+
+        OUTPUTS:
+        ========
+        reactants: a dictionary with reactants as key 
+        and the stoichiometric coeff as value.
+
+        EXAMPLES:
+        =========
+        >>> elementary_reaction = ElementaryReaction({'equation' : 'H + O2  [=] OH + O' ,
+        ...                     'id' : 'reaction01', 'products' : {'O' : '1' , 'OH' : '1'}, 
+        ...                     'rate_params' : {'A' : 3520000.0, 'E' : 71400.0 , 'b' : -0.7 }, 
+        ...                     'rate_type' : 'Arrhenius' , 'reactants' : {'H' : '1' , 'O2' : '1'} , 
+        ...                     'reversible': 'no', 'type' : ' Elementary'})
+        >>> elementary_reaction.get_reactants()
+        {'H': '1', 'O2': '1'}
+        """
+        
         return self.reactants
+        
     
     def get_products(self):
+        """
+        Returns a dictionary of products as key and the 
+        stoichiometric coeff as value for each elementary reaction.
+
+        INPUTS:
+        =======
+        None
+
+        OUTPUTS:
+        ========
+        reactants: a dictionary of reactants as key 
+        and the stoichiometric product coeff as value.
+
+        EXAMPLES:
+        =========
+        >>> elementary_reaction = ElementaryReaction({'equation' : 'H + O2  [=] OH + O' ,
+        ...                     'id' : 'reaction01', 'products' : {'O' : '1' , 'OH' : '1'}, 
+        ...                     'rate_params' : {'A' : 3520000.0, 'E' : 71400.0 , 'b' : -0.7 }, 
+        ...                     'rate_type' : 'Arrhenius' , 'reactants' : {'H' : '1' , 'O2' : '1'} , 
+        ...                     'reversible': 'no', 'type' : ' Elementary'})
+        >>> elementary_reaction.get_products()
+        {'O': '1', 'OH': '1'}
+        """
         return self.products
-      
+    
     def calculate_rate_coefficient(self, T):
+        """
+        Calculates and returns a rate coeffiecient based on the type of 
+        rate coefficeint required
+
+        INPUTS:
+        =======
+        T : float, 
+            Temperature in Kelvin scale,
+            Must be positive
+
+        OUTPUTS:
+        ========
+        rate_coeff : float,
+                     rate coefficient based on the type 
+                     of rate coefficient required.
+
+        EXAMPLES:
+        =========
+        >>> elementary_reaction = ElementaryReaction({'equation' : 'H + O2  [=] OH + O' ,
+        ...                     'id' : 'reaction01', 'products' : {'O' : '1' , 'OH' : '1'}, 
+        ...                     'rate_params' : {'A' : 3520000.0, 'E' : 71400.0 , 'b' : -0.7 }, 
+        ...                     'rate_type' : 'Arrhenius' , 'reactants' : {'H' : '1' , 'O2' : '1'} , 
+        ...                     'reversible': 'no', 'type' : ' Elementary'})
+        >>> elementary_reaction.calculate_rate_coefficient(1000)
+        5.2102032610668552
+        """
+
         if self.rate_type:
             if self.rate_type.lower() == 'constant':
-                self.k = self.rate_params['k']
-                rate_coeff = self._constant_rate()
+                if 'k' in self.rate_params:
+                    return self._constant_rate(self.rate_params['k'])
+                else:
+                    return self._constant_rate()
             else:
-                self.A = self.rate_params['A']
-                self.b = self.rate_params['b']
-                self.E = self.rate_params['E']
-                rate_coeff = self._k_arrhenius(T)
+                A = self.rate_params['A']
+                E = self.rate_params['E']
+                b = self.rate_params['b']
+                return self._k_arrhenius(A, E, b, T)
         else:
-            raise ValueError('No value for `type of rate passed`. '
+            raise ValueError('No value for `type of rate` passed. '
                              'Pass a value to get the reaction coeff')
-        return rate_coeff
         
 
     def _constant_rate(self, k = 1.0):
-        """Return a constant reaction rate coefficient.
+        """
+        Returns a constant reaction rate coefficient.
 
         In zeroth-order reactions, k = constant.
 
@@ -62,17 +154,22 @@ class ElementaryReaction():
 
         EXAMPLES:
         =========
-        >>> k_const(5.0)
+        >>> elementary_reaction = ElementaryReaction({'equation' : 'H + O2  [=] OH + O' ,
+        ...                     'id' : 'reaction01', 'products' : {'O' : '1' , 'OH' : '1'}, 
+        ...                     'rate_params' : {'A' : 3520000.0, 'E' : 71400.0 , 'b' : -0.7 }, 
+        ...                     'rate_type' : 'Arrhenius' , 'reactants' : {'H' : '1' , 'O2' : '1'} , 
+        ...                     'reversible': 'no', 'type' : ' Elementary'})
+        >>> elementary_reaction._constant_rate(5.0)
         5.0
         """
-        if self.k < 0:
-            raise ValueError("Negative reaction rate cannot be negative. "
+        if k < 0:
+            raise ValueError("Constant reaction rate cannot be negative. "
                              "Check the value. ")
 
-        return self.k
+        return k
 
 
-    def _k_arrhenius(self, temperature, R=8.314):
+    def _k_arrhenius(self, A, E, b = 0.0, T, R = 8.314):
         """Return a reaction rate coefficient according to the Arrhenius equation.
 
         The Arrhenius equation relates the rate constant, k, of a chemical
@@ -87,35 +184,43 @@ class ElementaryReaction():
 
         INPUTS:
         =======
-        A: float
+        A: float,
            Arrhenius prefactor, Must be positive
         b: float,
            Modified Arrhenius parameter, default value = 0.0
-        E: float
+        E: float,
            Activation energy
-        T: float
+        T: float,
            Temperature, Must be positive
         R: float, default value = 8.314
            Ideal gas constant
 
         RETURNS:
         ========
-        k: float
-           Modified Arrhenius reaction rate coefficient
+        k: float,
+           Arrhenius reaction rate coefficient
 
         EXAMPLES:
         =========
-        >>> k_mod_arr(2.0, -0.5, 3.0, 100.0)
-        0.19927962618542916
+        EXAMPLES:
+        =========
+        >>> elementary_reaction = ElementaryReaction({'equation' : 'H + O2  [=] OH + O' ,
+        ...                     'id' : 'reaction01', 'products' : {'O' : '1' , 'OH' : '1'}, 
+        ...                     'rate_params' : {'A' : 3520000.0, 'E' : 71400.0 , 'b' : -0.7 }, 
+        ...                     'rate_type' : 'Arrhenius' , 'reactants' : {'H' : '1' , 'O2' : '1'} , 
+        ...                     'reversible': 'no', 'type' : ' Elementary'})
+        >>> elementary_reaction._k_arrhenius(3520000.0, 71400.0, -0.7, 1000.0)
+        5.2102032610668552
         """
-        if self.A < 0.0:
-            raise ValueError("`A` must be positive.")
+        if A < 0.0:
+            raise ValueError("Activation Energy `A` must be positive.")
 
-        if temperature < 0.0:
-            raise ValueError("`T` in Kelvin scale  must be positive." )
+        if T < 0.0:
+            raise ValueError("Temperature `T` (in Kelvin scale) cannot be negative." )
 
-        k_arrhenius = (self.A * temperature ** self.b) * np.exp(-self.E / (R * temperature))
+        k_arrhenius = (A * T ** b) * np.exp(-E / (R * T))
         return k_arrhenius
+
 
 
 class ReactionSystem():
