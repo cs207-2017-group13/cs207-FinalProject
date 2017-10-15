@@ -297,7 +297,7 @@ class ReactionSystem():
         EXAMPLES:
         =========
         >>> concs = [1., 2., 1., 3., 1.]
-        >>> reader = XMLReader("rxns.xml")
+        >>> reader = XMLReader("tests/rxns.xml")
         >>> reaction_system = reader.get_reaction_systems()
         >>> len(reaction_system[0])
         5
@@ -324,7 +324,7 @@ class ReactionSystem():
         EXAMPLES:
         =========
         >>> concs = [1., 2., 1., 3., 1.]
-        >>> reader = XMLReader("rxns.xml")
+        >>> reader = XMLReader("tests/rxns.xml")
         >>> reaction_system = reader.get_reaction_systems()
         >>> reaction_system[0].calculate_progress_rate(concs, 300)
         [0.00024002941214766843, 39.005602653448953]
@@ -367,7 +367,7 @@ class ReactionSystem():
         EXAMPLES:
         =========
         >>> concs = [1., 2., 1., 3., 1.]
-        >>> reader = XMLReader("rxns.xml")
+        >>> reader = XMLReader("tests/rxns.xml")
         >>> reaction_system = reader.get_reaction_systems()
         >>> reaction_system[0].calculate_reaction_rate(concs, 300)
         array([  3.90053626e+01,  -3.90053626e+01,   3.90058427e+01,
@@ -393,7 +393,7 @@ class ReactionSystem():
 
         EXAMPLES:
         =========
-        >>> reader = XMLReader("rxns.xml")
+        >>> reader = XMLReader("tests/rxns.xml")
         >>> reaction_system = reader.get_reaction_systems()
         >>> reaction_system[0].get_rate_coefficients(300)
         [0.00024002941214766843, 6.5009337755748255]
@@ -413,7 +413,7 @@ class ReactionSystem():
 
         EXAMPLES:
         =========
-        >>> reader = XMLReader("rxns.xml")
+        >>> reader = XMLReader("tests/rxns.xml")
         >>> reaction_system = reader.get_reaction_systems()
         >>> reaction_system[0].build_reactant_coefficient_matrix()
         array([[ 1.,  0.],
@@ -440,7 +440,7 @@ class ReactionSystem():
 
         EXAMPLES:
         =========
-        >>> reader = XMLReader("rxns.xml")
+        >>> reader = XMLReader("tests/rxns.xml")
         >>> reaction_system = reader.get_reaction_systems()
         >>> reaction_system[0].build_product_coefficient_matrix()
         array([[ 0.,  1.],
