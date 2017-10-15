@@ -224,20 +224,57 @@ class ElementaryReaction():
 
 
 class ReactionSystem():
-    """
+    """Class for a system of reactions
 
+    Take a list of dictionaries from the ElementaryReaction class. Build stoichiometric coefficient matrices for the 
+    reactants and products, and calculate the corresponding progress rates and reaction rates.
     """
     def __init__(self, elementary_reactions, species):
+        """Constructor
+
+        INPUTS:
+        =======
+        elementary_reactions: a list of dictionaries 
+                              each element in the list is a dictionary of the information for an elementary reaction
+        species:              a list
+                              species in the reaction system
+        """
         self.elementary_reactions = elementary_reactions
         self.species = species
         self.reactant_coefficients = self.build_reactant_coefficient_matrix()
         self.product_coefficients = self.build_product_coefficient_matrix()
 
 
-    # def __repr__(self):
-    #     print("Species: ", self.species, "\n",
-    #           "Stoichiometric coefficients of reactants: ", self.reactant_coefficients, "\n",
-    #           "Stoichiometric coefficients of products: ", self.product_coefficients, "\n")
+    def __repr__(self):
+        """Returns a string containing basic information for the reaction system
+
+        RETURNS:
+        ========
+        str: string
+             Containing information on species and stoichiometric coefficients
+        """
+        info = "Species: {} \nStoichiometric coefficients of reactants: {} \nStoichiometric coefficients of products: {}".format(self.species, 
+            self.reactant_coefficients, self.product_coefficients)
+        return info
+
+
+    def __len__(self):
+        """Returns the number of species in the reaction system
+
+        RETURNS:
+        ========
+        species_len: int
+                     the number of species in the reaction system
+
+        EXAMPLES:
+        =========
+        >>> concs = [1., 2., 1., 3., 1.]
+        >>> reader = XMLReader("rxns.xml")
+        >>> reaction_system = reader.get_reaction_systems()
+        >>> len(reaction_system[0])
+        5
+        """
+        return len(self.species)
 
 
     def calculate_progress_rate(self, concs, temperature):
@@ -255,14 +292,18 @@ class ReactionSystem():
         progress: numpy array of floats
                   size: num_reactions
                   progress rate of each reaction
+
+        EXAMPLES:
+        =========
+        >>> concs = [1., 2., 1., 3., 1.]
+        >>> reader = XMLReader("rxns.xml")
+        >>> reaction_system = reader.get_reaction_systems()
+        >>> reaction_system[0].calculate_progress_rate(concs, 300)
+        [0.00024002941214766843, 39.005602653448953]
         """
         k = self.get_rate_coefficients(temperature)
         if type(k) is float:
             k = [k]*len(self.reactant_coefficients[0])
-        if (len(self.reactant_coefficients) != len(concs)
-            or len(self.reactant_coefficients) == 0
-            or len(self.reactant_coefficients[0]) != len(k)):
-            raise  ValueError("Invalid input parameters.")
         progress = k # Initialize progress rates with reaction rate coefficients
         for jdx, rj in enumerate(progress):
             if rj < 0:
@@ -294,12 +335,20 @@ class ReactionSystem():
         f: numpy array of floats
            size: num_species
            reaction rate of each specie
+
+        EXAMPLES:
+        =========
+        >>> concs = [1., 2., 1., 3., 1.]
+        >>> reader = XMLReader("rxns.xml")
+        >>> reaction_system = reader.get_reaction_systems()
+        >>> reaction_system[0].calculate_reaction_rate(concs, 300)
+        array([  3.90053626e+01,  -3.90053626e+01,   3.90058427e+01,
+                -3.90056027e+01,  -2.40029412e-04])
         """
-        if self.reactant_coefficients.shape != self.product_coefficients.shape:
-            raise  ValueError("Invalid input parameters.")
         nu = self.product_coefficients - self.reactant_coefficients
         rj = self.calculate_progress_rate(concs, temperature)
         return np.dot(nu, rj)
+
 
     def get_rate_coefficients(self, temperature):
         """Calculate reaction rate coefficients
@@ -313,10 +362,18 @@ class ReactionSystem():
         ========
         f: numpy array of floats
            reaction rate ooefficients
+
+        EXAMPLES:
+        =========
+        >>> reader = XMLReader("rxns.xml")
+        >>> reaction_system = reader.get_reaction_systems()
+        >>> reaction_system[0].get_rate_coefficients(300)
+        [0.00024002941214766843, 6.5009337755748255]
         """
         coefficients = [er.calculate_rate_coefficient(temperature) for er
                         in self.elementary_reactions]
         return coefficients
+
 
     def build_reactant_coefficient_matrix(self):
         """Build a reactant coefficients matrix for the reaction system
@@ -325,14 +382,25 @@ class ReactionSystem():
         ========
         f: numpy array of floats
            reactant coefficients matrix
+
+        EXAMPLES:
+        =========
+        >>> reader = XMLReader("rxns.xml")
+        >>> reaction_system = reader.get_reaction_systems()
+        >>> reaction_system[0].build_reactant_coefficient_matrix()
+        array([[ 1.,  0.],
+               [ 0.,  1.],
+               [ 0.,  0.],
+               [ 0.,  1.],
+               [ 1.,  0.]])
         """
         mat = np.zeros([len(self.species), len(self.elementary_reactions)])
         for i, reaction in enumerate(self.elementary_reactions):
             dict_react = reaction.get_reactants()
             for j,species in enumerate(self.species):
                 mat[j,i] = dict_react.get(species, 0)
-
         return mat
+
 
     def build_product_coefficient_matrix(self):
         """Build a product coefficients matrix for the reaction system
@@ -341,6 +409,17 @@ class ReactionSystem():
         ========
         f: numpy array of floats
            product coefficients matrix
+
+        EXAMPLES:
+        =========
+        >>> reader = XMLReader("rxns.xml")
+        >>> reaction_system = reader.get_reaction_systems()
+        >>> reaction_system[0].build_product_coefficient_matrix()
+        array([[ 0.,  1.],
+               [ 1.,  0.],
+               [ 1.,  1.],
+               [ 0.,  0.],
+               [ 0.,  0.]])
         """
         mat = np.zeros([len(self.species), len(self.elementary_reactions)])
         for i, reaction in enumerate(self.elementary_reactions):
@@ -423,9 +502,7 @@ class XMLReader():
 
 
 if __name__ == "__main__":
-    reader = XMLReader(xml_file)
-    reaction_system = reader.build_reaction_system()
-    print ("rates: ", reaction_system.calculate_reaction_rate(T=234))
-    print ("rates: ", reaction_system.calculate_reaction_rate(T=400))
+    import doctest
+    doctest.testmod()
 
 
