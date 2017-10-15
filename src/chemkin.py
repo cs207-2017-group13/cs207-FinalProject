@@ -2,9 +2,24 @@ import xml.etree.ElementTree as ET
 import numpy as np
 import numbers
 class ElementaryReaction():
+    """Class for a each elementary reaction.
+
+    Take a dictionaries of properties from the XMLReader class. 
+    Calculates the rate coefficient for each elementary reaction and returns it to
+    the ReactionSystem class. Returns a dictionary of recatants and products 
+    to the ReactionSystem class. Following methods are implemented in the class-
+    
+    __init__(self, reaction_properties)
+    __repr__(self)
+    get_reactants(self)
+    get_products(self)
+    calculate_rate_coefficient(self, T)
+    """
     
     def __init__(self, reaction_properties):
         """
+        Constructor for the class
+
         EXAMPLES:
         =========
         >>> elementary_reaction = ElementaryReaction({'equation' : 'H + O2  [=] OH + O' ,
@@ -31,7 +46,20 @@ class ElementaryReaction():
         if self.reversible: raise NotImplementedError('The library only deals with irreversible reactions.'
                                         'You have given a reversible reaction.') 
 
-        
+
+    def __repr__(self):
+        """Returns a string containing basic information
+         about the Elementary reaction
+
+        RETURNS:
+        ========
+        str: string
+             containing basic information about
+             the Elementary reaction
+        """
+        info = "Reactants: {} \nProducts: {} \nRate Params: {} \nRate Type: {} \nReversible: {}".format(self.reactants, 
+            self.products, self.rate_params, self.rate_type, self.reversible)
+        return info        
         
     def get_reactants(self):
         """
@@ -125,7 +153,7 @@ class ElementaryReaction():
                 A = self.rate_params['A']
                 E = self.rate_params['E']
                 b = self.rate_params['b']
-                return self._k_arrhenius(A, E, b, T)
+                return self._k_arrhenius(A, E, T, b)
         else:
             raise ValueError('No value for `type of rate` passed. '
                              'Pass a value to get the reaction coeff')
@@ -169,7 +197,7 @@ class ElementaryReaction():
         return k
 
 
-    def _k_arrhenius(self, A, E, b = 0.0, T, R = 8.314):
+    def _k_arrhenius(self, A, E, T, b = 0.0, R = 8.314):
         """Return a reaction rate coefficient according to the Arrhenius equation.
 
         The Arrhenius equation relates the rate constant, k, of a chemical
@@ -209,7 +237,7 @@ class ElementaryReaction():
         ...                     'rate_params' : {'A' : 3520000.0, 'E' : 71400.0 , 'b' : -0.7 }, 
         ...                     'rate_type' : 'Arrhenius' , 'reactants' : {'H' : '1' , 'O2' : '1'} , 
         ...                     'reversible': 'no', 'type' : ' Elementary'})
-        >>> elementary_reaction._k_arrhenius(3520000.0, 71400.0, -0.7, 1000.0)
+        >>> elementary_reaction._k_arrhenius(3520000.0, 71400.0, 1000.0, -0.7)
         5.2102032610668552
         """
         if A < 0.0:
