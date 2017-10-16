@@ -100,9 +100,9 @@ def test_progress_rate():
 def test_neg_concentration():
     reader = chemkin.XMLReader("tests/test_data1.xml")
     reaction_system = reader.get_reaction_systems()
-	try:
-	    reaction_system[0].calculate_progress_rate([3., -1., 2., -3., 1.], 425)
-	except ValueError as err:
-	    assert(type(err) == ValueError)
+    try:
+        reaction_system[0].calculate_progress_rate([3., -1., 2., -3., 1.], 425)
+    except ValueError as err:
+        assert(type(err) == ValueError)
 
 
