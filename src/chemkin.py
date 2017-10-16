@@ -251,7 +251,6 @@ class ElementaryReaction():
         return k_arrhenius
 
 
-
 class ReactionSystem():
     """Class for a system of reactions
 
@@ -291,8 +290,8 @@ class ReactionSystem():
 
         RETURNS:
         ========
-        species_len: int
-                     the number of species in the reaction system
+        species_len : int
+            The number of species in the reaction system
 
         EXAMPLES:
         =========
@@ -309,16 +308,16 @@ class ReactionSystem():
 
         INPUTS:
         =======
-        concs:    numpy array of floats 
-                  concentration of species
-        temperature: numpy array of floats
-                     temperatures of the elementary reactions
+        concs : np.ndarray
+            Concentration of species
+        temperature : float
+            Temperature of the elementary reactions
 
         RETURNS:
         ========
-        progress: numpy array of floats
-                  size: num_reactions
-                  progress rate of each reaction
+        progress : np.ndarray
+            size = num_reactions
+            progress rate of each reaction
 
         EXAMPLES:
         =========
@@ -351,10 +350,10 @@ class ReactionSystem():
         
         INPUTS:
         =======
-        concs:    numpy array of floats 
-                  concentration of species
-        temperature: numpy array of floats
-                     temperatures of the elementary reactions
+        concs : np.ndarray
+            Concentration of species
+        temperature : float
+            Temperature of the elementary reactions
 
         RETURNS:
         ========
@@ -380,12 +379,12 @@ class ReactionSystem():
         
         INPUTS:
         =======
-        temperature: numpy array of floats
-                     temperatures of the elementary reactions
+        temperature : array_like
+            Temperatures
 
         RETURNS:
         ========
-        f: numpy array of floats
+        coefficients : np.ndarray
            reaction rate ooefficients
 
         EXAMPLES:
@@ -404,8 +403,8 @@ class ReactionSystem():
 
         RETURNS:
         ========
-        f: numpy array of floats
-           reactant coefficients matrix
+        mat : np.ndarray
+           reactant stoichiometric coefficients
 
         EXAMPLES:
         =========
@@ -430,8 +429,8 @@ class ReactionSystem():
 
         RETURNS:
         ========
-        f: numpy array of floats
-           product coefficients matrix
+        mat : np.ndarray
+           product stoichiometric coefficients
 
         EXAMPLES:
         =========
@@ -570,7 +569,6 @@ class XMLReader():
 
     def __repr__(self):
         return "XMLReader(%s)" % self.xml_file
-
 
 
 if __name__ == "__main__":
