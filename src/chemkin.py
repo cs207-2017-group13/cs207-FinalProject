@@ -1,6 +1,8 @@
 import xml.etree.ElementTree as ET
 import numpy as np
 import numbers
+
+
 class ElementaryReaction():
     """Class for a each elementary reaction.
 
@@ -46,7 +48,6 @@ class ElementaryReaction():
         if self.reversible: raise NotImplementedError('The library only deals with irreversible reactions.'
                                         'You have given a reversible reaction.') 
 
-
     def __repr__(self):
         """Returns a string containing basic information
          about the Elementary reaction
@@ -87,7 +88,6 @@ class ElementaryReaction():
         """
         
         return self.reactants
-        
     
     def get_products(self):
         """
@@ -157,7 +157,6 @@ class ElementaryReaction():
         else:
             raise ValueError('No value for `type of rate` passed. '
                              'Pass a value to get the reaction coeff')
-        
 
     def _constant_rate(self, k = 1.0):
         """
@@ -195,7 +194,6 @@ class ElementaryReaction():
                              "Check the value. ")
 
         return k
-
 
     def _k_arrhenius(self, A, E, T, b = 0.0, R = 8.314):
         """Return a reaction rate coefficient according to the Arrhenius equation.
@@ -272,7 +270,6 @@ class ReactionSystem():
         self.reactant_coefficients = self.build_reactant_coefficient_matrix()
         self.product_coefficients = self.build_product_coefficient_matrix()
 
-
     def __repr__(self):
         """Returns a string containing basic information for the reaction system
 
@@ -284,7 +281,6 @@ class ReactionSystem():
         info = "Species: {} \nStoichiometric coefficients of reactants: {} \nStoichiometric coefficients of products: {}".format(self.species, 
             self.reactant_coefficients, self.product_coefficients)
         return info
-
 
     def __len__(self):
         """Returns the number of species in the reaction system
@@ -303,7 +299,6 @@ class ReactionSystem():
         5
         """
         return len(self.species)
-
 
     def calculate_progress_rate(self, concs, temperature):
         """Returns the progress rate of a system of irreversible, elementary reactions
@@ -347,7 +342,6 @@ class ReactionSystem():
                 progress[jdx] *= xi**nu_ij
         return progress   
 
-
     def calculate_reaction_rate(self, concs, temperature):
         """Returns the reaction rate of a system of irreversible, elementary reactions
         
@@ -377,7 +371,6 @@ class ReactionSystem():
         rj = self.calculate_progress_rate(concs, temperature)
         return np.dot(nu, rj)
 
-
     def get_rate_coefficients(self, temperature):
         """Calculate reaction rate coefficients
         
@@ -401,7 +394,6 @@ class ReactionSystem():
         coefficients = [er.calculate_rate_coefficient(temperature) for er
                         in self.elementary_reactions]
         return coefficients
-
 
     def build_reactant_coefficient_matrix(self):
         """Build a reactant coefficients matrix for the reaction system
@@ -429,7 +421,6 @@ class ReactionSystem():
                 mat[j,i] = dict_react.get(species, 0)
         return mat
 
-
     def build_product_coefficient_matrix(self):
         """Build a product coefficients matrix for the reaction system
 
@@ -456,13 +447,32 @@ class ReactionSystem():
                 mat[j,i] = dict_prod.get(species, 0)
         return mat
 
-            
-
 
 class XMLReader():
     """
-    # XMLReader will eventually create a ReactionSystem
+    Parser for chemical reaction XML files. Uses `xml.etree`.
 
+    Parameters
+    ----------
+    xml_file : str
+         Path to XML file.
+
+    Attributes
+    ----------
+    xml_file : str
+         Path to XML file.
+    root : xml.etree.Element
+         Top-level element in parsed tree.
+
+    Methods
+    -------
+    get_reaction_system()
+         Parse all groups of reactions in the XML file.
+
+    Examples
+    --------
+    >>> reader = XMLReader("tests/rxns.xml")
+    >>> reaction_systems = reader.get_reaction_systems()
     """
     def __init__(self, xml_file):
         self.xml_file = xml_file
@@ -470,8 +480,26 @@ class XMLReader():
         self.root = xml_tree.getroot()
 
     def _parse_reaction(self, reaction_elt):
-        """Collect individual reaction properties in a dictionary."""
+        """Collect individual reaction properties in a dictionary.
+
+        The first "rateCoeff" entry found is converted into two items,
+        `rate_type` and `rate_params`, the former containing the
+        reaction type and the latter being a dictionary of rate
+        parameters.
+
+        Parameters
+        ----------
+        reaction_elt : xml.etree.Element
+             A "reaction" entry within a "reactionData"
+             entry. Corresponds to an elementary reaction.
+        
+        Returns
+        -------
+        properties : dict
+             Dictionary of reaction parameters.
+        """
         properties = reaction_elt.attrib.copy()
+
         properties["equation"] = reaction_elt.find("equation").text
 
         rate_coeff = reaction_elt.find("rateCoeff")
@@ -496,7 +524,14 @@ class XMLReader():
         return properties
 
     def _get_species(self):
-        """Return the species involved in the reaction."""
+        """Return the species involved in the reaction.
+
+        Returns
+        -------
+        species : list
+            A list of strings identifying the species involved in the
+            reaction.
+        """
         try:
             phase_elt = self.root.find('phase')
             species_array_elt = phase_elt.find('speciesArray')
@@ -508,6 +543,12 @@ class XMLReader():
 
     def get_reaction_systems(self):
         """Parse all groups of reactions in xml file.
+
+        Returns
+        -------
+        reaction_systems : list
+             A list of `ReactionSystem` instances corresponding to
+             each "reactionData" entry in the XML file.
         """
         species = self._get_species()
         reaction_systems = []
