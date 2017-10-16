@@ -11,6 +11,12 @@ class ElementaryReaction():
     the ReactionSystem class. Returns a dictionary of recatants and products 
     to the ReactionSystem class. Following methods are implemented in the class-
     
+    Parameters
+    ==========
+    reaction_properties : dict
+        A dictonary of properties for the reaction, as parsed by
+        `XMLReader`.
+
     Methods
     =======
     get_reactants()
@@ -43,7 +49,8 @@ class ElementaryReaction():
         self.reactants = self.reaction_properties['reactants']
         self.products = self.reaction_properties['products']
         self.reversible = True if self.reaction_properties['reversible'] == 'yes' else False
-        if self.reversible: raise NotImplementedError('The library only deals with irreversible reactions.'
+        if self.reversible:
+            raise NotImplementedError('The library only deals with irreversible reactions.'
                                         'You have given a reversible reaction.') 
 
     def __repr__(self):
@@ -84,7 +91,6 @@ class ElementaryReaction():
         >>> elementary_reaction.get_reactants()
         {'H': '1', 'O2': '1'}
         """
-        
         return self.reactants
     
     def get_products(self):
@@ -140,7 +146,6 @@ class ElementaryReaction():
         >>> elementary_reaction.calculate_rate_coefficient(1000)
         5.2102032610668552
         """
-
         if self.rate_type:
             if self.rate_type.lower() == 'constant':
                 if 'k' in self.rate_params:
@@ -153,10 +158,10 @@ class ElementaryReaction():
                 b = self.rate_params['b']
                 return self._k_arrhenius(A, E, T, b)
         else:
-            raise ValueError('No value for `type of rate` passed. '
+            raise ValueError('No value for `rate_type` passed. '
                              'Pass a value to get the reaction coeff')
 
-    def _constant_rate(self, k = 1.0):
+    def _constant_rate(self, k=1.0):
         """
         Returns a constant reaction rate coefficient.
 
@@ -193,7 +198,7 @@ class ElementaryReaction():
 
         return k
 
-    def _k_arrhenius(self, A, E, T, b = 0.0, R = 8.314):
+    def _k_arrhenius(self, A, E, T, b=0.0, R=8.314):
         """Return a reaction rate coefficient according to the Arrhenius equation.
 
         The Arrhenius equation relates the rate constant, k, of a chemical
