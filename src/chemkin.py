@@ -11,34 +11,32 @@ class ElementaryReaction():
     the ReactionSystem class. Returns a dictionary of recatants and products 
     to the ReactionSystem class. Following methods are implemented in the class-
     
-    __init__(self, reaction_properties)
-    __repr__(self)
-    get_reactants(self)
-    get_products(self)
-    calculate_rate_coefficient(self, T)
-    """
-    
-    def __init__(self, reaction_properties):
-        """
-        Constructor for the class
+    Methods
+    =======
+    get_reactants()
 
-        EXAMPLES:
-        =========
-        >>> elementary_reaction = ElementaryReaction({'equation' : 'H + O2  [=] OH + O' ,
-        ...                     'id' : 'reaction01', 'products' : {'O' : '1' , 'OH' : '1'}, 
-        ...                     'rate_params' : {'A' : 3520000.0, 'E' : 71400.0 , 'b' : -0.7 }, 
-        ...                     'rate_type' : 'Arrhenius' , 'reactants' : {'H' : '1' , 'O2' : '1'} , 
-        ...                     'reversible': 'no', 'type' : ' Elementary'})
-        
-        >>> elementary_reaction = ElementaryReaction({'equation' : 'H + O2  [=] OH + O' ,
-        ...                     'id' : 'reaction01', 'products' : {'O' : '1' , 'OH' : '1'}, 
-        ...                     'rate_params' : {'A' : 3520000.0, 'E' : 71400.0 , 'b' : -0.7 }, 
-        ...                     'rate_type' : 'Arrhenius' , 'reactants' : {'H' : '1' , 'O2' : '1'} , 
-        ...                     'reversible': 'yes', 'type' : ' Elementary'})
-        Traceback (most recent call last):
-        ...
-        NotImplementedError: The library only deals with irreversible reactions.You have given a reversible reaction.
-        """
+    get_products()
+
+    calculate_rate_coefficient(T)
+
+    EXAMPLES:
+    =========
+    >>> elementary_reaction = ElementaryReaction({'equation' : 'H + O2  [=] OH + O' ,
+    ...                     'id' : 'reaction01', 'products' : {'O' : '1' , 'OH' : '1'}, 
+    ...                     'rate_params' : {'A' : 3520000.0, 'E' : 71400.0 , 'b' : -0.7 }, 
+    ...                     'rate_type' : 'Arrhenius' , 'reactants' : {'H' : '1' , 'O2' : '1'} , 
+    ...                     'reversible': 'no', 'type' : ' Elementary'})
+
+    >>> elementary_reaction = ElementaryReaction({'equation' : 'H + O2  [=] OH + O' ,
+    ...                     'id' : 'reaction01', 'products' : {'O' : '1' , 'OH' : '1'}, 
+    ...                     'rate_params' : {'A' : 3520000.0, 'E' : 71400.0 , 'b' : -0.7 }, 
+    ...                     'rate_type' : 'Arrhenius' , 'reactants' : {'H' : '1' , 'O2' : '1'} , 
+    ...                     'reversible': 'yes', 'type' : ' Elementary'})
+    Traceback (most recent call last):
+    ...
+    NotImplementedError: The library only deals with irreversible reactions.You have given a reversible reaction.
+    """
+    def __init__(self, reaction_properties):
         self.reaction_properties = reaction_properties
         self.rate_type = self.reaction_properties['rate_type']
         self.rate_params = self.reaction_properties['rate_params']
@@ -252,19 +250,20 @@ class ElementaryReaction():
 class ReactionSystem():
     """Class for a system of reactions
 
-    Take a list of dictionaries from the ElementaryReaction class. Build stoichiometric coefficient matrices for the 
-    reactants and products, and calculate the corresponding progress rates and reaction rates.
+    Takes a list of ElementaryReaction instances and a list of
+    species. Builds stoichiometric coefficient matrices for the
+    reactants and products and calculates the corresponding progress
+    rates and reaction rates.
+
+    Parameters:
+    ===========
+    elementary_reactions : list
+        A list of `ElementaryReaction` instances that compose the
+        system of reactions.
+    species : list
+        A list of strings identifying species in reaction system.
     """
     def __init__(self, elementary_reactions, species):
-        """Constructor
-
-        INPUTS:
-        =======
-        elementary_reactions: a list of dictionaries 
-                              each element in the list is a dictionary of the information for an elementary reaction
-        species:              a list
-                              species in the reaction system
-        """
         self.elementary_reactions = elementary_reactions
         self.species = species
         self.reactant_coefficients = self.build_reactant_coefficient_matrix()
@@ -283,7 +282,7 @@ class ReactionSystem():
         return info
 
     def __len__(self):
-        """Returns the number of species in the reaction system
+        """Returns the number of species in the reaction system.
 
         RETURNS:
         ========
@@ -301,7 +300,7 @@ class ReactionSystem():
         return len(self.species)
 
     def calculate_progress_rate(self, concs, temperature):
-        """Returns the progress rate of a system of irreversible, elementary reactions
+        """Returns the progress rate of a system of irreversible, elementary reactions.
 
         INPUTS:
         =======
@@ -343,7 +342,7 @@ class ReactionSystem():
         return progress   
 
     def calculate_reaction_rate(self, concs, temperature):
-        """Returns the reaction rate of a system of irreversible, elementary reactions
+        """Returns the reaction rate of a system of irreversible, elementary reactions.
         
         INPUTS:
         =======
@@ -396,7 +395,7 @@ class ReactionSystem():
         return coefficients
 
     def build_reactant_coefficient_matrix(self):
-        """Build a reactant coefficients matrix for the reaction system
+        """Build a reactant coefficients matrix for the reaction system.
 
         RETURNS:
         ========
@@ -422,7 +421,7 @@ class ReactionSystem():
         return mat
 
     def build_product_coefficient_matrix(self):
-        """Build a product coefficients matrix for the reaction system
+        """Build a product coefficients matrix for the reaction system.
 
         RETURNS:
         ========
@@ -449,8 +448,7 @@ class ReactionSystem():
 
 
 class XMLReader():
-    """
-    Parser for chemical reaction XML files. Uses `xml.etree`.
+    """Parser for chemical reaction XML files. Uses `xml.etree`.
 
     Parameters
     ----------
