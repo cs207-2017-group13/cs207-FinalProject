@@ -557,7 +557,7 @@ class XMLReader():
         for reaction_data in self.root.findall('reactionData'):
             elementary_reactions = []
             for reaction in reaction_data.findall('reaction'):
-                reaction_properties = self._parse_reaction(reaction)
+                reaction_properties = self.parse_reaction(reaction)
                 if reaction_properties['type'] != "Elementary":
                     raise NotImplementedError
                 elementary_reaction = ElementaryReaction(reaction_properties)
