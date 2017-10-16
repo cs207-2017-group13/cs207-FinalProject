@@ -43,15 +43,18 @@ class ElementaryReaction():
     NotImplementedError: The library only deals with irreversible reactions.You have given a reversible reaction.
     """
     def __init__(self, reaction_properties):
-        self.reaction_properties = reaction_properties
-        self.rate_type = self.reaction_properties['rate_type']
-        self.rate_params = self.reaction_properties['rate_params']
-        self.reactants = self.reaction_properties['reactants']
-        self.products = self.reaction_properties['products']
-        self.reversible = True if self.reaction_properties['reversible'] == 'yes' else False
-        if self.reversible:
-            raise NotImplementedError('The library only deals with irreversible reactions.'
-                                        'You have given a reversible reaction.') 
+        try:
+            self.reaction_properties = reaction_properties
+            self.rate_type = self.reaction_properties['rate_type']
+            self.rate_params = self.reaction_properties['rate_params']
+            self.reactants = self.reaction_properties['reactants']
+            self.products = self.reaction_properties['products']
+            self.reversible = True if self.reaction_properties['reversible'] == 'yes' else False
+            if self.reversible:
+                raise NotImplementedError('The library only deals with irreversible reactions.'
+                                            'You have given a reversible reaction.')
+        except KeyError as err :
+            print("Key {} is not present in the properties dictionary. Please check the XML.".format(str(err)))
 
     def __repr__(self):
         """Returns a string containing basic information
@@ -146,14 +149,17 @@ class ElementaryReaction():
                     return self._constant_rate(self.rate_params['k'])
                 else:
                     return self._constant_rate()
-            else:
+            elif 'Arrhenius' in self.rate_type:
                 A = self.rate_params['A']
                 E = self.rate_params['E']
                 b = self.rate_params['b']
                 return self._k_arrhenius(A, E, T, b)
+            else:
+                raise NotImplementedError('Rate type other than Constant, Arrhenius '
+                                        'and Modified Arrhenius is not implemented yet.')
         else:
             raise ValueError('No value for `rate_type` passed. '
-                             'Pass a value to get the reaction coeff')
+                             'Pass a value to get the reaction coeff.')
 
     def _constant_rate(self, k=1.0):
         """
@@ -575,5 +581,3 @@ class XMLReader():
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
-
-
