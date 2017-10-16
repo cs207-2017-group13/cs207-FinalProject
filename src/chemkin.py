@@ -1,6 +1,6 @@
+import numbers
 import xml.etree.ElementTree as ET
 import numpy as np
-import numbers
 
 
 class ElementaryReaction():
