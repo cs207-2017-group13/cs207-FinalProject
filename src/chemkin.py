@@ -59,7 +59,7 @@ class ElementaryReaction():
 
         RETURNS:
         ========
-        str: string
+        str : string
              containing basic information about
              the Elementary reaction
         """
@@ -72,14 +72,11 @@ class ElementaryReaction():
         Returns a dictionary with reactants as key 
         and the stoichiometric coeff as value for each elementary reaction.
 
-        INPUTS:
-        =======
-        None
-
         OUTPUTS:
         ========
-        reactants: a dictionary with reactants as key 
-        and the stoichiometric coeff as value.
+        reactants : dict
+            A dictionary with reactants as key and the stoichiometric
+            coeff as value.
 
         EXAMPLES:
         =========
@@ -98,14 +95,11 @@ class ElementaryReaction():
         Returns a dictionary of products as key and the 
         stoichiometric coeff as value for each elementary reaction.
 
-        INPUTS:
-        =======
-        None
-
         OUTPUTS:
         ========
-        reactants: a dictionary of reactants as key 
-        and the stoichiometric product coeff as value.
+        reactants : dict
+            A dictionary of reactants as key and the stoichiometric
+            product coeff as value.
 
         EXAMPLES:
         =========
@@ -126,7 +120,7 @@ class ElementaryReaction():
 
         INPUTS:
         =======
-        T : float, 
+        T : float
             Temperature in Kelvin scale,
             Must be positive
 
@@ -169,13 +163,13 @@ class ElementaryReaction():
 
         INPUTS:
         =======
-        k: float, default value = 1.0
-           Constant reaction rate coefficient
+        k : float, optional
+            Constant reaction rate coefficient
 
         RETURNS:
         ========
-        k: float
-           Constant reaction rate coefficient
+        k : float
+            Constant reaction rate coefficient
 
         Notes
         -----
@@ -213,24 +207,23 @@ class ElementaryReaction():
 
         INPUTS:
         =======
-        A: float,
-           Arrhenius prefactor, Must be positive
-        b: float,
-           Modified Arrhenius parameter, default value = 0.0
-        E: float,
-           Activation energy
-        T: float,
-           Temperature, Must be positive
-        R: float, default value = 8.314
-           Ideal gas constant
+        A : float
+            Arrhenius prefactor, Must be positive
+        E : float
+            Activation energy
+        T : float
+            Temperature, Must be positive
+        b : float, optional
+            Modified Arrhenius parameter, default value=0.0,
+            corresponding to regular Arrhenius.
+        R : float, optional
+            Ideal gas constant
 
         RETURNS:
         ========
-        k: float,
-           Arrhenius reaction rate coefficient
+        k : float
+            Arrhenius reaction rate coefficient
 
-        EXAMPLES:
-        =========
         EXAMPLES:
         =========
         >>> elementary_reaction = ElementaryReaction({'equation' : 'H + O2  [=] OH + O' ,
@@ -278,7 +271,7 @@ class ReactionSystem():
 
         RETURNS:
         ========
-        str: string
+        str : string
              Containing information on species and stoichiometric coefficients
         """
         info = "Species: {} \nStoichiometric coefficients of reactants: {} \nStoichiometric coefficients of products: {}".format(self.species, 
