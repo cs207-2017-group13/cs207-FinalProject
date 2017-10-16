@@ -482,7 +482,25 @@ class XMLReader():
         xml_tree = ET.parse(xml_file)
         self.root = xml_tree.getroot()
 
-    def _parse_reaction(self, reaction_elt):
+    def _get_species(self):
+        """Return the species involved in the reaction.
+
+        Returns
+        -------
+        species : list
+            A list of strings identifying the species involved in the
+            reaction.
+        """
+        try:
+            phase_elt = self.root.find('phase')
+            species_array_elt = phase_elt.find('speciesArray')
+            species_text = species_array_elt.text
+        except AttributeError:
+            raise LookupError("Element root>phase>speciesArray")
+        species = species_text.split()
+        return species
+
+    def parse_reaction(self, reaction_elt):
         """Collect individual reaction properties in a dictionary.
 
         The first "rateCoeff" entry found is converted into two items,
@@ -525,24 +543,6 @@ class XMLReader():
             properties['products'][species] = float(coefficient)
 
         return properties
-
-    def _get_species(self):
-        """Return the species involved in the reaction.
-
-        Returns
-        -------
-        species : list
-            A list of strings identifying the species involved in the
-            reaction.
-        """
-        try:
-            phase_elt = self.root.find('phase')
-            species_array_elt = phase_elt.find('speciesArray')
-            species_text = species_array_elt.text
-        except AttributeError:
-            raise LookupError("Element root>phase>speciesArray")
-        species = species_text.split()
-        return species
 
     def get_reaction_systems(self):
         """Parse all groups of reactions in xml file.
