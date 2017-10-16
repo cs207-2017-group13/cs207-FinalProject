@@ -259,6 +259,14 @@ class ReactionSystem():
         system of reactions.
     species : list
         A list of strings identifying species in reaction system.
+
+    Methods:
+    ========
+    calculate_progress_rate(concs, temperature)
+    calculate_reaction_rate(concs, temperature)
+    get_rate_coefficients()
+    build_reactant_coefficient_matrix()
+    build_product_coefficient_matrix()
     """
     def __init__(self, elementary_reactions, species):
         self.elementary_reactions = elementary_reactions
@@ -267,7 +275,7 @@ class ReactionSystem():
         self.product_coefficients = self.build_product_coefficient_matrix()
 
     def __repr__(self):
-        """Returns a string containing basic information for the reaction system
+        """Returns a string containing basic information for the reaction system.
 
         RETURNS:
         ========
