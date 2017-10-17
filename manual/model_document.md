@@ -1,7 +1,7 @@
 
 # Chemical Kinetics (`Chemkin`) Library User Manual
 
-## 1. Introduction 
+## 1. Introduction
 
 `chemical_kinetics` is a simple library for handling chemical reaction systems. Chemical reactions are input using a standard XML format, and reaction rates can be computed.
 

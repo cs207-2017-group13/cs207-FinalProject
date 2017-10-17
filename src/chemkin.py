@@ -43,15 +43,18 @@ class ElementaryReaction():
     NotImplementedError: The library only deals with irreversible reactions.You have given a reversible reaction.
     """
     def __init__(self, reaction_properties):
-        self.reaction_properties = reaction_properties
-        self.rate_type = self.reaction_properties['rate_type']
-        self.rate_params = self.reaction_properties['rate_params']
-        self.reactants = self.reaction_properties['reactants']
-        self.products = self.reaction_properties['products']
-        self.reversible = True if self.reaction_properties['reversible'] == 'yes' else False
-        if self.reversible:
-            raise NotImplementedError('The library only deals with irreversible reactions.'
-                                        'You have given a reversible reaction.') 
+        try:
+            self.reaction_properties = reaction_properties
+            self.rate_type = self.reaction_properties['rate_type']
+            self.rate_params = self.reaction_properties['rate_params']
+            self.reactants = self.reaction_properties['reactants']
+            self.products = self.reaction_properties['products']
+            self.reversible = True if self.reaction_properties['reversible'] == 'yes' else False
+            if self.reversible:
+                raise NotImplementedError('The library only deals with irreversible reactions.'
+                                            'You have given a reversible reaction.')
+        except KeyError as err :
+            print("Key {} is not present in the properties dictionary. Please check the XML.".format(str(err)))
 
     def __repr__(self):
         """Returns a string containing basic information
@@ -146,14 +149,17 @@ class ElementaryReaction():
                     return self._constant_rate(self.rate_params['k'])
                 else:
                     return self._constant_rate()
-            else:
+            elif 'Arrhenius' in self.rate_type:
                 A = self.rate_params['A']
                 E = self.rate_params['E']
                 b = self.rate_params['b']
                 return self._k_arrhenius(A, E, T, b)
+            else:
+                raise NotImplementedError('Rate type other than Constant, Arrhenius '
+                                        'and Modified Arrhenius is not implemented yet.')
         else:
             raise ValueError('No value for `rate_type` passed. '
-                             'Pass a value to get the reaction coeff')
+                             'Pass a value to get the reaction coeff.')
 
     def _constant_rate(self, k=1.0):
         """
@@ -479,7 +485,10 @@ class XMLReader():
     """
     def __init__(self, xml_file):
         self.xml_file = xml_file
-        xml_tree = ET.parse(xml_file)
+        try:
+            xml_tree = ET.parse(xml_file)
+        except ET.ParseError:
+            raise SyntaxError("Failed to parse %s" % xml_file)
         self.root = xml_tree.getroot()
 
     def _get_species(self):
@@ -490,13 +499,19 @@ class XMLReader():
         species : list
             A list of strings identifying the species involved in the
             reaction.
+
+        Raises
+        ------
+        LookupError
+            "speciesArray" element with text missing.
         """
         try:
             phase_elt = self.root.find('phase')
             species_array_elt = phase_elt.find('speciesArray')
             species_text = species_array_elt.text
         except AttributeError:
-            raise LookupError("Element root>phase>speciesArray")
+            raise LookupError("Could not find any species in "
+                              "root>phase>speciesArray")
         species = species_text.split()
         return species
 
@@ -513,35 +528,38 @@ class XMLReader():
         reaction_elt : xml.etree.Element
              A "reaction" entry within a "reactionData"
              entry. Corresponds to an elementary reaction.
-        
+
         Returns
         -------
         properties : dict
              Dictionary of reaction parameters.
         """
-        properties = reaction_elt.attrib.copy()
+        try:
+            properties = reaction_elt.attrib.copy()
 
-        properties["equation"] = reaction_elt.find("equation").text
+            properties["equation"] = reaction_elt.find("equation").text
 
-        rate_coeff = reaction_elt.find("rateCoeff")
-        rate_coeff_child = rate_coeff.getchildren()[0]
-        properties["rate_type"] = rate_coeff_child.tag
-        properties["rate_params"] = {}
-        for child in rate_coeff_child.getchildren():
-            properties["rate_params"][child.tag] = float(child.text)
+            rate_coeff = reaction_elt.find("rateCoeff")
+            rate_coeff_child = rate_coeff.getchildren()[0]
+            properties["rate_type"] = rate_coeff_child.tag
+            properties["rate_params"] = {}
+            for child in rate_coeff_child.getchildren():
+                properties["rate_params"][child.tag] = float(child.text)
 
-        reactants = reaction_elt.find("reactants").text.split()
-        properties["reactants"] = {}
-        for reactant in reactants:
-            species, coefficient = reactant.split(':')
-            properties['reactants'][species] = coefficient
+            reactants = reaction_elt.find("reactants").text.split()
+            properties["reactants"] = {}
+            for reactant in reactants:
+                species, coefficient = reactant.split(':')
+                properties['reactants'][species] = coefficient
 
-        products = reaction_elt.find("products").text.split()
-        properties["products"] = {}
-        for reactant in products:
-            species, coefficient = reactant.split(':')
-            properties['products'][species] = float(coefficient)
-
+            products = reaction_elt.find("products").text.split()
+            properties["products"] = {}
+            for reactant in products:
+                species, coefficient = reactant.split(':')
+                properties['products'][species] = float(coefficient)
+        except AttributeError:
+            raise LookupError("Could not properly parse reaction element "
+                              "in xml file %s" % self.xml_file)
         return properties
 
     def get_reaction_systems(self):
@@ -575,5 +593,3 @@ class XMLReader():
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
-
-
