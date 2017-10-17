@@ -9,7 +9,11 @@ The clients could call the chemkin package and obtained the right-hand-side of a
  
 
 ## 2. Installation
-You can obtain the `Chemkin` Library [here](https://github.com/cs207-2017-group13/cs207-FinalProject)
+You can obtain the `Chemkin` Library [here](https://github.com/cs207-2017-group13/cs207-FinalProject).
+Users can run the test suite by calling pytest from the main directory, i.e. 
+```python
+pytest --cov=src
+```
 
 
 ## 3. Basic Usage and Examples
