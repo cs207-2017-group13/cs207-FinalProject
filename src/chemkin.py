@@ -485,7 +485,10 @@ class XMLReader():
     """
     def __init__(self, xml_file):
         self.xml_file = xml_file
-        xml_tree = ET.parse(xml_file)
+        try:
+            xml_tree = ET.parse(xml_file)
+        except ET.ParseError:
+            raise SyntaxError("Failed to parse %s" % xml_file)
         self.root = xml_tree.getroot()
 
     def _get_species(self):
@@ -496,13 +499,19 @@ class XMLReader():
         species : list
             A list of strings identifying the species involved in the
             reaction.
+
+        Raises
+        ------
+        LookupError
+            "speciesArray" element with text missing.
         """
         try:
             phase_elt = self.root.find('phase')
             species_array_elt = phase_elt.find('speciesArray')
             species_text = species_array_elt.text
         except AttributeError:
-            raise LookupError("Element root>phase>speciesArray")
+            raise LookupError("Could not find any species in "
+                              "root>phase>speciesArray")
         species = species_text.split()
         return species
 
@@ -519,35 +528,38 @@ class XMLReader():
         reaction_elt : xml.etree.Element
              A "reaction" entry within a "reactionData"
              entry. Corresponds to an elementary reaction.
-        
+
         Returns
         -------
         properties : dict
              Dictionary of reaction parameters.
         """
-        properties = reaction_elt.attrib.copy()
+        try:
+            properties = reaction_elt.attrib.copy()
 
-        properties["equation"] = reaction_elt.find("equation").text
+            properties["equation"] = reaction_elt.find("equation").text
 
-        rate_coeff = reaction_elt.find("rateCoeff")
-        rate_coeff_child = rate_coeff.getchildren()[0]
-        properties["rate_type"] = rate_coeff_child.tag
-        properties["rate_params"] = {}
-        for child in rate_coeff_child.getchildren():
-            properties["rate_params"][child.tag] = float(child.text)
+            rate_coeff = reaction_elt.find("rateCoeff")
+            rate_coeff_child = rate_coeff.getchildren()[0]
+            properties["rate_type"] = rate_coeff_child.tag
+            properties["rate_params"] = {}
+            for child in rate_coeff_child.getchildren():
+                properties["rate_params"][child.tag] = float(child.text)
 
-        reactants = reaction_elt.find("reactants").text.split()
-        properties["reactants"] = {}
-        for reactant in reactants:
-            species, coefficient = reactant.split(':')
-            properties['reactants'][species] = coefficient
+            reactants = reaction_elt.find("reactants").text.split()
+            properties["reactants"] = {}
+            for reactant in reactants:
+                species, coefficient = reactant.split(':')
+                properties['reactants'][species] = coefficient
 
-        products = reaction_elt.find("products").text.split()
-        properties["products"] = {}
-        for reactant in products:
-            species, coefficient = reactant.split(':')
-            properties['products'][species] = float(coefficient)
-
+            products = reaction_elt.find("products").text.split()
+            properties["products"] = {}
+            for reactant in products:
+                species, coefficient = reactant.split(':')
+                properties['products'][species] = float(coefficient)
+        except AttributeError:
+            raise LookupError("Could not properly parse reaction element "
+                              "in xml file %s" % self.xml_file)
         return properties
 
     def get_reaction_systems(self):
