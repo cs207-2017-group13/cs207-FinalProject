@@ -1,4 +1,3 @@
-
 # Chemical Kinetics (`chemical_kinetics`) Library User Manual
 
 ## 1. Introduction
@@ -7,16 +6,19 @@
 
 The library `chemkin` is a simple library for handling such chemical reaction systems. A system of chemical reactions are input in a standard XML format and the library computes the reaction rates and progress rate of these reactions, based on the parameters passed in the XML. 
 
-In a system of $N$ species undergoing $M$ **irreversible**, **elementary** reactions, the reaction rate of specie $i$ is computed by - 
+In a system of $N$ species undergoing $M$ **irreversible**, **elementary** reactions, the reaction rate of species $i$ is computed by - 
 
+$$
 \begin{align}
-  f_{i} = \sum_{j=1}^{M}{\nu_{ij}\omega_{j}}, \qquad i = 1, \ldots, N
+  f_{i} &= \sum_{j=1}^{M}{\nu_{ij}\omega_{j}}, \qquad i = 1, \ldots, N
 \end{align}
 
 The progress rate for each reaction is computed by 
 \begin{align}
-  \omega_{j} = k_{j}\prod_{i=1}^{N}{x_{i}^{\nu_{ij}^{\prime}}}, \qquad j = 1, \ldots, M
+  \omega_{j} &= k_{j}\prod_{i=1}^{N}{x_{i}^{\nu_{ij}^{\prime}}}, \qquad j = 1, \ldots, M
 \end{align}
+$$
+
 where,
 
 $\nu_{ij}^{\prime}$ : Stoichiometric coefficients of reactants,
@@ -34,11 +36,11 @@ The clients could call the chemkin package and obtained the right-hand-side of a
  
 
 ## 2. Installation
-You can obtain the `Chemkin` Library [here](https://github.com/cs207-2017-group13/cs207-FinalProject).
+You can obtain the `chemical_kientics` Library [here](https://github.com/cs207-2017-group13/cs207-FinalProject).
 Users can run the test suite by calling pytest from the main directory, i.e. 
-```python
-!pytest --cov=src
-```
+
+    pytest --cov=src
+
 
 
 ## 3. Basic Usage and Examples
@@ -78,7 +80,8 @@ When b = 0, the above formula corresponds to the Arrhenius equation.
 
 $$ 
 \begin{align}
-  &k_{\textrm{arr}}     = A \exp\left(-\frac{E}{RT}\right) \tag{Arrhenius} \\
+  &k_{\textrm{arr}}     = A \exp\left(-\frac{E}{RT}\right) \tag{Arrhenius}
+\end{align}
 $$
  
 
