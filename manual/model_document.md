@@ -4,7 +4,7 @@
 
 `Chemical kinetics` is the study of chemical reactions with respect to reaction rates, effect of factors like  temperature, activation energy, stoichiometric coeffecients of reactants and products, etc. on these reactions.
 
-The library `chemkin` is a simple library for handling such chemical reaction systems. A system of chemical reactions are input in a standard XML format and the library computes the reaction rates and progress rate of these reactions, based on the parameters passed in the XML. 
+The library `chemical_kinetics` is a simple library for handling such chemical reaction systems. A system of chemical reactions are input in a standard XML format and the library computes the reaction rates and progress rate of these reactions, based on the parameters passed in the XML.
 
 In a system of $N$ species undergoing $M$ **irreversible**, **elementary** reactions, the reaction rate of species $i$ is computed by - 
 
@@ -37,7 +37,7 @@ The clients could call the chemkin package and obtained the right-hand-side of a
  
 
 ## 2. Installation
-You can obtain the `chemical_kientics` Library [here](https://github.com/cs207-2017-group13/cs207-FinalProject).
+You can obtain the `chemical_kinetics` Library [here](https://github.com/cs207-2017-group13/cs207-FinalProject).
 Users can run the test suite by calling pytest from the main directory, i.e. 
 
     pytest --cov=src
