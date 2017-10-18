@@ -1,5 +1,5 @@
 
-# Chemical Kinetics (`Chemkin`) Library User Manual
+# Chemical Kinetics (`chemical_kinetics`) Library User Manual
 
 ## 1. Introduction
 
@@ -43,20 +43,22 @@ This class has thee public methods, two private methods a special method:
       
     A nonzero value for b gives the modified Arrhenius equation.
 
-```latex
+$$
 \begin{align}
   &k_{\textrm{mod arr}} = A T^{b} \exp\left(-\frac{E}{RT}\right) \tag{Modified Arrhenius}
 \end{align}
- 
-    When b = 0, the above formula corresponds to the Arrhenius equation.
- 
+$$ 
+
+When b = 0, the above formula corresponds to the Arrhenius equation.
+
+$$ 
 \begin{align}
   &k_{\textrm{arr}}     = A \exp\left(-\frac{E}{RT}\right) \tag{Arrhenius} \\
-\end{align}
+$$
  
-```
 
 Example:
+
 ```python
 elementary_reaction = ElementaryReaction(reaction_properties)
 reactants = elementary_reaction.get_reactants()
