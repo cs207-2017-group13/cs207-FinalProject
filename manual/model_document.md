@@ -3,7 +3,32 @@
 
 ## 1. Introduction
 
-`chemical_kinetics` is a simple library for handling chemical reaction systems. Chemical reactions are input using a standard XML format, and reaction rates can be computed.
+`Chemical kinetics` is the study of chemical reactions with respect to reaction rates, effect of factors like  temperature, activation energy, stoichiometric coeffecients of reactants and products, etc. on these reactions.
+
+The library `chemkin` is a simple library for handling such chemical reaction systems. A system of chemical reactions are input in a standard XML format and the library computes the reaction rates and progress rate of these reactions, based on the parameters passed in the XML. 
+
+In a system of $N$ species undergoing $M$ **irreversible**, **elementary** reactions, the reaction rate of specie $i$ is computed by - 
+
+\begin{align}
+  f_{i} = \sum_{j=1}^{M}{\nu_{ij}\omega_{j}}, \qquad i = 1, \ldots, N
+\end{align}
+
+The progress rate for each reaction is computed by 
+\begin{align}
+  \omega_{j} = k_{j}\prod_{i=1}^{N}{x_{i}^{\nu_{ij}^{\prime}}}, \qquad j = 1, \ldots, M
+\end{align}
+where,
+
+$\nu_{ij}^{\prime}$ : Stoichiometric coefficients of reactants,
+
+$\nu_{ij}^{\prime\prime}$ : Stoichiometric coefficients of products,
+
+$\omega_{j}$ : Progress rate of reaction $j$,
+
+$x_{i}$ : Concentration of specie $i$,
+
+$k_{j}$ : Reaction rate coefficient for reaction $j$ 
+
 
 The clients could call the chemkin package and obtained the right-hand-side of an ODE. They can then use it as the righ-hand-side of the ODE, or in a neural net code to learn new reaction pathways.
  
@@ -41,7 +66,7 @@ This class has thee public methods, two private methods a special method:
  - `_constant_rate(k=1.0)`: Returns a constant reaction rate coefficient with default value as 1.0
  - `_k_arrhenius(A, E, T, b=0.0, R=8.314)`: Returns a reaction rate coefficient according to the Arrhenius equation. The Arrhenius equation relates the rate constant, k, of a chemical reaction to parameters A (pre-exponential factor), E (activation energy), T (absolute temperature), and b (exponential indicating temperature-dependence of pre-exponential factor)::
       
-    A nonzero value for b gives the modified Arrhenius equation.
+A nonzero value for b gives the modified Arrhenius equation.
 
 $$
 \begin{align}
