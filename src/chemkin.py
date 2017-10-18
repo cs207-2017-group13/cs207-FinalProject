@@ -154,7 +154,7 @@ class ElementaryReaction():
             elif 'Arrhenius' in self.rate_type:
                 A = self.rate_params['A']
                 E = self.rate_params['E']
-                b = self.rate_params['b']
+                b = self.rate_params.get('b', 0.)
                 return self._k_arrhenius(A, E, T, b)
             else:
                 raise NotImplementedError(
