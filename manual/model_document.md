@@ -12,6 +12,7 @@ $$
 \begin{align}
   f_{i} &= \sum_{j=1}^{M}{\nu_{ij}\omega_{j}}, \qquad i = 1, \ldots, N
 \end{align}
+$$
 
 The progress rate for each reaction is computed by 
 \begin{align}
