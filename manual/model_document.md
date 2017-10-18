@@ -31,12 +31,42 @@ reaction_systems = reader.get_reaction_systems()
 `reaction_systems` is a list containing multiple `ReactionSystem` instances. The length of `reaction_systems` is the number of reaction systems, and the length of each list element is the number of reactions in a reaction system.
 
 #### `ElementaryReaction` class: Class for each elementary reaction
- Take a dictionaries of properties from the XMLReader class. Calculate the rate coefficient for each elementary reaction and pass it to the ReactionSystem class. Returns a dictionary of recatants and products to the ReactionSystem class.
+Takes a dictionary of properties from the XMLReader class for each elementary reaction. Calculates the rate coefficient for each elementary reaction and passes it to the ReactionSystem class. It also returns a dictionary of recatants and products to the ReactionSystem class.
+
+This class has thee public methods, two private methods a special method:
+ - `__repr__()`: Returns a string containing basic information about the elementary reaction
+ - `get_reactants()`: Returns a dictionary with reactants as key and the stoichiometric coeff of reactants as value for each elementary reaction.
+ - `get_products()`:  Returns a dictionary with products as key and the stoichiometric coeff of products as value for each elementary reaction.
+ - `calculate_rate_coefficient(T)`: Calculates and returns the rate coeffiecient of the reaction based on the type of rate coefficient required.
+ - `_constant_rate(k=1.0)`: Returns a constant reaction rate coefficient with default value as 1.0
+ - `_k_arrhenius(A, E, T, b=0.0, R=8.314)`: Returns a reaction rate coefficient according to the Arrhenius equation. The Arrhenius equation relates the rate constant, k, of a chemical reaction to parameters A (pre-exponential factor), E (activation energy), T (absolute temperature), and b (exponential indicating temperature-dependence of pre-exponential factor)::
+      
+    A nonzero value for b gives the modified Arrhenius equation.
+
+
+\begin{align}
+  &k_{\textrm{mod arr}} = A T^{b} \exp\left(-\frac{E}{RT}\right) \tag{Modified Arrhenius}
+\end{align}
  
- Example:
+    When b = 0, the above formula corresponds to the Arrhenius equation.
+ 
+\begin{align}
+  &k_{\textrm{arr}}     = A \exp\left(-\frac{E}{RT}\right) \tag{Arrhenius} \\
+\end{align}
+ 
+ 
+Example:
  ```python
- 
+elementary_reaction = ElementaryReaction(reaction_properties)
+reactants = elementary_reaction.get_reactants()
+products = elementary_reaction.get_products()
+rate_coeff = elementary_reaction.calculate_rate_coefficient(1000)
+repr(elementary_reaction)
  ```
+ 
+
+ 
+
 
 
 #### `ReactionSystem` class: Class for a system of reactions
