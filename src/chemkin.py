@@ -6,11 +6,12 @@ import numpy as np
 class ElementaryReaction():
     """Class for a each elementary reaction.
 
-    Take a dictionaries of properties from the XMLReader class. 
-    Calculates the rate coefficient for each elementary reaction and returns it to
-    the ReactionSystem class. Returns a dictionary of recatants and products 
-    to the ReactionSystem class. Following methods are implemented in the class-
-    
+    Take a dictionaries of properties from the XMLReader class.
+    Calculates the rate coefficient for each elementary reaction and
+    returns it to the ReactionSystem class. Returns a dictionary of
+    recatants and products to the ReactionSystem class. Following
+    methods are implemented in the class.
+
     Parameters
     ==========
     reaction_properties : dict
@@ -66,14 +67,15 @@ class ElementaryReaction():
              containing basic information about
              the Elementary reaction
         """
-        info = "Reactants: {} \nProducts: {} \nRate Params: {} \nRate Type: {} \nReversible: {}".format(self.reactants, 
-            self.products, self.rate_params, self.rate_type, self.reversible)
-        return info        
-        
+        info = "Reactants: {} \nProducts: {} \nRate Params: {} \nRate Type: {} \nReversible: {}".format(
+            self.reactants, self.products, self.rate_params,
+            self.rate_type, self.reversible)
+        return info
+
     def get_reactants(self):
         """
-        Returns a dictionary with reactants as key 
-        and the stoichiometric coeff as value for each elementary reaction.
+        Returns a dictionary with reactants as key and the
+        stoichiometric coeff as value for each elementary reaction.
 
         OUTPUTS:
         ========
@@ -92,11 +94,11 @@ class ElementaryReaction():
         {'H': '1', 'O2': '1'}
         """
         return self.reactants
-    
+
     def get_products(self):
         """
-        Returns a dictionary of products as key and the 
-        stoichiometric coeff as value for each elementary reaction.
+        Returns a dictionary of products as key and the stoichiometric
+        coeff as value for each elementary reaction.
 
         OUTPUTS:
         ========
@@ -155,8 +157,9 @@ class ElementaryReaction():
                 b = self.rate_params['b']
                 return self._k_arrhenius(A, E, T, b)
             else:
-                raise NotImplementedError('Rate type other than Constant, Arrhenius '
-                                        'and Modified Arrhenius is not implemented yet.')
+                raise NotImplementedError(
+                    'Rate type other than Constant, Arrhenius and Modified '
+                    'Arrhenius is not implemented yet.')
         else:
             raise ValueError('No value for `rate_type` passed. '
                              'Pass a value to get the reaction coeff.')
@@ -337,20 +340,22 @@ class ReactionSystem():
         k = self.get_rate_coefficients(temperature)
         if type(k) is float:
             k = [k]*len(self.reactant_coefficients[0])
-        progress = k # Initialize progress rates with reaction rate coefficients
+
+        # Initialize progress rates with reaction rate coefficients
+        progress = k
         for jdx, rj in enumerate(progress):
             if rj < 0:
-                raise ValueError("k = {0:18.16e}:  Negative reaction "
-                                 "rate coefficients are prohibited!".format(rj))
+                raise ValueError("k = {0:18.16e}:  Negative reaction rate "
+                                 "coefficients are prohibited!".format(rj))
             for idx, xi in enumerate(concs):
-                nu_ij = self.reactant_coefficients[idx,jdx]
-                if xi  < 0.0:
+                nu_ij = self.reactant_coefficients[idx, jdx]
+                if xi < 0.0:
                     raise ValueError("x{0} = {1:18.16e}:  Negative concentrations are prohibited!".format(idx, xi))
                 if nu_ij < 0:
                     raise ValueError("nu_{0}{1} = {2}:  Negative stoichiometric coefficients are prohibited!".format(idx, jdx, nu_ij))
-                
+
                 progress[jdx] *= xi**nu_ij
-        return progress   
+        return progress
 
     def calculate_reaction_rate(self, concs, temperature):
         """Returns the reaction rate of a system of irreversible, elementary reactions.
@@ -427,8 +432,8 @@ class ReactionSystem():
         mat = np.zeros([len(self.species), len(self.elementary_reactions)])
         for i, reaction in enumerate(self.elementary_reactions):
             dict_react = reaction.get_reactants()
-            for j,species in enumerate(self.species):
-                mat[j,i] = dict_react.get(species, 0)
+            for j, species in enumerate(self.species):
+                mat[j, i] = dict_react.get(species, 0)
         return mat
 
     def build_product_coefficient_matrix(self):
@@ -453,8 +458,8 @@ class ReactionSystem():
         mat = np.zeros([len(self.species), len(self.elementary_reactions)])
         for i, reaction in enumerate(self.elementary_reactions):
             dict_prod = reaction.get_products()
-            for j,species in enumerate(self.species):
-                mat[j,i] = dict_prod.get(species, 0)
+            for j, species in enumerate(self.species):
+                mat[j, i] = dict_prod.get(species, 0)
         return mat
 
 
@@ -570,6 +575,11 @@ class XMLReader():
         reaction_systems : list
              A list of `ReactionSystem` instances corresponding to
              each "reactionData" entry in the XML file.
+
+        Raises
+        ------
+        NotImplementedError
+            Upon encountering reaction of not of type "Elementary".
         """
         species = self._get_species()
         reaction_systems = []
@@ -578,13 +588,14 @@ class XMLReader():
             for reaction in reaction_data.findall('reaction'):
                 reaction_properties = self.parse_reaction(reaction)
                 if reaction_properties['type'] != "Elementary":
-                    raise NotImplementedError
+                    raise NotImplementedError("Current implementation only "
+                                              "supports elementary reactions")
                 elementary_reaction = ElementaryReaction(reaction_properties)
                 elementary_reactions.append(elementary_reaction)
             reaction_system = ReactionSystem(elementary_reactions, species)
             reaction_systems.append(reaction_system)
 
-        return reaction_systems    
+        return reaction_systems
 
     def __repr__(self):
         return "XMLReader(%s)" % self.xml_file
