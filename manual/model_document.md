@@ -44,15 +44,12 @@ This class has thee public methods, two private methods a special method:
     A nonzero value for b gives the modified Arrhenius equation.
 
 
-\begin{align}
-  &k_{\textrm{mod arr}} = A T^{b} \exp\left(-\frac{E}{RT}\right) \tag{Modified Arrhenius}
-\end{align}
+
+$$  &k_{\textrm{mod arr}} = A T^{b} \exp\left(-\frac{E}{RT}\right) \tag{Modified Arrhenius} $$
  
     When b = 0, the above formula corresponds to the Arrhenius equation.
  
-\begin{align}
-  &k_{\textrm{arr}}     = A \exp\left(-\frac{E}{RT}\right) \tag{Arrhenius} \\
-\end{align}
+$$  &k_{\textrm{arr}}     = A \exp\left(-\frac{E}{RT}\right) \tag{Arrhenius} $$
  
  
 Example:
