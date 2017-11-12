@@ -20,7 +20,7 @@ cursor.execute('''CREATE TABLE coefficients (
 db.commit()
 
 # read from the text file
-with open('thermo30.txt') as f:
+with open('src/thermo30.txt') as f:
     thermo = [item.strip() for item in f.readlines()]
 
 thermo = thermo[5:-5]
