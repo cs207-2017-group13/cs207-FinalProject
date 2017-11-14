@@ -34,15 +34,6 @@ class ElementaryReaction():
     ...                     'rate_params' : {'A' : 3520000.0, 'E' : 71400.0 , 'b' : -0.7 }, 
     ...                     'rate_type' : 'Arrhenius' , 'reactants' : {'H' : '1' , 'O2' : '1'} , 
     ...                     'reversible': 'no', 'type' : ' Elementary'})
-
-    >>> elementary_reaction = ElementaryReaction({'equation' : 'H + O2  [=] OH + O' ,
-    ...                     'id' : 'reaction01', 'products' : {'O' : '1' , 'OH' : '1'}, 
-    ...                     'rate_params' : {'A' : 3520000.0, 'E' : 71400.0 , 'b' : -0.7 }, 
-    ...                     'rate_type' : 'Arrhenius' , 'reactants' : {'H' : '1' , 'O2' : '1'} , 
-    ...                     'reversible': 'yes', 'type' : ' Elementary'})
-    Traceback (most recent call last):
-    ...
-    NotImplementedError: The library only deals with irreversible reactions.You have given a reversible reaction.
     """
     def __init__(self, reaction_properties):
         try:
@@ -732,12 +723,12 @@ class rxnset():
 
 
 if __name__ == "__main__":
-    # import doctest
-    # doctest.testmod()
-    reader = XMLReader("tests/rxns_reversible.xml")
-    reaction_system = reader.get_reaction_systems()
-    concs = [1., 2., 1., 3., 1.]
-    print(reaction_system[0].calculate_reaction_rate(concs, 300))
+    import doctest
+    doctest.testmod()
+    # reader = XMLReader("tests/rxns_reversible.xml")
+    # reaction_system = reader.get_reaction_systems()
+    # concs = [1., 2., 1., 3., 1.]
+    # print(reaction_system[0].calculate_reaction_rate(concs, 300))
     
 
 
