@@ -715,7 +715,7 @@ class rxnset():
 
 
     def get_nasa_polynomials(self, T):
-        db = sqlite3.connect('src/NASA_polynomial_coefficients.sqlite')
+        db = sqlite3.connect('NASA_polynomial_coefficients.sqlite')
         cursor = db.cursor()
         coeff = []
         for i in self.species:
