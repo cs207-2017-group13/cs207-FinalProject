@@ -617,7 +617,7 @@ class XMLReader():
         return "XMLReader(%s)" % self.xml_file
 
 
-class thermochem:
+class Thermochem():
     """Methods for calculating the backward reaction rate.
     Cp_over_R: Returns specific heat of each specie given by 
                the NASA polynomials.
@@ -634,10 +634,10 @@ class thermochem:
     to be of some use.
     """
 
-    def __init__(self, rxnset):
+    def __init__(self, rxnset, p0=1e5, R=8.3144598):
         self.rxnset = rxnset
-        self.p0 = 1.0e+05 # Pa
-        self.R = 8.3144598 # J / mol / K
+        self.p0 = p0 # Pa
+        self.R = R # J / mol / K
         self.gamma = np.sum(self.rxnset.nuij, axis=0)
 
     def Cp_over_R(self, T):
@@ -698,28 +698,40 @@ class thermochem:
 
         return kf / kb
 
-class rxnset():
+
+# This class could get a different name or be incorporated into an
+# existing class.
+class Rxnset():
     def __init__(self, species, nuij, T):
+        # Does it make sense to have T as a parameter for the class?
         self.species = species
         self.nuij = nuij
         self.nasa7_coeffs = self.get_nasa_polynomials(T)
 
-
     def get_nasa_polynomials(self, T):
+        """Return NASA polynomial coefficients for all species for
+        temperature T.
+        
+        """        
         db = sqlite3.connect('NASA_polynomial_coefficients.sqlite')
         cursor = db.cursor()
-        coeff = []
+        coeffs = []
         for i in self.species:
-            query = '''SELECT * FROM coefficients WHERE species="{}"'''.format(i)
-            info = cursor.execute(query).fetchall()[0]
-            if T<info[3] and T>info[2]:
-                coeff.append([float(c) for c in info[5].split()])
-            elif T>=info[3] and T<info[4]:
-                coeff.append([float(c) for c in info[6].split()])
+            query = '''SELECT low_temp, mid_temp, high_temp,
+            low_coeffs, high_coeffs
+            FROM coefficients WHERE species="{}"'''.format(i)
+            low_T, mid_T, high_T, low_coeffs, high_coeffs = cursor.execute(
+                query).fetchone()
+
+            if T > low_T and T < mid_T:
+                coeffs.append([float(c) for c in low_coeffs.split()])
+            elif T >= mid_T and T < high_T:
+                coeffs.append([float(c) for c in high_coeffs.split()])
             else:
-                raise ValueError("Temperature not in range provided by NASA polynomial coefficients.")
+                raise ValueError("Temperature not in range provided by NASA "
+                                 "polynomial coefficients.")
         db.close()
-        return np.array(coeff)
+        return np.array(coeffs)
 
 
 if __name__ == "__main__":
@@ -729,6 +741,3 @@ if __name__ == "__main__":
     # reaction_system = reader.get_reaction_systems()
     # concs = [1., 2., 1., 3., 1.]
     # print(reaction_system[0].calculate_reaction_rate(concs, 300))
-    
-
-
