@@ -1,7 +1,5 @@
 import xml.etree.ElementTree as ET
 import numpy as np
-import sys
-sys.path.append('/src/thermodynamics.py')
 import thermodynamics
 
 
