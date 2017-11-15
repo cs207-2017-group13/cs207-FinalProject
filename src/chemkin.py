@@ -1,5 +1,6 @@
 import numbers
 import xml.etree.ElementTree as ET
+import sqlite3
 import numpy as np
 
 
@@ -33,15 +34,6 @@ class ElementaryReaction():
     ...                     'rate_params' : {'A' : 3520000.0, 'E' : 71400.0 , 'b' : -0.7 }, 
     ...                     'rate_type' : 'Arrhenius' , 'reactants' : {'H' : '1' , 'O2' : '1'} , 
     ...                     'reversible': 'no', 'type' : ' Elementary'})
-
-    >>> elementary_reaction = ElementaryReaction({'equation' : 'H + O2  [=] OH + O' ,
-    ...                     'id' : 'reaction01', 'products' : {'O' : '1' , 'OH' : '1'}, 
-    ...                     'rate_params' : {'A' : 3520000.0, 'E' : 71400.0 , 'b' : -0.7 }, 
-    ...                     'rate_type' : 'Arrhenius' , 'reactants' : {'H' : '1' , 'O2' : '1'} , 
-    ...                     'reversible': 'yes', 'type' : ' Elementary'})
-    Traceback (most recent call last):
-    ...
-    NotImplementedError: The library only deals with irreversible reactions.You have given a reversible reaction.
     """
     def __init__(self, reaction_properties):
         try:
@@ -51,9 +43,6 @@ class ElementaryReaction():
             self.reactants = self.reaction_properties['reactants']
             self.products = self.reaction_properties['products']
             self.reversible = True if self.reaction_properties['reversible'] == 'yes' else False
-            if self.reversible:
-                raise NotImplementedError('The library only deals with irreversible reactions.'
-                                            'You have given a reversible reaction.')
         except KeyError as err :
             print("Key {} is not present in the properties dictionary. Please check the XML.".format(str(err)))
 
@@ -253,6 +242,7 @@ class ElementaryReaction():
         return k_arrhenius
 
 
+
 class ReactionSystem():
     """Class for a system of reactions
 
@@ -282,6 +272,8 @@ class ReactionSystem():
         self.species = species
         self.reactant_coefficients = self.build_reactant_coefficient_matrix()
         self.product_coefficients = self.build_product_coefficient_matrix()
+        self.reversible = self.check_reversible()
+
 
     def __repr__(self):
         """Returns a string containing basic information for the reaction system.
@@ -341,6 +333,13 @@ class ReactionSystem():
         if type(k) is float:
             k = [k]*len(self.reactant_coefficients[0])
 
+        # backward reaction rate coefficient
+        if any(self.reversible):
+            nu = self.product_coefficients - self.reactant_coefficients
+            rxnset_ins = rxnset(self.species, nu, temperature)
+            thermochem_ins = thermochem(rxnset_ins) 
+            kb = thermochem_ins.backward_coeffs(k, temperature)
+
         # Initialize progress rates with reaction rate coefficients
         progress = k
         for jdx, rj in enumerate(progress):
@@ -352,9 +351,22 @@ class ReactionSystem():
                 if xi < 0.0:
                     raise ValueError("x{0} = {1:18.16e}:  Negative concentrations are prohibited!".format(idx, xi))
                 if nu_ij < 0:
-                    raise ValueError("nu_{0}{1} = {2}:  Negative stoichiometric coefficients are prohibited!".format(idx, jdx, nu_ij))
+                    raise ValueError('''nu_{0}{1} = {2}:  Negative stoichiometric 
+                        coefficients are prohibited!'''.format(idx, jdx, nu_ij))
 
                 progress[jdx] *= xi**nu_ij
+        
+            # substract backward progress rate if reversible
+            if self.reversible[jdx]:
+                for idx, xi in enumerate(concs):
+                    nuij2 = self.product_coefficients[idx, jdx]
+                    if nuij2 < 0:
+                        raise ValueError('''nu_{0}{1} = {2}:  Negative stoichiometric 
+                            coefficients are prohibited!'''.format(idx, jdx, nuij2))
+                    kb[jdx] *= xi**nuij2
+
+                progress[jdx] -= kb[jdx]
+
         return progress
 
     def calculate_reaction_rate(self, concs, temperature):
@@ -461,6 +473,10 @@ class ReactionSystem():
             for j, species in enumerate(self.species):
                 mat[j, i] = dict_prod.get(species, 0)
         return mat
+
+    def check_reversible(self):
+        reversible = [i.reversible for i in self.elementary_reactions]
+        return reversible
 
 
 class XMLReader():
@@ -604,3 +620,7 @@ class XMLReader():
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
+    # reader = XMLReader("tests/rxns_reversible.xml")
+    # reaction_system = reader.get_reaction_systems()
+    # concs = [1., 2., 1., 3., 1.]
+    # print(reaction_system[0].calculate_reaction_rate(concs, 300))
