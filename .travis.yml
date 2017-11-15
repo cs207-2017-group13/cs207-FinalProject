@@ -4,6 +4,8 @@ python:
 before_install:
     - pip install pytest pytest-cov
     - pip install coveralls
+install:
+    - pip install -e .
 script:
     - pytest --cov=src
 after_success:
