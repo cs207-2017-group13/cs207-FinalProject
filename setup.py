@@ -9,5 +9,8 @@ setup(
     license="BSD",
     package_dir={
         '': "src"
+    },
+    package_data={
+        '': ["data"]
     }
 )

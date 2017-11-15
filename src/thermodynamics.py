@@ -117,7 +117,7 @@ class Rxnset():
     def read_nasa_coefficients(self):
         """Return NASA polynomial coefficients for all species.
         """
-        db = sqlite3.connect('NASA_polynomial_coefficients.sqlite')
+        db = sqlite3.connect('../data/NASA_polynomial_coefficients.sqlite')
         cursor = db.cursor()
         coeffs = collections.OrderedDict()
         for species in self.species:
