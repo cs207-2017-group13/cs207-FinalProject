@@ -1,1 +1,2 @@
-from src import *
+import chemkin
+import thermodynamics
