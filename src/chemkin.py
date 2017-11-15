@@ -1,7 +1,7 @@
-import numbers
 import xml.etree.ElementTree as ET
-import sqlite3
 import numpy as np
+
+import thermodynamics
 
 
 class ElementaryReaction():
@@ -42,9 +42,11 @@ class ElementaryReaction():
             self.rate_params = self.reaction_properties['rate_params']
             self.reactants = self.reaction_properties['reactants']
             self.products = self.reaction_properties['products']
-            self.reversible = True if self.reaction_properties['reversible'] == 'yes' else False
-        except KeyError as err :
-            print("Key {} is not present in the properties dictionary. Please check the XML.".format(str(err)))
+            self.reversible = True if self.reaction_properties[
+                'reversible'] == 'yes' else False
+        except KeyError as err:
+            print("Key {} is not present in the properties dictionary. "
+                  "Please check the XML.".format(str(err)))
 
     def __repr__(self):
         """Returns a string containing basic information
@@ -56,6 +58,10 @@ class ElementaryReaction():
              containing basic information about
              the Elementary reaction
         """
+        return "<ElementaryReaction: %d species>" % (
+            len(self.reactants) + len(self.products))
+
+    def get_info(self):
         info = "Reactants: {} \nProducts: {} \nRate Params: {} \nRate Type: {} \nReversible: {}".format(
             self.reactants, self.products, self.rate_params,
             self.rate_type, self.reversible)
@@ -106,11 +112,11 @@ class ElementaryReaction():
         {'O': '1', 'OH': '1'}
         """
         return self.products
-    
+
     def calculate_rate_coefficient(self, T):
         """
-        Calculates and returns a rate coeffiecient based on the type of 
-        rate coefficeint required
+        Calculates and returns a rate coeffiecient based on the type
+        of rate coefficeint required
 
         INPUTS:
         =======
@@ -242,7 +248,6 @@ class ElementaryReaction():
         return k_arrhenius
 
 
-
 class ReactionSystem():
     """Class for a system of reactions
 
@@ -273,6 +278,12 @@ class ReactionSystem():
         self.reactant_coefficients = self.build_reactant_coefficient_matrix()
         self.product_coefficients = self.build_product_coefficient_matrix()
         self.reversible = self.check_reversible()
+        if any(self.reversible):
+            nu = self.product_coefficients - self.reactant_coefficients
+            rxnset = thermodynamics.Rxnset(self.species, nu)
+            self.thermochem = thermodynamics.Thermochem(rxnset)
+        else:
+            self.thermochem = None
 
 
     def __repr__(self):
@@ -329,16 +340,14 @@ class ReactionSystem():
         >>> reaction_system[0].calculate_progress_rate(concs, 300)
         [0.00024002941214766843, 39.005602653448953]
         """
+        assert len(concs) == len(self.species)
         k = self.get_rate_coefficients(temperature)
         if type(k) is float:
             k = [k]*len(self.reactant_coefficients[0])
 
         # backward reaction rate coefficient
-        if any(self.reversible):
-            nu = self.product_coefficients - self.reactant_coefficients
-            rxnset_ins = rxnset(self.species, nu, temperature)
-            thermochem_ins = thermochem(rxnset_ins) 
-            kb = thermochem_ins.backward_coeffs(k, temperature)
+        if self.thermochem:
+            kb = self.thermochem.backward_coeffs(k, temperature)
 
         # Initialize progress rates with reaction rate coefficients
         progress = k
@@ -355,7 +364,7 @@ class ReactionSystem():
                         coefficients are prohibited!'''.format(idx, jdx, nu_ij))
 
                 progress[jdx] *= xi**nu_ij
-        
+
             # substract backward progress rate if reversible
             if self.reversible[jdx]:
                 for idx, xi in enumerate(concs):
@@ -394,6 +403,7 @@ class ReactionSystem():
         array([  3.90053626e+01,  -3.90053626e+01,   3.90058427e+01,
                 -3.90056027e+01,  -2.40029412e-04])
         """
+        assert len(concs) == len(self.species)
         nu = self.product_coefficients - self.reactant_coefficients
         rj = self.calculate_progress_rate(concs, temperature)
         return np.dot(nu, rj)
