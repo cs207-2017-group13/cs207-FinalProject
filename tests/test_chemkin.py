@@ -134,6 +134,6 @@ def test_neg_concentration():
 def test_reversible_reaction_rate():
     reader = chemkin.XMLReader("tests/rxns_reversible.xml")
     reaction_system = reader.get_reaction_systems()
-    assert np.array_equal(reaction_system[0].calculate_reaction_rate(
-        [1, 2, 3, 1, 2, 3, 1, 2], 800), [2.35535379e+17, -2.23210348e+17, -2.60596746e+17, 
-    3.73952596e+13, 1.26615463e+16, 2.35840123e+17, -1.98181887e+14, -6.91669050e+13])
+    assert np.array_equal(list(reaction_system[0].calculate_reaction_rate([1, 2, 3, 1, 2, 3, 1, 2], 800)), 
+        [2.3553537901231184e+17, -2.2321034840197091e+17, -2.6059674644924278e+17, 37395259554341.125, 
+        12661546307481366.0, 2.3584012306405293e+17, -198181887233104.84, -69166904953671.859])
