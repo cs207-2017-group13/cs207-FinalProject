@@ -1,4 +1,5 @@
 import chemkin
+import numpy as np
 
 def test_for_keys():
     reaction_properties = {'equation' : 'H + O2  [=] OH + O' ,
@@ -130,4 +131,9 @@ def test_neg_concentration():
     except ValueError as err:
         assert(type(err) == ValueError)
 
-
+def test_reversible_reaction_rate():
+    reader = chemkin.XMLReader("tests/rxns_reversible.xml")
+    reaction_system = reader.get_reaction_systems()
+    assert np.allclose(list(reaction_system[0].calculate_reaction_rate([1, 2, 3, 1, 2, 3, 1, 2], 800)), 
+        [2.3553537901231184e+17, -2.2321034840197091e+17, -2.6059674644924278e+17, 37395259554341.125, 
+        12661546307481366.0, 2.3584012306405293e+17, -198181887233104.84, -69166904953671.859])

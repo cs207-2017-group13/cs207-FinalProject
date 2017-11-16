@@ -6,21 +6,39 @@
 
 The library `chemical_kinetics` is a simple library for handling such chemical reaction systems. A system of chemical reactions are input in a standard XML format and the library computes the reaction rates and progress rate of these reactions, based on the parameters passed in the XML.
 
-In a system of $N$ species undergoing $M$ **irreversible**, **elementary** reactions, the reaction rate of species $i$ is computed by - 
+In a system of $N$ species undergoing $M$ **elementary** reactions, the reaction rate of species $i$ is computed by - 
 
 $$
 \begin{align}
   f_{i} &= \sum_{j=1}^{M}{\nu_{ij}\omega_{j}}, \qquad i = 1, \ldots, N
 \end{align}
 $$
-
 The progress rate for each reaction is computed by 
+$$
 \begin{align}
-  \omega_{j} &= k_{j}\prod_{i=1}^{N}{x_{i}^{\nu_{ij}^{\prime}}}, \qquad j = 1, \ldots, M
+  \omega_{j} &= k_{j}^{\left(f\right)}\prod_{i=1}^{N}{x_{i}^{\nu_{ij}^{\prime}}} - k_{j}^{\left(b\right)}\prod_{i=1}^{N}{x_{i}^{\nu_{ij}^{\prime\prime}}}, \qquad j = 1,\ldots, M
+\end{align}
+$$
+where,
+$$
+\begin{align}
+  k_{j}^{\left(b\right)} &= \frac{k_{j}^{\left(f\right)}}{k_{j}^{e}}, \qquad j =1, \ldots, M\\
+  k_{j}^{e} &= \left(\frac{p_{0}}{RT}\right)^{\gamma_{j}}\exp\left(\frac{\Delta S_{j}}{R} - \frac{\Delta H_{j}}{RT}\right), \qquad j =1, \ldots, M\\
+  \gamma_{j} &= \sum_{i=1}^{N}{\nu_{ij}}\\
+  \Delta S_{j} &= \sum_{i=1}^{N}{\nu_{ij}S_{i}} \quad \textrm{and} \quad \Delta H_{j} = \sum_{i=1}^{N}{\nu_{ij}H_{i}}, , \qquad j =1, \ldots, M\\
+  H_{i} &= \int_{T_{0}}^{T}{C_{p,i}\left(T\right) \ \mathrm{d}T}, \qquad i = 1, \ldots, N \\
+  S_{i} &= \int_{T_{0}}^{T}{\frac{C_{p,i}\left(T\right)}{T} \ \mathrm{d}T}, \qquad i = 1, \ldots, N\\
+  C_{p,i} &= \left(\sum_{k=1}^{5}{a_{ik}T^{k-1}}\right)R, \qquad i = 1, \ldots, N
 \end{align}
 $$
 
-where,
+The $7$th order NASA polynomials are given by 
+$$\frac{C_{p,i}}{R} = a_{i1} + a_{i2}T + a_{i3}T^{2} + a_{i4}T^{3} + a_{i5}T^{4}$$
+$$\frac{H_{i}}{RT} = a_{i1} + \frac{1}{2}a_{i2}T + \frac{1}{3}a_{i3}T^{2} + \frac{1}{4}a_{i4}T^{3} + \frac{1}{5}a_{i5}T^{4} + \frac{a_{i6}}{T}$$
+$$\frac{S_{i}}{R} = a_{i1}\ln\left(T\right) + a_{i2}T + \frac{1}{2}a_{i3}T^{2} + \frac{1}{3}a_{i4}T^{3} + \frac{1}{4}a_{i5}T^{4} + a_{i7}$$
+for $i = 1,\dots, N$.
+
+Notation:
 
 $\nu_{ij}^{\prime}$ : Stoichiometric coefficients of reactants,
 
@@ -30,8 +48,19 @@ $\omega_{j}$ : Progress rate of reaction $j$,
 
 $x_{i}$ : Concentration of specie $i$,
 
-$k_{j}$ : Reaction rate coefficient for reaction $j$ 
+$k_{j}^{\left(f\right)}$: forward reaction rate coefficient for reaction $j$,
 
+$k_{j}^{\left(b\right)}$: backward reaction rate coefficient for reaction $j$,
+
+$k_{j}^{e}$: *equilibrium coefficient* for reaction $j$,
+
+$p_{0}$: pressure of the reactor (usually $10^{5}$ Pa),
+
+$\Delta S_{j}$: the entropy change of reaction $j$,
+
+$\Delta H_{j}$: the enthalpy change of reaction $j$,
+
+$C_{p,i}$: specific heat at constant pressure (given by the NASA polynomial)
 
 The clients could call the chemkin package and obtained the right-hand-side of an ODE. They can then use it as the righ-hand-side of the ODE, or in a neural net code to learn new reaction pathways.
  
@@ -108,11 +137,12 @@ Takes a list of ElementaryReaction instances and a list of species. Builds stoic
 This class has five methods, and two special methods:
  - `__repr__`: Returns a string containing basic information for the reaction system
  - `__len__`: Returns the number of species in the reaction system
- - `calculate_progress_rate(concs, temperature)`: Returns the progress rate of a system of irreversible, elementary reactions
- - `calculate_reaction_rate(concs, temperature)`: Returns the reaction rate of a system of irreversible, elementary reactions
+ - `calculate_progress_rate(concs, temperature)`: Returns the progress rate of a system of elementary reactions
+ - `calculate_reaction_rate(concs, temperature)`: Returns the reaction rate of a system of elementary reactions
  - `get_rate_coefficients()`: Calculate reaction rate coefficients
  - `build_reactant_coefficient_matrix()`: Build a reactant coefficients matrix for the reaction system
  - `build_product_coefficient_matrix()`: Build a product coefficients matrix for the reaction system
+ - `check_reversible`: Check if each elementary reaction is reversible
 
 Example:
 ```python
