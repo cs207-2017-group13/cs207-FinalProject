@@ -270,6 +270,7 @@ class ReactionSystem():
     get_rate_coefficients()
     build_reactant_coefficient_matrix()
     build_product_coefficient_matrix()
+    check_reversible()
     """
     def __init__(self, elementary_reactions, species):
         self.elementary_reactions = elementary_reactions
@@ -293,7 +294,8 @@ class ReactionSystem():
         str : string
              Containing information on species and stoichiometric coefficients
         """
-        info = "Species: {} \nStoichiometric coefficients of reactants: {} \nStoichiometric coefficients of products: {}".format(self.species, 
+        info = '''Species: {} \nStoichiometric coefficients of reactants: {} \n
+            Stoichiometric coefficients of products: {}'''.format(self.species, 
             self.reactant_coefficients, self.product_coefficients)
         return info
 
@@ -316,7 +318,9 @@ class ReactionSystem():
         return len(self.species)
 
     def calculate_progress_rate(self, concs, temperature):
-        """Returns the progress rate of a system of irreversible, elementary reactions.
+        """Returns the progress rate of a system of elementary reactions.
+        If the elementary reaction is reversible, substract the backward 
+        progress rate from the forward progress rate
 
         INPUTS:
         =======
@@ -351,13 +355,11 @@ class ReactionSystem():
         # Initialize progress rates with reaction rate coefficients
         progress = k
         for jdx, rj in enumerate(progress):
-            if rj < 0:
-                raise ValueError("k = {0:18.16e}:  Negative reaction rate "
-                                 "coefficients are prohibited!".format(rj))
             for idx, xi in enumerate(concs):
                 nu_ij = self.reactant_coefficients[idx, jdx]
                 if xi < 0.0:
-                    raise ValueError("x{0} = {1:18.16e}:  Negative concentrations are prohibited!".format(idx, xi))
+                    raise ValueError('''x{0} = {1:18.16e}:  Negative concentrations 
+                        are prohibited!'''.format(idx, xi))
                 if nu_ij < 0:
                     raise ValueError('''nu_{0}{1} = {2}:  Negative stoichiometric 
                         coefficients are prohibited!'''.format(idx, jdx, nu_ij))
@@ -484,6 +486,20 @@ class ReactionSystem():
         return mat
 
     def check_reversible(self):
+        """Check if each elementary reaction is reversible
+        RETURNS:
+        ========
+        reversible : list
+            a list of True and False indicating if each elementary
+            reaction is reversible
+
+        EXAMPLES:
+        =========
+        >>> reader = XMLReader("tests/rxns.xml")
+        >>> reaction_system = reader.get_reaction_systems()
+        >>> reaction_system[0].check_reversible()
+        [False, False]
+        """
         reversible = [i.reversible for i in self.elementary_reactions]
         return reversible
 
@@ -492,24 +508,24 @@ class XMLReader():
     """Parser for chemical reaction XML files. Uses `xml.etree`.
 
     Parameters
-    ----------
+    ==========
     xml_file : str
          Path to XML file.
 
     Attributes
-    ----------
+    ==========
     xml_file : str
          Path to XML file.
     root : xml.etree.Element
          Top-level element in parsed tree.
 
     Methods
-    -------
+    =======
     get_reaction_system()
          Parse all groups of reactions in the XML file.
 
     Examples
-    --------
+    ========
     >>> reader = XMLReader("tests/rxns.xml")
     >>> reaction_systems = reader.get_reaction_systems()
     """
@@ -629,7 +645,3 @@ class XMLReader():
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
-    # reader = XMLReader("tests/rxns_reversible.xml")
-    # reaction_system = reader.get_reaction_systems()
-    # concs = [1., 2., 1., 3., 1.]
-    # print(reaction_system[0].calculate_reaction_rate(concs, 300))
