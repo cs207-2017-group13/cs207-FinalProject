@@ -1,11 +1,3 @@
-"""
-thermodynamics.py
-
-victor: My feeling is that chemkin.py is getting to be too long.
-
-We should be able to separate out some things into this file.
-
-"""
 import collections
 import sqlite3
 import numpy as np
@@ -13,21 +5,31 @@ import numpy as np
 
 class Thermochem():
     """Methods for calculating the backward reaction rate.
-    Cp_over_R: Returns specific heat of each species given by
-               the NASA polynomials.
-    H_over_RT:  Returns the enthalpy of each species given by
-                the NASA polynomials.
-    S_over_R: Returns the entropy of each species given by
-              the NASA polynomials.
-    backward_coeffs:  Returns the backward reaction rate
-                      coefficient for reach reaction.
-    Please see the notes in each routine for clarifications and 
-    warnings.  You will need to customize these methods (and 
-    likely the entire class) to suit your own code base.  
-    Nevertheless, it is hoped that you will find these methods 
-    to be of some use.
-    """
+    Take Rxnset class object and calculate backward reaction rate
+    using the temperature passed into the clsss and the 
+    corresponding nasa polynomial coefficients.
 
+    Parameters
+    ==========
+    rxnset: class
+            containing nasa polynomial coefficients for all species,
+            the difference of product coefficients matrix and 
+            reactant coefficients matrix
+    p0:     float
+            pressure of the reactor, default 1e5
+    R:      float
+            ideal gas constant, default 8.3144598
+
+    Methods
+    =======
+    Cp_over_R(T)
+
+    H_over_RT(T)
+
+    S_over_R(T)
+
+    backward_coeffs(kf, T)
+    """
     def __init__(self, rxnset, p0=1e5, R=8.3144598):
         self.rxnset = rxnset
         self.p0 = p0 # Pa
@@ -35,11 +37,22 @@ class Thermochem():
         self.gamma = np.sum(self.rxnset.nuij, axis=0)
 
     def Cp_over_R(self, T):
+        """Returns specific heat of each species given by
+           the NASA polynomials.
+        
+        INPUTS:
+        =======
+        T:    float
+              Temperature of elementary reactions
 
-        # WARNING:  This line will depend on your own data structures!
-        # Be careful to get the correct coefficients for the appropriate 
-        # temperature range.  That is, for T <= Tmid get the low temperature 
-        # range coeffs and for T > Tmid get the high temperature range coeffs.
+        RETURNS:
+        ========
+        Cp_R: list of floats
+              specific heat of each species
+
+        EXAMPLES:
+        =========
+        """
         a = self.rxnset.get_nasa_coefficients(T)
 
         Cp_R = (a[:,0] + a[:,1] * T + a[:,2] * T**2.0 
@@ -48,11 +61,22 @@ class Thermochem():
         return Cp_R
 
     def H_over_RT(self, T):
+        """Returns the enthalpy of each species given by
+           the NASA polynomials.
+        
+        INPUTS:
+        =======
+        T:    float
+              Temperature of elementary reactions
 
-        # WARNING:  This line will depend on your own data structures!
-        # Be careful to get the correct coefficients for the appropriate 
-        # temperature range.  That is, for T <= Tmid get the low temperature 
-        # range coeffs and for T > Tmid get the high temperature range coeffs.
+        RETURNS:
+        ========
+        H_RT: list of floats
+              enthalpy of each species
+
+        EXAMPLES:
+        =========
+        """
         a = self.rxnset.get_nasa_coefficients(T)
 
         H_RT = (a[:,0] + a[:,1] * T / 2.0 + a[:,2] * T**2.0 / 3.0 
@@ -63,11 +87,22 @@ class Thermochem():
                
 
     def S_over_R(self, T):
+        """Returns the entropy of each species given by
+           he NASA polynomials.
+        
+        INPUTS:
+        =======
+        T:   float
+             Temperature of elementary reactions
 
-        # WARNING:  This line will depend on your own data structures!
-        # Be careful to get the correct coefficients for the appropriate 
-        # temperature range.  That is, for T <= Tmid get the low temperature 
-        # range coeffs and for T > Tmid get the high temperature range coeffs.
+        RETURNS:
+        ========
+        S_R: list of floats
+             entropy of each species
+
+        EXAMPLES:
+        =========
+        """
         a = self.rxnset.get_nasa_coefficients(T)
 
         S_R = (a[:,0] * np.log(T) + a[:,1] * T + a[:,2] * T**2.0 / 2.0 
@@ -76,7 +111,25 @@ class Thermochem():
         return S_R
 
     def backward_coeffs(self, kf, T):
+        """Returns the backward reaction rate
+           coefficient for reach reaction.
+        
+        INPUTS:
+        =======
+        kf:   list of floats
+              Forward reaction rate coefficients
+        T:    float
+              Temperature of elementary reactions
 
+        RETURNS:
+        ========
+        kf / kb: list of floats
+              backward reaction rate coefficient
+              for reach reaction
+
+        EXAMPLES:
+        =========
+        """
         # Change in enthalpy and entropy for each reaction
         delta_H_over_RT = np.dot(self.rxnset.nuij.T, self.H_over_RT(T))
         delta_S_over_R = np.dot(self.rxnset.nuij.T, self.S_over_R(T))
@@ -93,16 +146,48 @@ class Thermochem():
         return kf / kb
 
 
-# This class could get a different name or be incorporated into an
-# existing class.
+
 class Rxnset():
+    """Read and store certain NASA polynomial coefficients from the
+    SQL database containing coefficients for all species.
+
+    Parameters
+    ==========
+    species: list of string
+             name of all species in the reaction syste
+    nuij:    matrix
+             the difference of product coefficients matrix and 
+             reactant coefficients matrix
+
+    Methods
+    =======
+    get_nasa_coefficients(T)
+
+    read_nasa_coefficients()
+    """
     def __init__(self, species, nuij):
-        # Does it make sense to have T as a parameter for the class?
         self.species = species
         self.nuij = nuij
         self.coefficients = self.read_nasa_coefficients()
 
     def get_nasa_coefficients(self, T):
+        """Returns the corresponding NASA polynomial coefficients 
+           for all species at the given temperature
+        
+        INPUTS:
+        =======
+        T: float
+           Temperature of elementary reactions
+
+        RETURNS:
+        ========
+        coeffs: nd numpy array
+                NASA polynomial coefficients for all species
+                at the given temperature
+
+        EXAMPLES:
+        =========
+        """
         coeffs = []
         for species, data in self.coefficients.items():
             if T > data['low_T'] and T < data['mid_T']:
@@ -116,6 +201,17 @@ class Rxnset():
 
     def read_nasa_coefficients(self):
         """Return NASA polynomial coefficients for all species.
+
+        RETURNS:
+        ========
+        coeffs: ordered dictionary
+                dictionary of dictionaries of species, each dictionary
+                of species contains low, mid, high temperature, and NASA 
+                polynomial coefficients for two temprature ranges 
+                for all species
+
+        EXAMPLES:
+        =========
         """
         db = sqlite3.connect('data/NASA_polynomial_coefficients.sqlite')
         cursor = db.cursor()
