@@ -2,9 +2,43 @@
 thermodynamics
 
 """
+import os
 import collections
+import functools
 import sqlite3
 import numpy as np
+
+
+# memoization decorator; usage showcased on:
+# https://codereview.stackexchange.com/questions/20569/dynamic-programming-solution-to-knapsack-problem
+class memoized():
+    """Decorator. Caches a function's return value each time it is called.
+    If called later with the same arguments, the cached value is
+    returned (not reevaluated).
+    """
+    def __init__(self, func):
+        self.func = func
+        self.cache = {}
+
+    def __call__(self, *args):
+        if not isinstance(args, collections.Hashable):
+            # uncacheable. a list, for instance.
+            # better to not cache than blow up.
+            return self.func(*args)
+        if args in self.cache:
+            return self.cache[args]
+        else:
+            value = self.func(*args)
+            self.cache[args] = value
+            return value
+
+    def __repr__(self):
+        '''Return the function's docstring.'''
+        return self.func.__doc__
+
+    def __get__(self, obj, objtype):
+        '''Support instance methods.'''
+        return functools.partial(self.__call__, obj)
 
 
 # propose rename to Thermodyanmics
@@ -89,22 +123,25 @@ class Rxnset():
         self.nuij = nuij
         self.coefficients = self.read_nasa_coefficients()
 
+    @memoized
     def get_nasa_coefficients(self, T):
-        coeffs = []
-        for species, data in self.coefficients.items():
+        coeffs = np.zeros([len(self.species), 7])
+        for i, species, data in enumerate(self.coefficients.items()):
             if T > data['low_T'] and T < data['mid_T']:
-                coeffs.append(data['low_coeffs'])
+                coeffs[i, :] = data['low_coeffs']
             elif T >= data['mid_T'] and T < data['high_T']:
-                coeffs.append(data['high_coeffs'])
+                coeffs[i, :] = data['high_coeffs']
             else:
                 raise ValueError("Temperature not in range provided by NASA "
                                  "polynomial coefficients.")
-        return np.array(coeffs)
+        return coeffs
 
     def read_nasa_coefficients(self):
         """Return NASA polynomial coefficients for all species.
         """
-        db = sqlite3.connect('data/NASA_polynomial_coefficients.sqlite')
+        db_location = os.pathname.abspath(
+            __file__) + 'data/NASA_polynomial_coefficients.sqlite'
+        db = sqlite3.connect(db_location)
         cursor = db.cursor()
         coeffs = collections.OrderedDict()
         for species in self.species:
