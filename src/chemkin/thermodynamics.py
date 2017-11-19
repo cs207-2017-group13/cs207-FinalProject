@@ -98,6 +98,7 @@ class Thermochem():
 
         EXAMPLES:
         =========
+        >>> import chemkin.chemkin as chemkin
         >>> reader = chemkin.XMLReader("tests/rxns_reversible.xml")
         >>> reaction_system = reader.get_reaction_systems()
         >>> nu = reaction_system[0].product_coefficients - reaction_system[0].reactant_coefficients
@@ -129,6 +130,7 @@ class Thermochem():
 
         EXAMPLES:
         =========
+        >>> import chemkin.chemkin as chemkin
         >>> reader = chemkin.XMLReader("tests/rxns_reversible.xml")
         >>> reaction_system = reader.get_reaction_systems()
         >>> nu = reaction_system[0].product_coefficients - reaction_system[0].reactant_coefficients
@@ -162,6 +164,7 @@ class Thermochem():
 
         EXAMPLES:
         =========
+        >>> import chemkin.chemkin as chemkin
         >>> reader = chemkin.XMLReader("tests/rxns_reversible.xml")
         >>> reaction_system = reader.get_reaction_systems()
         >>> nu = reaction_system[0].product_coefficients - reaction_system[0].reactant_coefficients
@@ -199,6 +202,7 @@ class Thermochem():
 
         EXAMPLES:
         =========
+        >>> import chemkin.chemkin as chemkin
         >>> reader = chemkin.XMLReader("tests/rxns_reversible.xml")
         >>> reaction_system = reader.get_reaction_systems()
         >>> k = reaction_system[0].get_rate_coefficients(300)
@@ -269,6 +273,7 @@ class Rxnset():
 
         EXAMPLES:
         =========
+        >>> import chemkin.chemkin as chemkin
         >>> reader = chemkin.XMLReader("tests/rxns_reversible.xml")
         >>> reaction_system = reader.get_reaction_systems()
         >>> nu = reaction_system[0].product_coefficients - reaction_system[0].reactant_coefficients
@@ -326,7 +331,7 @@ class Rxnset():
         db.close()
         return coeffs
 
+
 if __name__ == "__main__":
     import doctest
-    import chemkin.chemkin as chemkin
     doctest.testmod()
