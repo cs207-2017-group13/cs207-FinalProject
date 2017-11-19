@@ -7,7 +7,7 @@ import collections
 import functools
 import sqlite3
 import numpy as np
-import chemkin
+import chemkin.chemkin as chemkin
 
 
 # memoization decorator; usage showcased on:
