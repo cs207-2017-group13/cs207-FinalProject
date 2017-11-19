@@ -108,7 +108,7 @@ class Thermochem():
     def H_over_RT(self, T):
         """Returns the enthalpy of each species given by the NASA
         polynomials.
-        
+
         INPUTS:
         =======
         T : float
@@ -260,7 +260,7 @@ class Rxnset():
         =========
         """
         db_location = os.path.dirname(
-            __file__) + '/data/NASA_polynomial_coefficients.sqlite'
+            __file__) + '../data/NASA_polynomial_coefficients.sqlite'
         db = sqlite3.connect(db_location)
         cursor = db.cursor()
         coeffs = collections.OrderedDict()

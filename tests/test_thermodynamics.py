@@ -1,5 +1,5 @@
-import thermodynamics
-import chemkin
+import chemkin.thermodynamics as thermodynamics
+import chemkin.chemkin as chemkin
 import numpy as np
 
 

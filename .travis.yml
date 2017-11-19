@@ -7,6 +7,6 @@ before_install:
 install:
     - pip install -e .
 script:
-    - pytest --cov=src
+    - pytest --cov=src --ignore=src/data
 after_success:
     - coveralls

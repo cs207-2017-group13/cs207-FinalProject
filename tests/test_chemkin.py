@@ -1,4 +1,4 @@
-import chemkin
+import chemkin.chemkin as chemkin
 import numpy as np
 
 def test_for_keys():

@@ -25,7 +25,7 @@ if __name__ == "__main__":
     db.commit()
 
     # read from the text file
-    with open('../src/thermo30.txt') as f:
+    with open('thermo30.txt') as f:
         thermo = [item.strip() for item in f.readlines()]
 
     thermo = thermo[5:-5]

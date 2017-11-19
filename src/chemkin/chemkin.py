@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ET
 import numpy as np
-import thermodynamics
+import chemkin.thermodynamics as thermodynamics
 
 
 class ElementaryReaction():

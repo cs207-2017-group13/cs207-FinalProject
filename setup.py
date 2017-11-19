@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 setup(
@@ -7,7 +7,5 @@ setup(
     author=["Divyam Misra", "Shiyun Qiu", "Victor Zhao"],
     description=("Chemical kinetics library"),
     license="BSD",
-    package_dir={
-        '': "src"
-    }
+    packages=find_packages()
 )
