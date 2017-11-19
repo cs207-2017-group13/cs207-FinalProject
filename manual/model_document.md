@@ -67,10 +67,24 @@ The clients could call the chemkin package and obtained the right-hand-side of a
 
 ## 2. Installation
 You can obtain the `chemical_kinetics` Library [here](https://github.com/cs207-2017-group13/cs207-FinalProject).
+
+### Installation instructions
+Obtain the latest version from github, change to the directory, and install using pip.
+
+    git clone https://github.com/cs207-2017-group13/cs207-FinalProject.git
+	cd cs207-FinalProject
+
+	# Either
+	pip3 install ./
+	# or alternatively
+	pip3 install -e ./
+
+The latter install command invokes "editable" mode. Package files will not be copied to your Python package directory, and source files may be edited from the installation directory.
+
+### Testing
 Users can run the test suite by calling pytest from the main directory, i.e. 
 
-    pytest --cov=src
-
+    pytest --cov=src --ignore=src/data
 
 
 ## 3. Basic Usage and Examples
