@@ -7,6 +7,7 @@ import collections
 import functools
 import sqlite3
 import numpy as np
+import chemkin
 
 
 # memoization decorator; usage showcased on:
@@ -98,6 +99,14 @@ class Thermochem():
 
         EXAMPLES:
         =========
+        >>> reader = chemkin.XMLReader("tests/rxns_reversible.xml")
+        >>> reaction_system = reader.get_reaction_systems()
+        >>> nu = reaction_system[0].product_coefficients - reaction_system[0].reactant_coefficients
+        >>> rxnset = Rxnset(reaction_system[0].species, nu)
+        >>> thermochem = Thermochem(rxnset)
+        >>> thermochem.Cp_over_R(300)
+        array([ 2.5       ,  2.63400196,  3.59349336,  3.46995186,  4.04072434,
+                3.53457253,  4.2011126 ,  5.10656488])
         """
         a = self.rxnset.get_nasa_coefficients(T)
 
@@ -121,6 +130,15 @@ class Thermochem():
 
         EXAMPLES:
         =========
+        >>> reader = chemkin.XMLReader("tests/rxns_reversible.xml")
+        >>> reaction_system = reader.get_reaction_systems()
+        >>> nu = reaction_system[0].product_coefficients - reaction_system[0].reactant_coefficients
+        >>> rxnset = Rxnset(reaction_system[0].species, nu)
+        >>> thermochem = Thermochem(rxnset)
+        >>> thermochem.H_over_RT(300)
+        array([  8.74121997e+01,   9.99119166e+01,   1.57966367e+01,
+                 2.13926454e-02,  -9.69244747e+01,   2.17928611e-02,
+                 5.05805989e+00,  -5.44435841e+01])
         """
         a = self.rxnset.get_nasa_coefficients(T)
 
@@ -145,6 +163,14 @@ class Thermochem():
 
         EXAMPLES:
         =========
+        >>> reader = chemkin.XMLReader("tests/rxns_reversible.xml")
+        >>> reaction_system = reader.get_reaction_systems()
+        >>> nu = reaction_system[0].product_coefficients - reaction_system[0].reactant_coefficients
+        >>> rxnset = Rxnset(reaction_system[0].species, nu)
+        >>> thermochem = Thermochem(rxnset)
+        >>> thermochem.S_over_R(300)
+        array([ 13.81277333,  19.38730759,  22.12090629,  15.73868267,
+                22.73578462,  24.69552926,  27.58089871,  28.23850226])
         """
         a = self.rxnset.get_nasa_coefficients(T)
 
@@ -174,6 +200,17 @@ class Thermochem():
 
         EXAMPLES:
         =========
+        >>> reader = chemkin.XMLReader("tests/rxns_reversible.xml")
+        >>> reaction_system = reader.get_reaction_systems()
+        >>> k = reaction_system[0].get_rate_coefficients(300)
+        >>> nu = reaction_system[0].product_coefficients - reaction_system[0].reactant_coefficients
+        >>> rxnset = Rxnset(reaction_system[0].species, nu)
+        >>> thermochem = Thermochem(rxnset)
+        >>> thermochem.backward_coeffs(k,300)
+        array([  4.27113939e+22,   1.97842662e+11,   1.11232410e+01,
+                 4.43114607e+20,   2.25385449e-27,   1.32780748e-14,
+                 7.24055199e-26,   2.46671212e-37,   8.33522066e-39,
+                 4.32365740e-01,   4.48562565e-01])
         """
         # Change in enthalpy and entropy for each reaction
         delta_H_over_RT = np.dot(self.rxnset.nuij.T, self.H_over_RT(T))
@@ -233,6 +270,14 @@ class Rxnset():
 
         EXAMPLES:
         =========
+        >>> reader = chemkin.XMLReader("tests/rxns_reversible.xml")
+        >>> reaction_system = reader.get_reaction_systems()
+        >>> nu = reaction_system[0].product_coefficients - reaction_system[0].reactant_coefficients
+        >>> rxnset = Rxnset(reaction_system[0].species, nu)
+        >>> rxnset.get_nasa_coefficients(300)[1]
+        array([  3.16826710e+00,  -3.27931884e-03,   6.64306396e-06,
+                -6.12806624e-09,   2.11265971e-12,   2.91222592e+04,
+                 2.05193346e+00])
         """
         coeffs = np.zeros([len(self.species), 7])
         for i, (species, data) in enumerate(self.coefficients.items()):
@@ -281,3 +326,7 @@ class Rxnset():
             coeffs[species]['high_T'] = high_T
         db.close()
         return coeffs
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
