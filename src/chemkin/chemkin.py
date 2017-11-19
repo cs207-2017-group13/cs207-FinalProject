@@ -57,7 +57,8 @@ class ElementaryReaction():
              containing basic information about
              the Elementary reaction
         """
-        return "<ElementaryReaction: %d species>" % (
+        return "<%s: %d species>" % (
+            self.__class__.__name__,
             len(self.reactants) + len(self.products))
 
     def get_info(self):
@@ -285,8 +286,11 @@ class ReactionSystem():
         else:
             self.thermochem = None
 
-
     def __repr__(self):
+        return "<%s: %d reactions>" % (self.__class__.__name__,
+                                       len(self.elementary_reactions))
+
+    def get_info(self):
         """Returns a string containing basic information for the reaction system.
 
         RETURNS:
@@ -639,7 +643,7 @@ class XMLReader():
         return reaction_systems
 
     def __repr__(self):
-        return "XMLReader(%s)" % self.xml_file
+        return "%s(%s)" % (self.__class__.__name__, self.xml_file)
 
 
 if __name__ == "__main__":
