@@ -260,7 +260,7 @@ class Rxnset():
         =========
         """
         db_location = os.path.dirname(
-            __file__) + '../data/NASA_polynomial_coefficients.sqlite'
+            __file__) + '/NASA_polynomial_coefficients.sqlite'
         db = sqlite3.connect(db_location)
         cursor = db.cursor()
         coeffs = collections.OrderedDict()
