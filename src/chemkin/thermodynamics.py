@@ -7,7 +7,6 @@ import collections
 import functools
 import sqlite3
 import numpy as np
-import chemkin.chemkin as chemkin
 
 
 # memoization decorator; usage showcased on:
@@ -329,4 +328,5 @@ class Rxnset():
 
 if __name__ == "__main__":
     import doctest
+    import chemkin.chemkin as chemkin
     doctest.testmod()
