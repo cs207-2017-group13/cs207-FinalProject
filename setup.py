@@ -9,5 +9,6 @@ setup(
     license="BSD",
     packages=find_packages('src'),
     package_dir={"": "src"},
-    package_data={'chemkin': ["*.sqlite"]}
+    package_data={'chemkin': ["*.sqlite"]},
+    scripts=['src/bin/process_reaction_system']
 )
