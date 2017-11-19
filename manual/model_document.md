@@ -84,11 +84,11 @@ The latter install command invokes "editable" mode. Package files will not be co
 ### Testing
 Users can run the test suite by calling pytest from the main directory, i.e. 
 
-    pytest --cov=src --ignore=src/data
+    pytest --cov=src
 
 
 ## 3. Basic Usage and Examples
-#### `XMLReader` class: Read and parse XML input file
+### `XMLReader` class: Read and parse XML input file
 
 The user should have an XML input file containing all the chemical reactions. `XMLReader` will read in the file and parse the file with the `xml.etree` library. It will output a list of dictionaries containing all the elements needed to calculate reaction rate coefficients, progress rates and reaction rates. It will create `ElementaryReaction` objects inside the `get_reaction_systems` function, and then put all `ElementaryReaction` objects in a reaction system into a list. It will then create `ReactionSystem` objects.
 
@@ -102,7 +102,7 @@ reaction_systems = reader.get_reaction_systems()
 `reaction_systems` is a list containing multiple `ReactionSystem` instances. The length of `reaction_systems` is the number of reaction systems, and the length of each list element is the number of reactions in a reaction system.
 
 
-#### `ElementaryReaction` class: Class for each elementary reaction
+### `ElementaryReaction` class: Class for each elementary reaction
 
 Takes a dictionary of properties from the XMLReader class for each elementary reaction. Calculates the rate coefficient for each elementary reaction and passes it to the ReactionSystem class. It also returns a dictionary of recatants and products to the ReactionSystem class.
 
@@ -129,7 +129,6 @@ $$
   &k_{\textrm{arr}}     = A \exp\left(-\frac{E}{RT}\right) \tag{Arrhenius}
 \end{align}
 $$
- 
 
 Example:
 
@@ -142,7 +141,7 @@ repr(elementary_reaction)
  ```
 
 
-#### `ReactionSystem` class: Class for a system of reactions
+### `ReactionSystem` class: Class for a system of reactions
 
 Takes a list of ElementaryReaction instances and a list of species. Builds stoichiometric coefficient matrices for the reactants and products and calculates the corresponding progress rates and reaction rates.
 
@@ -168,7 +167,7 @@ reaction_system[0].calculate_reaction_rate(concs, 300)
 ```
 
 
-#### `Thermochem` class: Class for calculating the backward reaction rate
+### `Thermochem` class: Class for calculating the backward reaction rate
 
 Construct with Rxnset class object, the default pressure of the reactor and the default ideal gas constant. The values of pressure of the reactor and ideal gas constant can be changed. It calculates backward reaction rate using the temperature passed into the functions and the corresponding NASA polynomial coefficients.
 
@@ -193,7 +192,7 @@ thermo.backward_coeffs(kf, 800)
 ```
 
 
-#### `Rxnset` class: Read and store NASA polynomial coefficients 
+### `Rxnset` class: Read and store NASA polynomial coefficients 
 
 This class reads the NASA polynomial coefficients for all species in the reaction system from the SQL database which contains coefficients for all species. It stores the coefficients and temperature ranges in a dictionary of dictionaries where the name of species is the key. For each reaction system, the class just need to read from the database once, and check the range the given temperature is in every time the temperature of the reaction system changes afterwards. If the `get_nasa_coefficients` function is called twice for the same reaction system and the same temperature, the cached value is returned.
 
@@ -211,7 +210,7 @@ rxnset.get_nasa_coefficients(800)
 ```
 
 
-#### `memoized` class: Caches a function's return value each time it is called
+### `memoized` class: Caches a function's return value each time it is called
 
 Decorator class. Caches a function's return value each time it is called. If called later with the same arguments, the cached value is returned (not reevaluated).
 
