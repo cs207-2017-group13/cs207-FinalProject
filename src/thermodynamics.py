@@ -12,9 +12,9 @@ import numpy as np
 # memoization decorator; usage showcased on:
 # https://codereview.stackexchange.com/questions/20569/dynamic-programming-solution-to-knapsack-problem
 class memoized():
-    """Decorator. Caches a function's return value each time it is called.
-    If called later with the same arguments, the cached value is
-    returned (not reevaluated).
+    """Decorator. Caches a function's return value each time it is
+    called. If called later with the same arguments, the cached value
+    is returned (not reevaluated).
     """
     def __init__(self, func):
         self.func = func
@@ -132,7 +132,7 @@ class Thermochem():
     def S_over_R(self, T):
         """Returns the entropy of each species given by the NASA
         polynomials.
-        
+
         INPUTS:
         =======
         T : float
@@ -159,7 +159,7 @@ class Thermochem():
         quantities and then calculates backward rate coefficient from
         equilibrium constant and forward reaction rate coefficient.
         reaction.
-        
+
         INPUTS:
         =======
         kf : np.array
@@ -206,6 +206,7 @@ class Rxnset():
     Methods
     =======
     get_nasa_coefficients(T)
+        
 
     read_nasa_coefficients()
     """
@@ -234,7 +235,7 @@ class Rxnset():
         =========
         """
         coeffs = np.zeros([len(self.species), 7])
-        for i, species, data in enumerate(self.coefficients.items()):
+        for i, (species, data) in enumerate(self.coefficients.items()):
             if T > data['low_T'] and T < data['mid_T']:
                 coeffs[i, :] = data['low_coeffs']
             elif T >= data['mid_T'] and T < data['high_T']:
@@ -258,8 +259,8 @@ class Rxnset():
         EXAMPLES:
         =========
         """
-        db_location = os.pathname.abspath(
-            __file__) + 'data/NASA_polynomial_coefficients.sqlite'
+        db_location = os.path.dirname(
+            __file__) + '/data/NASA_polynomial_coefficients.sqlite'
         db = sqlite3.connect(db_location)
         cursor = db.cursor()
         coeffs = collections.OrderedDict()
