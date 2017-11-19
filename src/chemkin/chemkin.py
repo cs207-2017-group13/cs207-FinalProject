@@ -323,7 +323,7 @@ class ReactionSystem():
 
     def calculate_progress_rate(self, concs, temperature):
         """Returns the progress rate of a system of elementary reactions.
-        If the elementary reaction is reversible, substract the backward 
+        If the elementary reaction is reversible, subtract the backward
         progress rate from the forward progress rate
 
         INPUTS:
@@ -385,7 +385,7 @@ class ReactionSystem():
 
     def calculate_reaction_rate(self, concs, temperature):
         """Returns the reaction rate of a system of irreversible, elementary reactions.
-        
+
         INPUTS:
         =======
         concs : np.ndarray

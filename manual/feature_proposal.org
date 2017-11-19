@@ -2,7 +2,7 @@
 #+STARTUP: showall
 #+LATEX_HEADER: \usepackage[margin=1.25in]{geometry}
 #+OPTIONS: toc:nil 
-#+TITLE: Feature proposal for COMPSCI207 final project
+#+TITLE: CS207 Final Project Feature Proposal: stochastic and deterministic simulation
 
 * Summary
   
