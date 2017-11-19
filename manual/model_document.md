@@ -87,7 +87,9 @@ reaction_systems = reader.get_reaction_systems()
 ```
 `reaction_systems` is a list containing multiple `ReactionSystem` instances. The length of `reaction_systems` is the number of reaction systems, and the length of each list element is the number of reactions in a reaction system.
 
+
 #### `ElementaryReaction` class: Class for each elementary reaction
+
 Takes a dictionary of properties from the XMLReader class for each elementary reaction. Calculates the rate coefficient for each elementary reaction and passes it to the ReactionSystem class. It also returns a dictionary of recatants and products to the ReactionSystem class.
 
 This class has thee public methods, two private methods a special method:
@@ -124,10 +126,6 @@ products = elementary_reaction.get_products()
 rate_coeff = elementary_reaction.calculate_rate_coefficient(1000)
 repr(elementary_reaction)
  ```
- 
-
- 
-
 
 
 #### `ReactionSystem` class: Class for a system of reactions
@@ -154,3 +152,58 @@ print(reaction_system[0])
 reaction_system[0].calculate_progress_rate(concs, 300)
 reaction_system[0].calculate_reaction_rate(concs, 300)
 ```
+
+
+#### `Thermochem` class: Class for calculating the backward reaction rate
+
+Construct with Rxnset class object, the default pressure of the reactor and the default ideal gas constant. The values of pressure of the reactor and ideal gas constant can be changed. It calculates backward reaction rate using the temperature passed into the functions and the corresponding NASA polynomial coefficients.
+
+This class has four methods:
+ - `Cp_over_R(T)`: Returns specific heat of each species given by the NASA polynomials
+ - `H_over_RT(T)`: Returns the enthalpy of each species given by the NASA polynomials
+ - `S_over_R(T)`: Returns the entropy of each species given by the NASA polynomials
+ - `backward_coeffs(kf, T)`: Returns the backward reaction rate coefficient for reach reaction
+
+Example:
+```python
+reader = chemkin.XMLReader("tests/rxns_reversible.xml")
+reaction_system = reader.get_reaction_systems()[0]
+nu = reaction_system.product_coefficients - reaction_system.reactant_coefficients
+rxnset = thermodynamics.Rxnset(reaction_system.species, nu)
+thermo =  thermodynamics.Thermochem(rxnset)
+thermo.Cp_over_R(800)
+thermo.H_over_RT(800)
+thermo.S_over_R(800)
+kf = reaction_system.get_rate_coefficients(800)
+thermo.backward_coeffs(kf, 800)
+```
+
+
+#### `Rxnset` class: Read and store NASA polynomial coefficients 
+
+This class reads the NASA polynomial coefficients for all species in the reaction system from the SQL database which contains coefficients for all species. It stores the coefficients and temperature ranges in a dictionary of dictionaries where the name of species is the key. For each reaction system, the class just need to read from the database once, and check the range the given temperature is in every time the temperature of the reaction system changes afterwards. If the `get_nasa_coefficients` function is called twice for the same reaction system and the same temperature, the cached value is returned.
+
+This class has two methods:
+ - `get_nasa_coefficients(T)`: Returns the corresponding NASA polynomial coefficients for all species at the given temperature
+ - `read_nasa_coefficients()`: Return NASA polynomial coefficients for all species involved in the reaction system
+
+Example:
+```python
+reader = chemkin.XMLReader("tests/rxns_reversible.xml")
+reaction_system = reader.get_reaction_systems()[0]
+nu = reaction_system.product_coefficients - reaction_system.reactant_coefficients
+rxnset = thermodynamics.Rxnset(reaction_system.species, nu)
+rxnset.get_nasa_coefficients(800)
+```
+
+
+#### `memoized` class: Caches a function's return value each time it is called
+
+Decorator class. Caches a function's return value each time it is called. If called later with the same arguments, the cached value is returned (not reevaluated).
+
+This class has three special methods:
+ - `__call__(*args)`: Cached a function's return value
+ - `__repr__`: Return the function's docstring
+ - `__get__(obj, objtype)`: Support instance methods
+
+
