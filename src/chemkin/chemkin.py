@@ -48,20 +48,27 @@ class ElementaryReaction():
                   "Please check the XML.".format(str(err)))
 
     def __repr__(self):
-        """Returns a string containing basic information
-         about the Elementary reaction
+        """Returns a string containing basic class information
 
         RETURNS:
         ========
         str : string
-             containing basic information about
-             the Elementary reaction
+             containing basic information about this class
         """
         return "<%s: %d species>" % (
             self.__class__.__name__,
             len(self.reactants) + len(self.products))
 
     def get_info(self):
+        """Returns a string containing basic information
+         about the Elementary reaction
+
+        RETURNS:
+        ========
+        info: string
+              containing basic information about
+              the Elementary reaction
+        """
         info = "Reactants: {} \nProducts: {} \nRate Params: {} \nRate Type: {} \nReversible: {}".format(
             self.reactants, self.products, self.rate_params,
             self.rate_type, self.reversible)
@@ -287,16 +294,23 @@ class ReactionSystem():
             self.thermochem = None
 
     def __repr__(self):
+        """Returns a string containing basic class information
+
+        RETURNS:
+        ========
+        str: string
+             Containing information on this class
+        """
         return "<%s: %d reactions>" % (self.__class__.__name__,
                                        len(self.elementary_reactions))
 
     def get_info(self):
-        """Returns a string containing basic information for the reaction system.
+        """Returns a string containing basic information for the reaction system
 
         RETURNS:
         ========
-        str : string
-             Containing information on species and stoichiometric coefficients
+        info: string
+              Containing information on species and stoichiometric coefficients
         """
         info = '''Species: {} \nStoichiometric coefficients of reactants: {} \n
             Stoichiometric coefficients of products: {}'''.format(self.species, 
@@ -643,6 +657,13 @@ class XMLReader():
         return reaction_systems
 
     def __repr__(self):
+        """Returns a string containing basic class information
+
+        RETURNS:
+        ========
+        str: string
+             Containing information on this class
+        """
         return "%s(%s)" % (self.__class__.__name__, self.xml_file)
 
 
