@@ -50,3 +50,10 @@ Note that no provision has been made for non-elementary reactions.
 We propose to enable both stochastic and deterministic simulation of reaction systems. This will enable comparison between stochastic trajectories and the deterministically predicted trajectory. Our software feature will generate trajectory data and be able to plot such data using =matplotlib=.
 
 It would be interesting to see at what quantities of chemical species that deterministic modelling is sufficiently predictive, and also how the efficiency of our stochastic algorithm changes with the quantities of chemical species.
+
+** Plans for implementation
+Currently, our chemical kinetics library returns reaction rates with a single function call (a class method). It should be simple to integrate that function call into an ODE solver class that produces the deterministic solution.
+
+For stochastic simulation, some of our existing classes will have to be adapted to handle discrete numbers of chemical reactants. Additionally, the stochastic simulation will probably be handled by a new class, one that can store parameters, advance the simulation, and save results.
+
+Currently, we foresee at least two new modules, one for each type of simulation.
