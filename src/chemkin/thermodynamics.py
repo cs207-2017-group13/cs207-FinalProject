@@ -9,8 +9,8 @@ import sqlite3
 import numpy as np
 
 
-# memoization decorator; usage showcased on:
-# https://codereview.stackexchange.com/questions/20569/dynamic-programming-solution-to-knapsack-problem
+# memoization decorator; from
+# https://wiki.python.org/moin/PythonDecoratorLibrary#Memoize
 class memoized():
     """Decorator. Caches a function's return value each time it is
     called. If called later with the same arguments, the cached value
@@ -41,13 +41,13 @@ class memoized():
         return functools.partial(self.__call__, obj)
 
 
-# propose rename to Thermodyanmics
+# rename?
 class Thermochem():
     """Methods for calculating the backward reaction rate.
 
-    Take Rxnset class object and calculate backward reaction rate
-    using the temperature passed into the clsss and the corresponding
-    nasa polynomial coefficients.
+    Take `Rxnset` instance and calculate backward reaction rate using
+    the temperature passed into the class and the corresponding nasa
+    polynomial coefficients.
 
     Parameters
     ==========
@@ -56,9 +56,9 @@ class Thermochem():
         difference of product coefficients matrix and reactant
         coefficients matrix
     p0 : float
-        Pressure of the reactor, default 1e5
+        Pressure of the reactor, default 1e5 (Pa)
     R : float
-        Ideal gas constant, default 8.3144598
+        Ideal gas constant, default 8.3144598 (J/mol K)
 
     Methods
     =======
@@ -246,8 +246,6 @@ class Rxnset():
     Methods
     =======
     get_nasa_coefficients(T)
-        
-
     read_nasa_coefficients()
     """
     def __init__(self, species, nuij):
