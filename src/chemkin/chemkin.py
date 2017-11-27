@@ -512,6 +512,18 @@ class ReactionSystem():
         reversible = [i.reversible for i in self.elementary_reactions]
         return reversible
 
+    def setup_reaction_simulator(self, simulation_type, abundances):
+        # based on simulation_type, build simulator class
+        choices = ['stochastic', 'deterministic']
+        if simulation_type not in choices:
+            raise ValueError
+
+        if simulation_type == 'deterministic':
+            pass
+        else:
+            pass
+        pass
+
 
 class XMLReader():
     """Parser for chemical reaction XML files. Uses `xml.etree`.
