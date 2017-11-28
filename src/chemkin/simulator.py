@@ -1,6 +1,13 @@
 class ReactionSimulator():
-    # could contain common plotting
-    pass
+    def plot(self, t, y, species):
+        # plot y's 
+        for i in range(len(species)):
+            plt.plot(t, y[i], label=species[i])
+            plt.xlabel("Time")
+            plt.ylabel("Concentration")
+            plt.legend(loc='best')
+            plt.show()
+            # maybe save figure?
 
 
 class StochasticSimulator(ReactionSimulator):
@@ -10,10 +17,10 @@ class StochasticSimulator(ReactionSimulator):
 class DeterministicSimulator(ReactionSimulator):
     def __init__(self, reaction_system, initial_concentrations, temperature):
         self.reaction_system = reaction_system
-        # self.concentrations = initial_concentrations
+        if temperature <=0:
+            raise ValueError("Temperature must be positive.")
         self.temperature = temperature
         # assert concentrations shape is number of species in reaction system
-        # assert temperature is a positive number
         self.time = [0.]
         self.concentrations = [initial_concentrations]
 
@@ -26,10 +33,7 @@ class DeterministicSimulator(ReactionSimulator):
             self.step()
         # save data
 
-    def step(self, dt):
-        # placeholder
-        rate = self.reaction_system.calculate_reaction_rate()
-        previous_concentrations = self.concentrations[-1]
-        new_concentrations = dt * rate + previous_concentrations
+    def diff_func(self, t, y):
+        self.reaction_system.calculate_reaction_rate(y, self.temperature)
 
         
