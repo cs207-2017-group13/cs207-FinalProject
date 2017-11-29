@@ -1,7 +1,3 @@
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib 
-
 class ODE_solver:
     def __init__(self, func, y0, t_span, dt):
         self.diff_function = func

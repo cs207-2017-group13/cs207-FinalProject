@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import chemkin.ode_solver as ode_solver
 import matplotlib.pyplot as plt
 import numpy as np
