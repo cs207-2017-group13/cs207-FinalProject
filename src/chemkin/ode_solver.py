@@ -1,3 +1,4 @@
+from scipy.optimize import newton
 class ODE_solver:
     def __init__(self, func, y0, t_span, dt):
         self.diff_function = func
@@ -26,16 +27,19 @@ class ODE_solver:
 
     def backward_euler_step(self, epsilon = 1e-06):
         if self.t[-1] + self.dt <= self.t_span[-1]:
-            y_prev = self.y[-1]
-            y_curr = self.y[-1] + self.dt*self.diff_function(self.t[-1]+self.dt, y_prev)
-            j = 0
+            # y_prev = self.y[-1]
+            # y_curr = self.y[-1] + self.dt*self.diff_function(self.t[-1]+self.dt, y_prev)
+            # j = 0
+            # newton raphson
+            y_curr = newton(lambda update_y: update_y - self.y[-1] - 
+                self.dt*self.diff_function(self.t[-1]+self.dt, update_y), self.y[-1])
             # fixed point iteration
-            while abs(y_curr-y_prev) > epsilon:
-                y_prev = y_curr
-                y_curr = self.y[-1] + self.dt*self.diff_function(self.t[-1]+self.dt, y_prev)
-                j += 1
-                if j>10000:
-                    raise RuntimeError("The sequence does not converge.")
+            # while abs(y_curr-y_prev) > epsilon:
+            #     y_prev = y_curr
+            #     y_curr = self.y[-1] + self.dt*self.diff_function(self.t[-1]+self.dt, y_prev)
+            #     j += 1
+            #     if j>10000:
+            #         raise RuntimeError("The sequence does not converge.")
             # assign the approximation to result
             self.y.append(y_curr)
             self.t.append(self.t[-1]+self.dt)
@@ -68,7 +72,13 @@ class ODE_solver:
         return self.t, self.y
 
     def rk45_step(self, epsilon = 1e-06):
+        j=1
         while (self.t[-1]+self.dt) <= self.t_span[-1]:
+            if j>10000:
+                raise ValueError("Cannot converge.")
+            j += 1
+            if self.dt < 1e-15:
+            	print("Warning: Step size too small.")
             k1 = self.dt*self.diff_function(self.t[-1], self.y[-1])
             k2 = self.dt*self.diff_function(self.t[-1]+self.dt/4, self.y[-1]+k1/2)
             k3 = self.dt*self.diff_function(self.t[-1]+3*self.dt/8, self.y[-1]+3*k1/32+9*k2/32)
@@ -80,6 +90,11 @@ class ODE_solver:
                 self.y[-1]-8*k1/27+2*k2-3544*k3/2565+1859*k4*4104-11*k5/40)
             w1 = self.y[-1] + 25*k1/216 + 1408*k3/2565 + 2197*k4/4104 - k5/5
             w2 = self.y[-1] + 16*k1/135 + 6656*k3/12825 + 28561*k4/56430 -9*k5/50 + 2*k6/55
+            if abs(w2-w1)==0:
+                self.y.append(w2)
+                self.t.append(self.t[-1]+self.dt)
+                self.dt = 4*self.dt
+                return "Success"
             q = 0.84 * (epsilon*self.dt/abs(w2-w1))**0.25
             if q>=1:
                 self.y.append(w2)
@@ -94,10 +109,6 @@ class ODE_solver:
             else:
                 self.dt = q*self.dt
             
-
-
-
-
 
 
 

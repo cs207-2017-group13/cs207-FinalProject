@@ -41,7 +41,7 @@ class DeterministicSimulator(ReactionSimulator):
         self.ode_solver = ode_solver.ODE_solver(
             self.diff_func, initial_concentrations, t_span, self.dt)
 
-    def simulate(self, method='rk45', epsilon = 1e-06):
+    def simulate(self, method='backward_euler', epsilon = 1e-06):
         choices = ['backward_euler','rk45']
         if method not in choices:
             raise ValueError("Wrong method.")
@@ -50,7 +50,7 @@ class DeterministicSimulator(ReactionSimulator):
         else:
             self.time, self.concentrations = self.ode_solver.backward_euler(epsilon)
 
-    def simulate_step(self, method='rk45', epsilon = 1e-06):
+    def simulate_step(self, method='backward_euler', epsilon = 1e-06):
         """Calculate concentrations between last time and `t_final`.
         Neccessary? refer to scipy.integrate.solve_ivp
         """
@@ -61,10 +61,9 @@ class DeterministicSimulator(ReactionSimulator):
                 raise ValueError("Wrong method.")
             if method == 'rk45':
                 message = self.ode_solver.rk45_step(epsilon)
-                self.dt, self.time, self.concentrations = self.ode_solver.dt, self.ode_solver.t, self.ode_solver.y
             else:
                 message = self.ode_solver.backward_euler_step(epsilon)
-                self.dt, self.time, self.concentrations = self.ode_solver.dt, self.ode_solver.t, self.ode_solver.y
+            self.dt, self.time, self.concentrations = self.ode_solver.dt, self.ode_solver.t, self.ode_solver.y
         else:
             raise IndexError("Time exceeds time span.")
         return message
