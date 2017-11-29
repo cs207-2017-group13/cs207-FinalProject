@@ -1,13 +1,23 @@
 import chemkin.ode_solver as ode_solver
+import matplotlib.pyplot as plt
+import numpy as np
+
 class ReactionSimulator():
+    def __init__(self, reaction_system):
+        self.reaction_system = reaction_system
+        self.time = []
+        self.concentrations = []
+
     def plot(self, t, y, species):
         # plot y's 
-        for i in range(len(species)):
-            plt.plot(t, y[i], label=species[i])
-            plt.xlabel("Time")
-            plt.ylabel("Concentration")
-            plt.legend(loc='best')
-            plt.show()
+        y = np.array(self.concentrations)
+        y = y.transpose()
+        for i in range(len(self.reaction_system.species)):
+            plt.plot(self.time, y, label=self.reaction_system.species[i])
+        plt.xlabel("Time")
+        plt.ylabel("Concentration")
+        plt.legend(loc='best')
+        plt.show()
             # maybe save figure?
 
 
