@@ -45,14 +45,14 @@ class DeterministicSimulator(ReactionSimulator):
         choices = ['backward_euler','rk45']
         if method not in choices:
             raise ValueError("Wrong method.")
+
         if method == 'rk45':
             self.time, self.concentrations = self.ode_solver.rk45(epsilon)
         else:
             self.time, self.concentrations = self.ode_solver.backward_euler(epsilon)
 
     def simulate_step(self, method='backward_euler', epsilon = 1e-06):
-        """Calculate concentrations between last time and `t_final`.
-        Neccessary? refer to scipy.integrate.solve_ivp
+        """Calculate concentrations between last time and `t_final`
         """
         # initialize solver
         if self.time[-1] < self.t_span[-1]:

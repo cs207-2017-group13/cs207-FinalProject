@@ -1,5 +1,4 @@
 from scipy.optimize import newton
-from scipy.integrate import odeint
 
 class ODE_solver:
     def __init__(self, func, y0, t_span, dt):
@@ -23,18 +22,18 @@ class ODE_solver:
             self.y.append(y_curr)
             self.t.append(self.t[-1]+self.dt)
         return "Success"
-
+        
     def rk45(self, epsilon = 1e-06):
-    	# does not work well
         while (self.t[-1]+self.dt) <= self.t_span[-1]:
-        	self.rk45_step(epsilon)
+            message = self.rk45_step(epsilon)
+            if message == "Failure":
+                print("ODE should not be solved by RK45. Try backward euler.")
         return self.t, self.y
 
     def rk45_step(self, epsilon = 1e-06):
+        message = "Failure"
         j=1
-        while (self.t[-1]+self.dt) <= self.t_span[-1]:
-            if j>100:
-                raise ValueError("Cannot converge.")
+        while ((self.t[-1]+self.dt) <= self.t_span[-1]) & (j<1000):
             j += 1
             if self.dt < 1e-10:
             	print("Warning: Step size too small.")
@@ -53,7 +52,8 @@ class ODE_solver:
                 self.y.append(w2)
                 self.t.append(self.t[-1]+self.dt)
                 self.dt = 4*self.dt
-                return "Success"
+                message = "Success"
+                return message
             q = 0.84 * (epsilon*self.dt/abs(w2-w1))**0.25
             if q>=1:
                 self.y.append(w2)
@@ -62,23 +62,13 @@ class ODE_solver:
                     self.dt = 4*self.dt
                 else:
                     self.dt = q*self.dt
-                return "Success"
+                message = "Success"
+                return message
             if q <= 0.1:
                 self.dt = 0.1*self.dt
             else:
                 self.dt = q*self.dt
-
-    def system_ode_solver(self, epsilon=1e-06):
-    	while self.t[-1] + self.dt <= self.t_span[-1]:
-    		self.t.append(self.t[-1] + self.dt)
-    	sol = odeint(self.diff_function, self.y[-1], self.t, atol=epsilon)
-    	self.y = sol
-    	return self.t, self.y
-            
-
-
-
-
+        return message
 
 
     
