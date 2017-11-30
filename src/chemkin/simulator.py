@@ -41,12 +41,14 @@ class DeterministicSimulator(ReactionSimulator):
         self.ode_solver = ode_solver.ODE_solver(
             self.diff_func, initial_concentrations, t_span, self.dt)
 
-    def simulate(self, method='backward_euler', epsilon = 1e-06):
-        choices = ['backward_euler','rk45']
+    def simulate(self, method='bdf', epsilon = 1e-06):
+        choices = ['backward_euler','rk45', 'bdf']
         if method not in choices:
             raise ValueError("Wrong method.")
 
-        if method == 'rk45':
+        if method == 'bdf':
+            self.time, self.concentrations = self.ode_solver.BDF(epsilon)
+        elif method == 'rk45':
             self.time, self.concentrations = self.ode_solver.rk45(epsilon)
         else:
             self.time, self.concentrations = self.ode_solver.backward_euler(epsilon)
