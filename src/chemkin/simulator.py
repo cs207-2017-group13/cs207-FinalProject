@@ -13,13 +13,13 @@ class ReactionSimulator():
         # plot y's 
         y = np.array(self.concentrations)
         y = y.transpose()
-        for i in range(len(self.reaction_system.species)):
-            plt.plot(self.time, y, label=self.reaction_system.species[i])
+        for i, species_name in enumerate(self.reaction_system.species):
+            plt.plot(self.time, y[i], label=species_name)
         plt.xlabel("Time")
         plt.ylabel("Concentration")
         plt.legend(loc='best')
         plt.show()
-            # maybe save figure?
+        # maybe save figure?
 
 
 class StochasticSimulator(ReactionSimulator):
