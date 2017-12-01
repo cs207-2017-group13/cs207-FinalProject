@@ -1,16 +1,18 @@
 #!/usr/bin/env python
 import chemkin.ode_solver as ode_solver
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 
+
 class ReactionSimulator():
-    def __init__(self, reaction_system):
-        self.reaction_system = reaction_system
-        self.time = []
-        self.concentrations = []
+    def __init__(self):
+        # need init function here?
+        pass
 
     def plot(self, t, y, species):
-        # plot y's 
+        # plot y's
         y = np.array(self.concentrations)
         y = y.transpose()
         for i in range(len(self.reaction_system.species)):
@@ -19,11 +21,31 @@ class ReactionSimulator():
         plt.ylabel("Concentration")
         plt.legend(loc='best')
         plt.show()
-            # maybe save figure?
+        # maybe save figure?
 
 
 class StochasticSimulator(ReactionSimulator):
-    pass
+    def __init__(self, reaction_system, initial_abundances, temperature):
+        self.reaction_system = reaction_system
+        self.abundances = [initial_abundances]
+        self.temperature = temperature
+        self.state_change_vectors = self.calculate_state_change_vectors()
+        self.reaction_propensities = self.calculate_reaction_propensities(
+            temperature)
+
+    def calculate_state_change_vectors(self):
+        pass
+
+    def calculate_reaction_propensities(self, temperature):
+        # First, obtain deterministic rate constants
+        rate_constants = self.reaction_system.get_rate_coefficients(
+            temperature)
+        backward_rate_constants = self.reaction_system.get_backward_rate_coefficients()
+        # Obtain order of each reaction
+        pass
+
+    def some_sort_of_simulator(self):
+        pass
 
 
 class DeterministicSimulator(ReactionSimulator):

@@ -11,5 +11,7 @@ parser.add_argument("xmlfile")
 args = parser.parse_args()
 
 xmlfile = chemkin.XMLReader(args.xmlfile)
+reaction_systems = xmlfile.get_reaction_systems()
 
-embed(header="Available name: xmlfile")
+embed(header="Available name: reaction_systems\n"
+      "  (a list of `ReactionSystem`s)")

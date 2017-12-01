@@ -420,7 +420,7 @@ class ReactionSystem():
 
     def get_rate_coefficients(self, temperature):
         """Calculate reaction rate coefficients
-        
+
         INPUTS:
         =======
         temperature : array_like
