@@ -1,5 +1,5 @@
-#!/usr/bin/env python
 import chemkin.ode_solver as ode_solver
+# import ode_solver
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -16,7 +16,7 @@ class ReactionSimulator():
         y = np.array(self.concentrations)
         y = y.transpose()
         for i, species_name in enumerate(self.reaction_system.species):
-            plt.plot(self.time, y[i], label=species_name)
+            plt.plot(self.times, y[i], label=species_name)
         plt.xlabel("Time")
         plt.ylabel("Concentration")
         plt.legend(loc='best')
@@ -84,14 +84,14 @@ class StochasticSimulator(ReactionSimulator):
 
 
 class DeterministicSimulator(ReactionSimulator):
-    def __init__(self, reaction_system, initial_concentrations, temperature, t_span, dt=1):
+    def __init__(self, reaction_system, initial_concentrations, temperature, t_span, dt=0.1):
         self.reaction_system = reaction_system
         if temperature <=0:
             raise ValueError("Temperature must be positive.")
         self.temperature = temperature
         if len(initial_concentrations) != len(self.reaction_system.species):
             raise ValueError("Invalid initial concentration.")
-        self.time = [t_span[0]]
+        self.times = [t_span[0]]
         self.concentrations = [initial_concentrations]
         self.t_span = t_span
         self.dt = dt
@@ -104,17 +104,18 @@ class DeterministicSimulator(ReactionSimulator):
             raise ValueError("Wrong method.")
 
         if method == 'bdf':
-            self.time, self.concentrations = self.ode_solver.BDF(epsilon)
+            self.times, self.concentrations = self.ode_solver.BDF(epsilon)
         elif method == 'rk45':
-            self.time, self.concentrations = self.ode_solver.rk45(epsilon)
+            self.times, self.concentrations = self.ode_solver.rk45(epsilon)
         else:
-            self.time, self.concentrations = self.ode_solver.backward_euler(epsilon)
+            self.times, self.concentrations = self.ode_solver.backward_euler(epsilon)
+        return self.times, self.concentrations
 
     def simulate_step(self, method='backward_euler', epsilon = 1e-06):
         """Calculate concentrations between last time and `t_final`
         """
         # initialize solver
-        if self.time[-1] < self.t_span[-1]:
+        if self.times[-1] < self.t_span[-1]:
             choices = ['backward_euler','rk45']
             if method not in choices:
                 raise ValueError("Wrong method.")
