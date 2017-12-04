@@ -30,10 +30,13 @@ class StochasticSimulator(ReactionSimulator):
     Inherits from base class `ReactionSimulator`.
 
     """
-    def __init__(self, reaction_system, initial_abundances, temperature):
+    def __init__(self, reaction_system, initial_abundances, temperature,
+                 system_volume):
         self.reaction_system = reaction_system
         self.abundances = [initial_abundances]
+        self.times = [0.]
         self.temperature = temperature
+        self.system_volume = system_volume
         self.state_change_vectors = self.calculate_state_change_vectors()
         self.reaction_propensities = self.calculate_reaction_propensities(
             temperature)
@@ -67,7 +70,16 @@ class StochasticSimulator(ReactionSimulator):
         # Obtain order of each reaction
         pass
 
-    def some_sort_of_simulator(self):
+    def simulate_system(self, t_final, seed=None):
+        np.random.seed(seed)
+        while self.times[-1] < t_final:
+            self.advance_simulation()
+        return
+
+    # I am imagining multiple possible methods
+    def advance_simulation(self):
+        r1 = np.random.rand()
+        r2 = np.random.rand()
         pass
 
 
