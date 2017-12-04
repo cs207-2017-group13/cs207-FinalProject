@@ -92,7 +92,7 @@ class DeterministicSimulator(ReactionSimulator):
         if len(initial_concentrations) != len(self.reaction_system.species):
             raise ValueError("Invalid initial concentration.")
         self.times = [t_span[0]]
-        self.concentrations = [initial_concentrations]
+        self.abundances = [initial_concentrations]
         self.t_span = t_span
         self.dt = dt
         self.ode_solver = ode_solver.ODE_solver(
@@ -104,12 +104,12 @@ class DeterministicSimulator(ReactionSimulator):
             raise ValueError("Wrong method.")
 
         if method == 'bdf':
-            self.times, self.concentrations = self.ode_solver.BDF(epsilon)
+            self.times, self.abundances = self.ode_solver.BDF(epsilon)
         elif method == 'rk45':
-            self.times, self.concentrations = self.ode_solver.rk45(epsilon)
+            self.times, self.abundances = self.ode_solver.rk45(epsilon)
         else:
-            self.times, self.concentrations = self.ode_solver.backward_euler(epsilon)
-        return self.times, self.concentrations
+            self.times, self.abundances = self.ode_solver.backward_euler(epsilon)
+        return self.times, self.abundances
 
     def simulate_step(self, method='backward_euler', epsilon = 1e-06):
         """Calculate concentrations between last time and `t_final`
@@ -123,7 +123,7 @@ class DeterministicSimulator(ReactionSimulator):
                 message = self.ode_solver.rk45_step(epsilon)
             else:
                 message = self.ode_solver.backward_euler_step(epsilon)
-            self.dt, self.time, self.concentrations = self.ode_solver.dt, self.ode_solver.t, self.ode_solver.y
+            self.dt, self.time, self.abundances = self.ode_solver.dt, self.ode_solver.t, self.ode_solver.y
         else:
             raise IndexError("Time exceeds time span.")
         return message
