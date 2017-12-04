@@ -25,6 +25,11 @@ class ReactionSimulator():
 
 
 class StochasticSimulator(ReactionSimulator):
+    """Carries out stochastic reaction simulations.
+
+    Inherits from base class `ReactionSimulator`.
+
+    """
     def __init__(self, reaction_system, initial_abundances, temperature):
         self.reaction_system = reaction_system
         self.abundances = [initial_abundances]
@@ -34,13 +39,31 @@ class StochasticSimulator(ReactionSimulator):
             temperature)
 
     def calculate_state_change_vectors(self):
-        pass
+        """Set vectors that determine how abundances change.
+
+        `self.state_change_vectors` is a 2D matrix of n_reactions x
+        n_species. Note that this is flipped from other places in this code.
+
+        """
+        n_reactions = len(self.reaction_system.elementary_reactions)
+        n_species = len(self.reaction_system)
+        self.state_change_vectors = (
+            self.reaction_system.product_coefficients
+            - self.reaction_system.reactant_coefficients).T
+        assert self.state_change_vectors.shape == (n_reactions, n_species)
+        return
 
     def calculate_reaction_propensities(self, temperature):
+        """
+
+        Reaction propensity * dt gives probability.
+
+        """
         # First, obtain deterministic rate constants
         rate_constants = self.reaction_system.get_rate_coefficients(
             temperature)
-        backward_rate_constants = self.reaction_system.get_backward_rate_coefficients()
+        backward_rate_constants = (
+            self.reaction_system.get_backward_rate_coefficients())
         # Obtain order of each reaction
         pass
 

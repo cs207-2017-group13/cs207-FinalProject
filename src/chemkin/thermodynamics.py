@@ -237,11 +237,11 @@ class Rxnset():
 
     Parameters
     ==========
-    species : list of string
-        name of all species in the reaction system
-    nuij : matrix
-        the difference of product coefficients matrix and reactant
-        coefficients matrix
+    species : list
+        Names of all species in the reaction system.
+    nuij : np.ndarray
+        The difference between product and reactant coefficient
+        matrices. Dimensions n_species x n_reactions.
 
     Methods
     =======

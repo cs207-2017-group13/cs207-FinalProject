@@ -113,6 +113,11 @@ class ElementaryReaction():
         """
         return self.products
 
+    def calculate_reaction_order(self):
+        """Determine reaction order from number of reactants.
+        """
+        return len(self.get_products())
+
     def calculate_rate_coefficient(self, T):
         """ Calculates and returns a rate coefficient based on the
         type of rate coefficient required
@@ -453,8 +458,8 @@ class ReactionSystem():
         EXAMPLES:
         =========
         >>> reader = XMLReader("tests/rxns.xml")
-        >>> reaction_system = reader.get_reaction_systems()
-        >>> reaction_system[0].build_reactant_coefficient_matrix()
+        >>> reaction_systems = reader.get_reaction_systems()
+        >>> reaction_systems[0].build_reactant_coefficient_matrix()
         array([[ 1.,  0.],
                [ 0.,  1.],
                [ 0.,  0.],
@@ -479,8 +484,8 @@ class ReactionSystem():
         EXAMPLES:
         =========
         >>> reader = XMLReader("tests/rxns.xml")
-        >>> reaction_system = reader.get_reaction_systems()
-        >>> reaction_system[0].build_product_coefficient_matrix()
+        >>> reaction_systems = reader.get_reaction_systems()
+        >>> reaction_systems[0].build_product_coefficient_matrix()
         array([[ 0.,  1.],
                [ 1.,  0.],
                [ 1.,  1.],
