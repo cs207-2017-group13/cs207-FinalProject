@@ -2,7 +2,7 @@ from scipy.optimize import newton
 from scipy.integrate import ode
 
 class ODE_solver:
-     """ODE Solver class
+    """ODE Solver class
 
     Implemented three ode solvers: backward euler method,
     Runge-Kutta-Fehlberg, and backward differentiation formula.
