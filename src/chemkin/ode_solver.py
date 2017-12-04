@@ -2,6 +2,27 @@ from scipy.optimize import newton
 from scipy.integrate import ode
 
 class ODE_solver:
+     """ODE Solver class
+
+    Implemented three ode solvers: backward euler method,
+    Runge-Kutta-Fehlberg, and backward differentiation formula.
+
+    Parameters:
+    ===========
+    func:   ordinary differential equation to be integrated
+    y0:     initial value of the variable y
+    t_span: time span, first element indicating the initial time,
+            second element indicating the stopping time
+    dt:     size of time step
+
+    Methods:
+    ========
+    backward_euler()
+    backward_euler_step()
+    rk45()
+    rk45_step()
+    BDF()
+    """
     def __init__(self, func, y0, t_span, dt):
         self.diff_function = func
         self.t_span = t_span
@@ -10,21 +31,99 @@ class ODE_solver:
         self.y = [y0]
 
     def backward_euler(self, epsilon = 1e-06):
+        """Solve the ODE using backward euler method.
+
+        INPUTS:
+        =======
+        epsilon: float
+                 tolerance of error of the zero value
+
+        RETURNS:
+        ========
+        self.t:  array
+                 all times evaluated
+        self.y:  array
+                 variable values at each time t
+
+        EXAMPLES:
+        =========
+        >>> func = lambda t, y: 2*t
+        >>> ode = ODE_solver(func, 0.8, [1, 2], 0.1)
+        >>> ode.backward_euler()
+        ([1, 1.1, 1.2000000000000002, 1.3000000000000003, 
+          1.4000000000000004, 1.5000000000000004, 1.6000000000000005, 
+          1.7000000000000006, 1.8000000000000007, 1.9000000000000008, 2], 
+          [0.8, 1.02, 1.26, 1.52, 1.8, 2.1, 2.4200000000000004, 
+          2.7600000000000007, 3.120000000000001, 
+          3.5000000000000013, 3.9000000000000012])
+        """
         while (self.t[-1]+self.dt) <= self.t_span[-1]:
+            self.backward_euler_step(epsilon)
+        if self.t[-1] < self.t_span[-1]:
             self.backward_euler_step(epsilon)
         return self.t, self.y
 
     def backward_euler_step(self, epsilon = 1e-06):
+        """Solve the ODE one step/time forward 
+           using backward euler method.
+           
+
+        INPUTS:
+        =======
+        epsilon: float
+                 tolerance of error of the zero value
+
+        RETURNS:
+        ========
+        message: "Success"
+                 indicating if the integration is successful
+
+        EXAMPLES:
+        =========
+        >>> func = lambda t, y: 2*t
+        >>> ode = ODE_solver(func, 0.8, [1, 2], 0.1)
+        >>> ode.backward_euler_step()
+        Success
+        """
         if self.t[-1] + self.dt <= self.t_span[-1]:
             # newton raphson
             y_curr = newton(lambda update_y: update_y - self.y[-1] - 
-                self.dt*self.diff_function(self.t[-1]+self.dt, update_y), self.y[-1])
+                self.dt*self.diff_function(self.t[-1]+self.dt, update_y), self.y[-1],
+                tol = epsilon)
             # assign the approximation to result
             self.y.append(y_curr)
             self.t.append(self.t[-1]+self.dt)
+        elif self.t[-1] < self.t_span[-1]:
+            y_curr = newton(lambda update_y: update_y - self.y[-1] - 
+                self.dt*self.diff_function(self.t_span[-1], update_y), self.y[-1],
+                tol = epsilon)
+            # assign the approximation to result
+            self.y.append(y_curr)
+            self.t.append(self.t_span[-1])
         return "Success"
         
     def rk45(self, epsilon = 1e-06):
+        """Solve the ODE using Runge-Kutta-Fehlberg method.
+
+        INPUTS:
+        =======
+        epsilon: float
+                 tolerance of error of the zero value
+
+        RETURNS:
+        ========
+        self.t:  array
+                 all times evaluated
+        self.y:  array
+                 variable values at each time t
+
+        EXAMPLES:
+        =========
+        >>> func = lambda t, y: 2*t
+        >>> ode = ODE_solver(func, 0.8, [1, 2], 0.1)
+        >>> ode.rk45()
+        ([1, 1.1, 1.5, 2], [0.8, 1.01, 2.0500000000000003, 3.8000000000000003])
+        """
         while (self.t[-1]+self.dt) <= self.t_span[-1]:
             message = self.rk45_step(epsilon)
         if self.t[-1] < self.t_span[-1]:
@@ -35,6 +134,26 @@ class ODE_solver:
         return self.t, self.y
 
     def rk45_step(self, epsilon = 1e-06):
+        """Solve the ODE one step/time forward 
+            using Runge-Kutta-Fehlberg method.
+
+        INPUTS:
+        =======
+        epsilon: float
+                 tolerance of error of the zero value
+
+        RETURNS:
+        ========
+        message: "Success"
+                 indicating if the integration is successful
+
+        EXAMPLES:
+        =========
+        >>> func = lambda t, y: 2*t
+        >>> ode = ODE_solver(func, 0.8, [1, 2], 0.1)
+        >>> ode.rk45_step()
+        Success
+        """
         message = "Failure"
         j=1
         while ((self.t[-1]+self.dt) <= self.t_span[-1]) & (j<1000):
@@ -90,6 +209,33 @@ class ODE_solver:
         return message
 
     def BDF(self, epsilon = 1e-06):
+        """Solve the ODE using backward differentiation formula.
+
+        INPUTS:
+        =======
+        epsilon: float
+                 tolerance of error of the zero value
+
+        RETURNS:
+        ========
+        self.t:  array
+                 all times evaluated
+        self.y:  array
+                 variable values at each time t
+
+        EXAMPLES:
+        =========
+        >>> func = lambda t, y: 2*t
+        >>> obj = ODE_solver(func, 0.8, [1, 2], 0.1)
+        >>> obj.BDF()
+        ([1, 1.1, 1.2000000000000002, 1.3000000000000003, 
+          1.4000000000000004, 1.5000000000000004, 1.6000000000000005, 
+          1.7000000000000006, 1.8000000000000007, 1.9000000000000008, 
+          2.000000000000001], [0.8, 1.0100028876739957, 1.2400029762488538, 
+          1.4900030227013614, 1.7600030613655735, 2.0500030861821226, 
+          2.3600031183809405, 2.6900031380352489, 3.040003145145048, 
+          3.4100031693276773, 3.8000031911685168])
+        """
         r = ode(self.diff_function).set_integrator('vode', method='bdf',
             atol=epsilon, with_jacobian=False)
         r.set_initial_value(self.y[-1], self.t[-1])
@@ -102,3 +248,4 @@ class ODE_solver:
             self.y.append(y_val)
             self.t.append(r.t)
         return self.t, self.y
+
