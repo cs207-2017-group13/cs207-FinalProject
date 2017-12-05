@@ -1,4 +1,5 @@
-from scipy.optimize import newton
+# from scipy.optimize import newton
+from scipy.optimize import root
 from scipy.integrate import ode
 
 class ODE_solver:
@@ -81,15 +82,15 @@ class ODE_solver:
         'Success'
         """
         if self.t[-1] + self.dt <= self.t_span[-1]:
-            # newton raphson
-            y_curr = newton(lambda update_y: update_y - self.y[-1] - 
+            # modified powell method
+            y_curr = root(lambda update_y: update_y - self.y[-1] - 
                 self.dt*self.diff_function(self.t[-1]+self.dt, update_y), self.y[-1],
                 tol = epsilon)
             # assign the approximation to result
             self.y.append(y_curr)
             self.t.append(self.t[-1]+self.dt)
         elif self.t[-1] < self.t_span[-1]:
-            y_curr = newton(lambda update_y: update_y - self.y[-1] - 
+            y_curr = root(lambda update_y: update_y - self.y[-1] - 
                 self.dt*self.diff_function(self.t_span[-1], update_y), self.y[-1],
                 tol = epsilon)
             # assign the approximation to result
