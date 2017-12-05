@@ -1,9 +1,9 @@
 import xml.etree.ElementTree as ET
 import numpy as np
+
 import chemkin.thermodynamics as thermodynamics
 import chemkin.simulator as simulator
-# import thermodynamics
-# import simulator
+
 
 class ElementaryReaction():
     """Class representing a single elementary reaction.
@@ -26,16 +26,18 @@ class ElementaryReaction():
     Methods
     =======
     get_info()
-        Return string describing elementary reaction.
+        Obtain description of elementary reaction.
     get_reactants()
-        Return reactants.
+        Return reactants and stochiometric coefficients.
     get_products()
-        Return products.
+        Return products and stochiometric coefficients.
+    calculate_reaction_order()
+        Determine the order of the reaction.
     calculate_rate_coefficient(T)
         Calculate the rate coefficient according to the reaction type.
 
-    EXAMPLES:
-    =========
+    Examples
+    ========
     >>> elementary_reaction = ElementaryReaction({'equation' : 'H + O2  [=] OH + O' ,
     ...                     'id' : 'reaction01', 'products' : {'O' : '1' , 'OH' : '1'}, 
     ...                     'rate_params' : {'A' : 3520000.0, 'E' : 71400.0 , 'b' : -0.7 }, 
@@ -65,8 +67,8 @@ class ElementaryReaction():
         """Returns a string containing basic information about the
         Elementary reaction.
 
-        RETURNS:
-        ========
+        Returns
+        =======
         info : str
         """
         info = "Reactants: {} \nProducts: {} \nRate Params: {} "
@@ -79,12 +81,12 @@ class ElementaryReaction():
         """Returns a dictionary with reactants as keys and the
         corresponding stoichiometric coefficients as values.
 
-        OUTPUTS:
-        ========
+        Returns
+        =======
         reactants : dict
 
-        EXAMPLES:
-        =========
+        Examples
+        ========
         >>> elementary_reaction = ElementaryReaction({'equation' : 'H + O2  [=] OH + O' ,
         ...                     'id' : 'reaction01', 'products' : {'O' : '1' , 'OH' : '1'}, 
         ...                     'rate_params' : {'A' : 3520000.0, 'E' : 71400.0 , 'b' : -0.7 }, 
@@ -99,12 +101,12 @@ class ElementaryReaction():
         """Returns a dictionary with products as keys and the
         corresponding stoichiometric coefficients as values.
 
-        OUTPUTS:
-        ========
+        Returns
+        =======
         products : dict
 
-        EXAMPLES:
-        =========
+        Examples
+        ========
         >>> elementary_reaction = ElementaryReaction({'equation' : 'H + O2  [=] OH + O' ,
         ...                     'id' : 'reaction01', 'products' : {'O' : '1' , 'OH' : '1'}, 
         ...                     'rate_params' : {'A' : 3520000.0, 'E' : 71400.0 , 'b' : -0.7 }, 
@@ -117,25 +119,33 @@ class ElementaryReaction():
 
     def calculate_reaction_order(self):
         """Determine reaction order from number of reactants.
+
+        If reaction is reversible, returns 2-tuple, for forward and
+        backward reaction order. Otherwise returns a 1-tuple, for the
+        forward reaction order.
         """
-        return len(self.get_products())
+        if self.reversible:
+            return (len(self.get_reactants()), len(self.get_products()))
+        else:
+            return (len(self.get_reactants()),)
 
-    def calculate_rate_coefficient(self, T):
-        """ Calculates and returns a rate coefficient based on the
-        type of rate coefficient required
+    def calculate_rate_coefficient(self, T=None):
+        """Calculates and returns a rate coefficient based on the type
+        of rate coefficient required.
 
-        INPUTS:
-        =======
+        Parameters
+        ==========
         T : float
-            Temperature in Kelvin scale. Must be positive.
+            Temperature in Kelvin scale. Must be positive. Optional
+            (irrelevant) for constant rate reactions.
 
-        OUTPUTS:
-        ========
+        Returns
+        =======
         rate_coeff : float
             Rate coefficient based on the type of elementary reaction.
 
-        EXAMPLES:
-        =========
+        Examples
+        ========
         >>> elementary_reaction = ElementaryReaction({'equation' : 'H + O2  [=] OH + O' ,
         ...                     'id' : 'reaction01', 'products' : {'O' : '1' , 'OH' : '1'}, 
         ...                     'rate_params' : {'A' : 3520000.0, 'E' : 71400.0 , 'b' : -0.7 }, 
@@ -151,6 +161,7 @@ class ElementaryReaction():
                 else:
                     return self._constant_rate()
             elif 'Arrhenius' in self.rate_type:
+                assert T is not None
                 A = self.rate_params['A']
                 E = self.rate_params['E']
                 b = self.rate_params.get('b', 0.)
@@ -169,13 +180,13 @@ class ElementaryReaction():
 
         In zeroth-order reactions, k = constant.
 
-        INPUTS:
-        =======
+        Parameters
+        ==========
         k : float, optional
             Constant reaction rate coefficient
 
-        RETURNS:
-        ========
+        Returns
+        =======
         k : float
             Constant reaction rate coefficient
 
@@ -184,8 +195,8 @@ class ElementaryReaction():
         Although it would be sensible if input is numeric, no exceptions
         will be raised if this is not the case.
 
-        EXAMPLES:
-        =========
+        Examples
+        ========
         >>> elementary_reaction = ElementaryReaction({'equation' : 'H + O2  [=] OH + O' ,
         ...                     'id' : 'reaction01', 'products' : {'O' : '1' , 'OH' : '1'}, 
         ...                     'rate_params' : {'A' : 3520000.0, 'E' : 71400.0 , 'b' : -0.7 }, 
@@ -213,8 +224,8 @@ class ElementaryReaction():
         equation. A nonzero value for b gives the modified Arrhenius
         equation.
 
-        INPUTS:
-        =======
+        Parameters
+        ==========
         A : float
             Arrhenius prefactor, Must be positive
         E : float
@@ -227,13 +238,13 @@ class ElementaryReaction():
         R : float, optional
             Ideal gas constant
 
-        RETURNS:
-        ========
+        Returns
+        =======
         k : float
             Arrhenius reaction rate coefficient
 
-        EXAMPLES:
-        =========
+        Examples
+        ========
         >>> elementary_reaction = ElementaryReaction({'equation' : 'H + O2  [=] OH + O' ,
         ...                     'id' : 'reaction01', 'products' : {'O' : '1' , 'OH' : '1'}, 
         ...                     'rate_params' : {'A' : 3520000.0, 'E' : 71400.0 , 'b' : -0.7 }, 
@@ -261,19 +272,24 @@ class ReactionSystem():
     for the reactants and products and calculates the corresponding
     progress rates and reaction rates.
 
-    Parameters:
-    ===========
+    Parameters
+    ==========
     elementary_reactions : list
         A list of `ElementaryReaction` instances that compose the
         system of reactions.
     species : list
         A list of strings identifying species in reaction system.
 
-    Methods:
-    ========
+    Methods
+    =======
     calculate_progress_rate(concs, temperature)
     calculate_reaction_rate(concs, temperature)
     get_rate_coefficients()
+        Return rate coefficients (a.k.a. rate constants) for reactions
+        in the forward direction.
+    get_backward_rate_coefficients()
+        Return rate coefficients for reactions in the reverse
+        direction. (0 for irreversible reactions)
     build_reactant_coefficient_matrix()
     build_product_coefficient_matrix()
     check_reversible()
@@ -298,8 +314,8 @@ class ReactionSystem():
     def get_info(self):
         """Returns a string containing basic information for the reaction system
 
-        RETURNS:
-        ========
+        Returns
+        =======
         info : str
               Containing information on species and stoichiometric coefficients
         """
@@ -312,13 +328,13 @@ class ReactionSystem():
     def __len__(self):
         """Returns the number of species in the reaction system.
 
-        RETURNS:
-        ========
+        Returns
+        =======
         species_len : int
             The number of species in the reaction system
 
-        EXAMPLES:
-        =========
+        Examples
+        ========
         >>> concs = [1., 2., 1., 3., 1.]
         >>> reader = XMLReader("tests/rxns.xml")
         >>> reaction_system = reader.get_reaction_systems()
@@ -334,20 +350,20 @@ class ReactionSystem():
         backward progress rate from the forward progress rate to
         obtain the net progress rate.
 
-        INPUTS:
-        =======
+        Parameters
+        ==========
         concs : np.ndarray
             Concentration of species
         temperature : float
             Temperature of the elementary reactions
 
-        RETURNS:
-        ========
+        Returns
+        =======
         progress : np.ndarray
             Progress rate of each reaction. (size = number of reactions)
 
-        EXAMPLES:
-        =========
+        Examples
+        ========
         >>> concs = [1., 2., 1., 3., 1.]
         >>> reader = XMLReader("tests/rxns.xml")
         >>> reaction_system = reader.get_reaction_systems()
@@ -360,8 +376,7 @@ class ReactionSystem():
             k = [k]*len(self.reactant_coefficients[0])
 
         # backward reaction rate coefficient
-        if self.thermochem:
-            kb = self.thermochem.backward_coeffs(k, temperature)
+        kb = self.get_backward_rate_coefficients(temperature)
 
         # Initialize progress rates with reaction rate coefficients
         progress = k
@@ -398,21 +413,21 @@ class ReactionSystem():
         """Returns the reaction rate of a system of irreversible,
         elementary reactions.
 
-        INPUTS:
-        =======
+        Parameters
+        ==========
         concs : np.ndarray
             Concentration of species
         temperature : float
             Temperature of the elementary reactions
 
-        RETURNS:
-        ========
+        Returns
+        =======
         f : numpy array of floats
             Reaction rate (change in concentration) of each
             species. (size: number of species)
 
-        EXAMPLES:
-        =========
+        Examples
+        ========
         >>> concs = [1., 2., 1., 3., 1.]
         >>> reader = XMLReader("tests/rxns.xml")
         >>> reaction_system = reader.get_reaction_systems()
@@ -426,20 +441,23 @@ class ReactionSystem():
         return np.dot(nu, rj)
 
     def get_rate_coefficients(self, temperature):
-        """Calculate reaction rate coefficients
+        """Calculate reaction rate coefficients.
 
-        INPUTS:
-        =======
+        These rate coefficients are for reactions in the forward
+        direction.
+
+        Parameters
+        ==========
         temperature : array_like
             Temperatures
 
-        RETURNS:
-        ========
+        Returns
+        =======
         coefficients : np.ndarray
            reaction rate ooefficients
 
-        EXAMPLES:
-        =========
+        Examples
+        ========
         >>> reader = XMLReader("tests/rxns.xml")
         >>> reaction_system = reader.get_reaction_systems()
         >>> reaction_system[0].get_rate_coefficients(300)
@@ -449,16 +467,26 @@ class ReactionSystem():
                         in self.elementary_reactions]
         return coefficients
 
+    def get_backward_rate_coefficients(self, temperature):
+        """
+        """
+        k = self.get_rate_coefficients(temperature)
+        if self.thermochem:
+            kb = self.thermochem.backward_coeffs(k, temperature)
+        else:
+            kb = np.zeros(len(self.elementary_reactions))
+        return kb
+
     def build_reactant_coefficient_matrix(self):
         """Build a reactant coefficients matrix for the reaction system.
 
-        RETURNS:
-        ========
+        Returns
+        =======
         mat : np.ndarray
            reactant stoichiometric coefficients
 
-        EXAMPLES:
-        =========
+        Examples
+        ========
         >>> reader = XMLReader("tests/rxns.xml")
         >>> reaction_systems = reader.get_reaction_systems()
         >>> reaction_systems[0].build_reactant_coefficient_matrix()
@@ -478,13 +506,13 @@ class ReactionSystem():
     def build_product_coefficient_matrix(self):
         """Build a product coefficients matrix for the reaction system.
 
-        RETURNS:
-        ========
+        Returns
+        =======
         mat : np.ndarray
            product stoichiometric coefficients
 
-        EXAMPLES:
-        =========
+        Examples
+        ========
         >>> reader = XMLReader("tests/rxns.xml")
         >>> reaction_systems = reader.get_reaction_systems()
         >>> reaction_systems[0].build_product_coefficient_matrix()
@@ -503,14 +531,15 @@ class ReactionSystem():
 
     def check_reversible(self):
         """Check if each elementary reaction is reversible
-        RETURNS:
-        ========
+
+        Returns
+        =======
         reversible : list
             a list of True and False indicating if each elementary
             reaction is reversible
 
-        EXAMPLES:
-        =========
+        Examples
+        ========
         >>> reader = XMLReader("tests/rxns.xml")
         >>> reaction_system = reader.get_reaction_systems()
         >>> reaction_system[0].check_reversible()
