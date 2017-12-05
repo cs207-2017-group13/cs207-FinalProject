@@ -108,7 +108,7 @@ class StochasticSimulator(ReactionSimulator):
 
 
 class DeterministicSimulator(ReactionSimulator):
-    def __init__(self, reaction_system, initial_concentrations, temperature, t_span, dt=0.1):
+    def __init__(self, reaction_system, initial_concentrations, temperature, t_span, dt=0.01):
         self.reaction_system = reaction_system
         if temperature <=0:
             raise ValueError("Temperature must be positive.")
@@ -155,4 +155,6 @@ class DeterministicSimulator(ReactionSimulator):
     def diff_func(self, t, y):
         self.reaction_system.calculate_reaction_rate(y, self.temperature)
 
-        
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()       
