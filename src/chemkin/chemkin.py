@@ -3,6 +3,8 @@ import numpy as np
 
 import chemkin.thermodynamics as thermodynamics
 import chemkin.simulator as simulator
+# import thermodynamics
+# import simulator
 
 
 class ElementaryReaction():
