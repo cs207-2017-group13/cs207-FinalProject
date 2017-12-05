@@ -229,7 +229,7 @@ class DeterministicSimulator(ReactionSimulator):
         =======
         function: right hand side of the ODE function
         '''
-        self.reaction_system.calculate_reaction_rate(y, self.temperature)
+        return self.reaction_system.calculate_reaction_rate(y, self.temperature)
 
 if __name__ == "__main__":
     import doctest

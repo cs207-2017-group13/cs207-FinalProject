@@ -1,6 +1,7 @@
 # from scipy.optimize import newton
 # from scipy.optimize import root
 from scipy.integrate import ode
+from numpy.linalg import norm
 
 class ODE_solver:
     """ODE Solver class
@@ -82,10 +83,10 @@ class ODE_solver:
         'Success'
         """
         if self.t[-1] + self.dt <= self.t_span[-1]:
-        	# fix point iteration
+        	# fixed point iteration
         	prev_y = self.y[-1]
         	curr_y = self.y[-1]+ self.dt*self.diff_function(self.t[-1]+self.dt, prev_y)
-        	while abs(curr_y-prev_y) > epsilon:
+        	while norm(abs(curr_y-prev_y)) > epsilon:
         		prev_y = curr_y
         		curr_y = self.y[-1]+ self.dt*self.diff_function(self.t[-1]+self.dt, prev_y)
         	# modified powell method to find root
@@ -96,7 +97,7 @@ class ODE_solver:
         elif self.t[-1] < self.t_span[-1]:
         	prev_y = self.y[-1]
         	curr_y = self.y[-1]+ self.dt*self.diff_function(self.t[-1]+self.dt, prev_y)
-        	while abs(curr_y-prev_y) > epsilon:
+        	while norm(abs(curr_y-prev_y)) > epsilon:
         		prev_y = curr_y
         		curr_y = self.y[-1] + self.dt*self.diff_function(self.t[-1]+self.dt, prev_y)
         	self.y.append(curr_y)
