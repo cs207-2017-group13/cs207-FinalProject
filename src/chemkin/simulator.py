@@ -137,7 +137,7 @@ class DeterministicSimulator(ReactionSimulator):
             raise ValueError("Temperature must be positive.")
         self.temperature = temperature
         if len(initial_abundances) != len(self.reaction_system.species):
-            raise ValueError("Invalid initial concentration.")
+            raise ValueError("Invalid initial species abundances.")
         self.times = [t_span[0]]
         self.abundances = [initial_abundances]
         self.t_span = t_span
