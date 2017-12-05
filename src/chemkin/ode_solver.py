@@ -1,5 +1,5 @@
 # from scipy.optimize import newton
-from scipy.optimize import root
+# from scipy.optimize import root
 from scipy.integrate import ode
 
 class ODE_solver:
@@ -51,7 +51,7 @@ class ODE_solver:
         >>> func = lambda t, y: 2*t
         >>> ode = ODE_solver(func, 0.8, [1, 2], 0.5)
         >>> ode.backward_euler()
-        ([1, 1.5, 2.0], [0.8, 2.3000000000000003, 4.300000000000001])
+        ([1, 1.5, 2.0], [0.8, 2.3, 4.3])
         """
         while (self.t[-1]+self.dt) <= self.t_span[-1]:
             self.backward_euler_step(epsilon)
@@ -82,20 +82,25 @@ class ODE_solver:
         'Success'
         """
         if self.t[-1] + self.dt <= self.t_span[-1]:
-            # modified powell method
-            y_curr = root(lambda update_y: update_y - self.y[-1] - 
-                self.dt*self.diff_function(self.t[-1]+self.dt, update_y), self.y[-1],
-                tol = epsilon)
-            # assign the approximation to result
-            self.y.append(y_curr)
-            self.t.append(self.t[-1]+self.dt)
+        	# fix point iteration
+        	prev_y = self.y[-1]
+        	curr_y = self.y[-1]+ self.dt*self.diff_function(self.t[-1]+self.dt, prev_y)
+        	while abs(curr_y-prev_y) > epsilon:
+        		prev_y = curr_y
+        		curr_y = self.y[-1]+ self.dt*self.diff_function(self.t[-1]+self.dt, prev_y)
+        	# modified powell method to find root
+        	# rhs = lambda update_y: (update_y - self.y[-1] - self.dt*self.diff_function(self.t[-1]+self.dt, update_y))
+        	# y_curr = root(rhs, self.y[-1], tol = epsilon)
+        	self.y.append(curr_y)
+        	self.t.append(self.t[-1]+self.dt)
         elif self.t[-1] < self.t_span[-1]:
-            y_curr = root(lambda update_y: update_y - self.y[-1] - 
-                self.dt*self.diff_function(self.t_span[-1], update_y), self.y[-1],
-                tol = epsilon)
-            # assign the approximation to result
-            self.y.append(y_curr)
-            self.t.append(self.t_span[-1])
+        	prev_y = self.y[-1]
+        	curr_y = self.y[-1]+ self.dt*self.diff_function(self.t[-1]+self.dt, prev_y)
+        	while abs(curr_y-prev_y) > epsilon:
+        		prev_y = curr_y
+        		curr_y = self.y[-1] + self.dt*self.diff_function(self.t[-1]+self.dt, prev_y)
+        	self.y.append(curr_y)
+        	self.t.append(self.t_span[-1])
         return "Success"
         
     def rk45(self, epsilon = 1e-06):
@@ -242,4 +247,3 @@ class ODE_solver:
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
-
