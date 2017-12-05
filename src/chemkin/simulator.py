@@ -108,6 +108,28 @@ class StochasticSimulator(ReactionSimulator):
 
 
 class DeterministicSimulator(ReactionSimulator):
+    """Class for deterministic simulation
+    Simulate species abundances deterministically.
+
+    Parameters
+    ==========
+    reaction_system:    `ReactionSystem` class object
+                        containing all the methods and attributes of
+                        `ReactionSystem` class
+    initial_abundances: array
+                        initial abundances of each species inside
+                        the reaction_system
+    temperature:        float
+                        temperature when the reaction take place
+    t_span:             time span of the reactions users want to 
+                        simulate
+    dt:                 size of time steps users want to simulate
+
+    Methods
+    =======
+    simulate(method='bdf', epsilon = 1e-06)
+    diff_func(t, y)
+    """
     def __init__(self, reaction_system, initial_abundances, temperature,
                  t_span, dt=0.01):
         self.reaction_system = reaction_system
@@ -124,7 +146,7 @@ class DeterministicSimulator(ReactionSimulator):
             self.diff_func, initial_abundances, t_span, self.dt)
 
     def simulate(self, method='bdf', epsilon = 1e-06):
-        """Simulate species abundance deterministically.
+        """Simulate species abundances deterministically.
 
         We implemented three methods to solve the ordinary differential 
         equation. Backward differentiation formula and backward euler
@@ -156,6 +178,7 @@ class DeterministicSimulator(ReactionSimulator):
         >>> reaction_system = reader.get_reaction_systems()[0]
         >>> det_sim = DeterministicSimulator(reaction_system, concs, 800, [0, 2], dt=1)
         >>> det_sim.simulate()
+        ([0, 1.0, 2.0], [[1.0, 2.0, 1.0, 3.0, 1.0], array([ 1.,  2.,  1.,  3.,  1.]), array([ 1.,  2.,  1.,  3.,  1.])])
         """
         choices = ['backward_euler','rk45', 'bdf']
         if method not in choices:
@@ -187,6 +210,25 @@ class DeterministicSimulator(ReactionSimulator):
     #     return message
 
     def diff_func(self, t, y):
+        ''' Turn the calculate reaction rate function into the rhs of
+            the ODE.
+
+        In order for the ode solver to work, we need a function with
+        t (time) and y as parameters. However, the original calculate reaction
+        rate function is a function of y and temperature. We need to
+        transform the original function.
+
+        Parameters
+        ==========
+        t: float
+           time
+        y: array
+           value of the variable we would like to integrate
+
+        Returns
+        =======
+        function: right hand side of the ODE function
+        '''
         self.reaction_system.calculate_reaction_rate(y, self.temperature)
 
 if __name__ == "__main__":
