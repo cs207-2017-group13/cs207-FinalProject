@@ -7,8 +7,8 @@ def test_neg_temp():
 	reader = chemkin.XMLReader("tests/rxns.xml")
 	reaction_system = reader.get_reaction_systems()[0]
 	try:
-		det_sim = simulator.DeterministicSimulator(reaction_system, 
-												   concs, -800, [0, 2], dt=1)
+		det_sim = simulator.DeterministicSimulator(reaction_system,
+			concs, -800, [0, 2], dt=1)
 	except ValueError as err:
 		assert (type(err) == ValueError)
 
@@ -17,8 +17,8 @@ def test_neg_temp():
 	reader = chemkin.XMLReader("tests/rxns.xml")
 	reaction_system = reader.get_reaction_systems()[0]
 	try:
-		det_sim = simulator.DeterministicSimulator(reaction_system, 
-												   concs, 800, [0, 2], dt=1)
+		det_sim = simulator.DeterministicSimulator(reaction_system,
+			concs, 800, [0, 2], dt=1)
 	except ValueError as err:
 		assert (type(err) == ValueError)
 
@@ -27,5 +27,5 @@ def test_sim_backward_euler():
 	reader = chemkin.XMLReader("tests/rxns.xml")
 	reaction_system = reader.get_reaction_systems()[0]
 	det_sim = simulator.DeterministicSimulator(reaction_system,
-											   concs, 800, [0, 2], dt=1)
+		concs, 800, [0, 2], dt=1)
 	assert det_sim.simulate('backward_euler') == 1

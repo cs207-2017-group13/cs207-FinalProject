@@ -177,7 +177,7 @@ class DeterministicSimulator(ReactionSimulator):
         >>> reader = chemkin.XMLReader("tests/rxns.xml")
         >>> reaction_system = reader.get_reaction_systems()[0]
         >>> det_sim = DeterministicSimulator(reaction_system, concs, 800, [0, 2], dt=1)
-        >>> det_sim.simulate()
+        >>> det_sim.simulate('backward_euler')
         ([0, 1.0, 2.0], [[1.0, 2.0, 1.0, 3.0, 1.0], array([ 1.,  2.,  1.,  3.,  1.]), array([ 1.,  2.,  1.,  3.,  1.])])
         """
         choices = ['backward_euler','rk45', 'bdf']
