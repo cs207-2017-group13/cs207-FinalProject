@@ -237,7 +237,3 @@ class ODE_solver:
             self.y.append(y_val)
             self.t.append(r.t)
         return self.t, self.y
-
-func = lambda t, y: 2*t
-obj = ODE_solver(func, 0.8, [1, 2], 0.5)
-print(obj.BDF())
