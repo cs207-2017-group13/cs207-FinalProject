@@ -238,10 +238,10 @@ class ODE_solver:
             self.t.append(r.t)
         return self.t, self.y
 
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()
+# if __name__ == "__main__":
+#     import doctest
+#     doctest.testmod()
 
-# func = lambda t, y: 2*t
-# ode = ODE_solver(func, 0.8, [1, 2], 0.2)
-# print(ode.backward_euler())
+func = lambda t, y: 2*t
+ode = ODE_solver(func, 0.8, [1, 2], 0.2)
+print(ode.rk45())
