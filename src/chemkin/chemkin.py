@@ -1,6 +1,8 @@
 import xml.etree.ElementTree as ET
 import numpy as np
+
 import chemkin.thermodynamics as thermodynamics
+import chemkin.simulator as simulator
 
 
 class ElementaryReaction():
@@ -546,14 +548,17 @@ class ReactionSystem():
         reversible = [i.reversible for i in self.elementary_reactions]
         return reversible
 
-    def setup_reaction_simulator(self, simulation_type, abundances):
+    def setup_reaction_simulator(self, simulation_type, abundances, temperature, t_span):
         # based on simulation_type, build simulator class
         choices = ['stochastic', 'deterministic']
         if simulation_type not in choices:
             raise ValueError
 
         if simulation_type == 'deterministic':
-            pass
+            determine_sim = simulator.DeterministicSimulator(
+                self, abundances, temperature, t_span)
+            #print(determine_sim.simulate())
+            return determine_sim.simulate()
         else:
             pass
         pass
