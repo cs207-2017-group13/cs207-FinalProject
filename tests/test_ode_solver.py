@@ -14,6 +14,6 @@ def test_back_euler():
 def test_rk45():
 	func = lambda t, y: 2*t
 	ode = ode_solver.ODE_solver(func, 0.8, [1, 2], 0.2)
-	t, y = ode.backward_euler()
+	t, y = ode.rk45()
 	assert np.allclose(t, [1, 1.2, 2.0])
 	assert np.allclose(y, [0.8, 1.2400000000000002, 3.8000000000000007])
