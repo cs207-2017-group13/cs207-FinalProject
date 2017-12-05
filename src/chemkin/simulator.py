@@ -1,9 +1,13 @@
 #!/usr/bin/env python
-import chemkin.ode_solver as ode_solver
+import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import numpy as np
+
+import chemkin.ode_solver as ode_solver
+
+
+AVOGADRO = 6.022e23
 
 
 class ReactionSimulator():
@@ -16,7 +20,7 @@ class ReactionSimulator():
         y = np.array(self.concentrations)
         y = y.transpose()
         for i, species_name in enumerate(self.reaction_system.species):
-            plt.plot(self.time, y[i], label=species_name)
+            plt.plot(self.times, y[i], label=species_name)
         plt.xlabel("Time")
         plt.ylabel("Concentration")
         plt.legend(loc='best')
@@ -29,6 +33,9 @@ class StochasticSimulator(ReactionSimulator):
 
     Inherits from base class `ReactionSimulator`.
 
+    Note that a reversible elementary reaction represents two
+    reactions in stochastic simulation.
+
     """
     def __init__(self, reaction_system, initial_abundances, temperature,
                  system_volume):
@@ -37,24 +44,29 @@ class StochasticSimulator(ReactionSimulator):
         self.times = [0.]
         self.temperature = temperature
         self.system_volume = system_volume
-        self.state_change_vectors = self.calculate_state_change_vectors()
+        self.state_change_matrix = self.calculate_state_change_vectors()
         self.reaction_propensities = self.calculate_reaction_propensities(
             temperature)
 
     def calculate_state_change_vectors(self):
         """Set vectors that determine how abundances change.
 
-        `self.state_change_vectors` is a 2D matrix of n_reactions x
-        n_species. Note that this is flipped from other places in this code.
+        `self.state_change_matrix` is a 2D matrix of n_reactions x
+        n_species.
 
         """
-        n_reactions = len(self.reaction_system.elementary_reactions)
         n_species = len(self.reaction_system)
-        self.state_change_vectors = (
-            self.reaction_system.product_coefficients
-            - self.reaction_system.reactant_coefficients).T
-        assert self.state_change_vectors.shape == (n_reactions, n_species)
-        return
+        state_change_vector = np.zeros(n_species, dtype=int)
+        state_change_matrix = []
+        for reaction in self.reaction_system.elementary_reactions:
+            for i, species in enumerate(self.reaction_system.species):
+                state_change_vector[i] = (
+                    reaction.get_products()[species]
+                    - reaction.get_reactants()[species])
+            state_change_matrix.append(state_change_vector)
+            if reaction.reversible:
+                state_change_matrix.append(-1*state_change_vector)
+        return np.array(state_change_matrix)
 
     def calculate_reaction_propensities(self, temperature):
         """
@@ -62,13 +74,26 @@ class StochasticSimulator(ReactionSimulator):
         Reaction propensity * dt gives probability.
 
         """
+        reaction_propensities = []
         # First, obtain deterministic rate constants
         rate_constants = self.reaction_system.get_rate_coefficients(
             temperature)
         backward_rate_constants = (
             self.reaction_system.get_backward_rate_coefficients())
-        # Obtain order of each reaction
-        pass
+        for forward_rate, backward_rate, reaction in zip(
+                rate_constants, backward_rate_constants,
+                self.reaction_system.elementary_reactions):
+            reaction_order = reaction.calculate_reaction_order()
+            for rate, order in zip(
+                    [forward_rate, backward_rate], reaction_order):
+                if order == 1:
+                    reaction_propensity = rate
+                elif order == 2:
+                    reaction_propensity = rate / AVOGADRO / self.system_volume
+                else:
+                    raise NotImplementedError
+                reaction_propensities.append(reaction_propensity)
+        return reaction_propensities
 
     def simulate_system(self, t_final, seed=None):
         np.random.seed(seed)

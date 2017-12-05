@@ -85,19 +85,19 @@ class Thermochem():
     def Cp_over_R(self, T):
         """Returns specific heat of each species given by the NASA
         polynomials.
-        
-        INPUTS:
-        =======
+
+        Parameters
+        ==========
         T : float
             Reaction temperature
 
-        RETURNS:
-        ========
+        Returns
+        =======
         Cp_R : np.array
             specific heat of each species
 
-        EXAMPLES:
-        =========
+        Examples
+        ========
         >>> import chemkin.chemkin as chemkin
         >>> reader = chemkin.XMLReader("tests/rxns_reversible.xml")
         >>> reaction_system = reader.get_reaction_systems()
@@ -118,18 +118,18 @@ class Thermochem():
         """Returns the enthalpy of each species given by the NASA
         polynomials.
 
-        INPUTS:
-        =======
+        Parameters
+        ==========
         T : float
             Temperature of elementary reactions
 
-        RETURNS:
-        ========
+        Returns
+        =======
         H_RT : np.array
             enthalpy of each species
 
-        EXAMPLES:
-        =========
+        Examples
+        ========
         >>> import chemkin.chemkin as chemkin
         >>> reader = chemkin.XMLReader("tests/rxns_reversible.xml")
         >>> reaction_system = reader.get_reaction_systems()
@@ -152,18 +152,18 @@ class Thermochem():
         """Returns the entropy of each species given by the NASA
         polynomials.
 
-        INPUTS:
-        =======
+        Parameters
+        ==========
         T : float
             Temperature of elementary reactions
 
-        RETURNS:
-        ========
+        Returns
+        =======
         S_R : list of floats
             entropy of each species
 
-        EXAMPLES:
-        =========
+        Examples
+        ========
         >>> import chemkin.chemkin as chemkin
         >>> reader = chemkin.XMLReader("tests/rxns_reversible.xml")
         >>> reaction_system = reader.get_reaction_systems()
@@ -184,24 +184,26 @@ class Thermochem():
         """Calculates backward rate coefficient.
 
         First calculates equilibrium constant from thermodynamic
-        quantities and then calculates backward rate coefficient from
+        quantities. Then calculates backward rate coefficient from
         equilibrium constant and forward reaction rate coefficient.
-        reaction.
 
-        INPUTS:
-        =======
+        For irreversible reactions, the backward rate coefficients
+        will be approximately 0.
+
+        Parameters
+        ==========
         kf : np.array
             Forward reaction rate coefficients
         T : float
             Temperature of elementary reactions
 
-        RETURNS:
-        ========
+        Returns
+        =======
         kf / kb : np.array
-            Backward reaction rate coefficient for reach reaction
+            Backward reaction rate coefficient for each reaction
 
-        EXAMPLES:
-        =========
+        Examples
+        ========
         >>> import chemkin.chemkin as chemkin
         >>> reader = chemkin.XMLReader("tests/rxns_reversible.xml")
         >>> reaction_system = reader.get_reaction_systems()
@@ -258,19 +260,19 @@ class Rxnset():
         """Returns the corresponding NASA polynomial coefficients for
         all species at the given temperature
 
-        INPUTS:
-        =======
+        Parameters
+        ==========
         T : float
             Temperature of elementary reactions
 
-        RETURNS:
-        ========
+        Returns
+        =======
         coeffs : np.array (2D)
             NASA polynomial coefficients for all species at the given
             temperature
 
-        EXAMPLES:
-        =========
+        Examples
+        ========
         >>> import chemkin.chemkin as chemkin
         >>> reader = chemkin.XMLReader("tests/rxns_reversible.xml")
         >>> reaction_system = reader.get_reaction_systems()
@@ -295,16 +297,16 @@ class Rxnset():
     def read_nasa_coefficients(self):
         """Return NASA polynomial coefficients for all species.
 
-        RETURNS:
-        ========
+        Returns
+        =======
         coeffs : collections.OrderedDictionary
             Dictionary of dictionaries of species, each dictionary of
             species contains low, mid, high temperature, and NASA
             polynomial coefficients for two temprature ranges for all
             species
 
-        EXAMPLES:
-        =========
+        Examples
+        ========
         """
         db_location = os.path.dirname(
             __file__) + '/NASA_polynomial_coefficients.sqlite'
