@@ -4,7 +4,7 @@ import numpy as np
 
 def test_back_euler():
 	func = lambda t, y: 2*t
-	ode = ODE_solver(func, 0.8, [1, 2], 0.2)
+	ode = ode_solver.ODE_solver(func, 0.8, [1, 2], 0.2)
 	t, y = ode.backward_euler()
 	assert np.allclose(t, [1, 1.2, 1.4, 
 		1.5999999999999999, 1.7999999999999998, 1.9999999999999998, 2])
@@ -13,7 +13,7 @@ def test_back_euler():
 
 def test_rk45():
 	func = lambda t, y: 2*t
-	ode = ODE_solver(func, 0.8, [1, 2], 0.2)
+	ode = ode_solver.ODE_solver(func, 0.8, [1, 2], 0.2)
 	t, y = ode.backward_euler()
 	assert np.allclose(t, [1, 1.2, 2.0])
 	assert np.allclose(y, [0.8, 1.2400000000000002, 3.8000000000000007])
