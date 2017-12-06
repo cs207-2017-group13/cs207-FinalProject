@@ -1,5 +1,7 @@
-from scipy.optimize import newton
+# from scipy.optimize import newton
+# from scipy.optimize import root
 from scipy.integrate import ode
+from numpy.linalg import norm
 
 class ODE_solver:
     """ODE Solver class
@@ -50,12 +52,16 @@ class ODE_solver:
         >>> func = lambda t, y: 2*t
         >>> ode = ODE_solver(func, 0.8, [1, 2], 0.5)
         >>> ode.backward_euler()
-        ([1, 1.5, 2.0], [0.8, 2.3000000000000003, 4.300000000000001])
+        ([1, 1.5, 2.0], [0.8, 2.3, 4.3])
         """
         while (self.t[-1]+self.dt) <= self.t_span[-1]:
-            self.backward_euler_step(epsilon)
+            message = self.backward_euler_step(epsilon)
+            if message == "Failure":
+                print("Step size too large.")
         if self.t[-1] < self.t_span[-1]:
-            self.backward_euler_step(epsilon)
+            message = self.backward_euler_step(epsilon)
+            if message == "Failure":
+                print("Step size too large.")
         return self.t, self.y
 
     def backward_euler_step(self, epsilon = 1e-06):
@@ -81,19 +87,33 @@ class ODE_solver:
         'Success'
         """
         if self.t[-1] + self.dt <= self.t_span[-1]:
-            # newton raphson
-            y_curr = newton(lambda update_y: update_y - self.y[-1] - 
-                self.dt*self.diff_function(self.t[-1]+self.dt, update_y), self.y[-1],
-                tol = epsilon)
-            # assign the approximation to result
-            self.y.append(y_curr)
+            # fixed point iteration
+            prev_y = self.y[-1]
+            curr_y = self.y[-1]+ self.dt*self.diff_function(self.t[-1]+self.dt, prev_y)
+            j = 1
+            while (norm(abs(curr_y-prev_y)) > epsilon) & (j<=1000):
+                # print(curr_y)
+                j+=1
+                prev_y = curr_y
+                curr_y = self.y[-1]+ self.dt*self.diff_function(self.t[-1]+self.dt, prev_y)
+            # modified powell method to find root
+            # rhs = lambda update_y: (update_y - self.y[-1] - self.dt*self.diff_function(self.t[-1]+self.dt, update_y))
+            # y_curr = root(rhs, self.y[-1], tol = epsilon)
+            if j > 1000:
+                return "Failure"
+            self.y.append(curr_y)
             self.t.append(self.t[-1]+self.dt)
         elif self.t[-1] < self.t_span[-1]:
-            y_curr = newton(lambda update_y: update_y - self.y[-1] - 
-                self.dt*self.diff_function(self.t_span[-1], update_y), self.y[-1],
-                tol = epsilon)
-            # assign the approximation to result
-            self.y.append(y_curr)
+            prev_y = self.y[-1]
+            curr_y = self.y[-1]+ self.dt*self.diff_function(self.t[-1]+self.dt, prev_y)
+            j = 1
+            while (norm(abs(curr_y-prev_y)) > epsilon) & (j<=1000):
+                j += 1
+                prev_y = curr_y
+                curr_y = self.y[-1] + self.dt*self.diff_function(self.t[-1]+self.dt, prev_y)
+            if j > 1000:
+                return "Failure"
+            self.y.append(curr_y)
             self.t.append(self.t_span[-1])
         return "Success"
         
@@ -154,7 +174,7 @@ class ODE_solver:
         while ((self.t[-1]+self.dt) <= self.t_span[-1]) & (j<1000):
             j += 1
             if self.dt < 1e-10:
-            	print("Warning: Step size too small.")
+                print("Warning: Step size too small.")
             k1 = self.dt*self.diff_function(self.t[-1], self.y[-1])
             k2 = self.dt*self.diff_function(self.t[-1]+self.dt/4, self.y[-1]+k1/2)
             k3 = self.dt*self.diff_function(self.t[-1]+3*self.dt/8, self.y[-1]+3*k1/32+9*k2/32)
@@ -231,9 +251,13 @@ class ODE_solver:
         while r.successful() and r.t < self.t_span[1]:
             r.integrate(r.t + self.dt)
             if len(r.y)==1:
-            	y_val=r.y[0]
+                y_val=r.y[0]
             else:
-            	y_val = r.y
+                y_val = r.y
             self.y.append(y_val)
             self.t.append(r.t)
         return self.t, self.y
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()

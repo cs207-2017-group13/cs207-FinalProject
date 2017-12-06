@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-
+# import ode_solver
 import chemkin.ode_solver as ode_solver
 
 
@@ -14,17 +14,19 @@ class ReactionSimulator():
         # need init function here?
         pass
 
-    def plot(self, t, y, species):
+    def plot(self, t, y, species, name):
         # plot y's
-        y = np.array(self.concentrations)
+        y = np.array(self.abundances)
         y = y.transpose()
         for i, species_name in enumerate(self.reaction_system.species):
             plt.plot(self.times, y[i], label=species_name)
         plt.xlabel("Time")
         plt.ylabel("Concentration")
         plt.legend(loc='best')
+        # file_name = "examples/figures/"+name+".png"
+        # plt.savefig(file_name, dpi=125)
         plt.show()
-        # maybe save figure?
+        
 
 
 class StochasticSimulator(ReactionSimulator):
@@ -109,21 +111,80 @@ class StochasticSimulator(ReactionSimulator):
 
 
 class DeterministicSimulator(ReactionSimulator):
-    def __init__(self, reaction_system, initial_concentrations, temperature, t_span, dt=0.1):
+    """Class for deterministic simulation
+    Simulate species abundances deterministically.
+
+    Parameters
+    ==========
+    reaction_system:    `ReactionSystem` class object
+                        containing all the methods and attributes of
+                        `ReactionSystem` class
+    initial_abundances: array
+                        initial abundances of each species inside
+                        the reaction_system
+    temperature:        float
+                        temperature when the reaction take place
+    t_span:             time span of the reactions users want to 
+                        simulate
+    dt:                 size of time steps users want to simulate
+
+    Methods
+    =======
+    simulate(method='bdf', epsilon = 1e-06)
+    diff_func(t, y)
+    """
+    def __init__(self, reaction_system, initial_abundances, temperature,
+                 t_span, dt=0.01):
         self.reaction_system = reaction_system
         if temperature <=0:
             raise ValueError("Temperature must be positive.")
         self.temperature = temperature
-        if len(initial_concentrations) != len(self.reaction_system.species):
-            raise ValueError("Invalid initial concentration.")
+        if len(initial_abundances) != len(self.reaction_system.species):
+            raise ValueError("Invalid initial species abundances.")
         self.times = [t_span[0]]
-        self.abundances = [initial_concentrations]
+        self.abundances = [initial_abundances]
         self.t_span = t_span
         self.dt = dt
         self.ode_solver = ode_solver.ODE_solver(
-            self.diff_func, initial_concentrations, t_span, self.dt)
+            self.diff_func, initial_abundances, t_span, self.dt)
 
     def simulate(self, method='bdf', epsilon = 1e-06):
+        """Simulate species abundances deterministically.
+
+        We implemented three methods to solve the ordinary differential 
+        equation. Backward differentiation formula and backward euler
+        are good for stiff functions, and rk45 is accurate for non-stiff
+        functions. BDF is the most suitable for solving ODE problems in
+        chemical kinetics, so our default method is set as BDF.
+
+        Parameters
+        ==========
+        method:  string
+                 default as 'bdf'-- backward differentiation formula
+                 name of the ODE solver
+        epsilon: float
+                 default as 1e-06
+                 tolerance of error
+
+        Returns
+        =======
+        self.times:      array
+                         time of evaluations
+        self.abundances: array
+                         abundances of species at every time step
+
+        Examples
+        ========
+        >>> import chemkin.chemkin as chemkin
+        >>> concs = np.array([1., 2., 1., 3., 1.])*1e-05
+        >>> reader = chemkin.XMLReader("tests/rxns.xml")
+        >>> reaction_system = reader.get_reaction_systems()[0]
+        >>> det_sim = DeterministicSimulator(reaction_system, concs, 800, [0, 0.01], dt=0.01)
+        >>> det_sim.simulate()
+        ([0, 0.01], [array([  1.00000000e-05,   2.00000000e-05,   1.00000000e-05,
+                 3.00000000e-05,   1.00000000e-05]), array([  1.03778637e-05,   1.96221363e-05,   1.03927707e-05,
+                 2.96146828e-05,   9.99254648e-06])])
+        """
         choices = ['backward_euler','rk45', 'bdf']
         if method not in choices:
             raise ValueError("Wrong method.")
@@ -136,24 +197,45 @@ class DeterministicSimulator(ReactionSimulator):
             self.times, self.abundances = self.ode_solver.backward_euler(epsilon)
         return self.times, self.abundances
 
-    def simulate_step(self, method='backward_euler', epsilon = 1e-06):
-        """Calculate concentrations between last time and `t_final`
-        """
-        # initialize solver
-        if self.times[-1] < self.t_span[-1]:
-            choices = ['backward_euler','rk45']
-            if method not in choices:
-                raise ValueError("Wrong method.")
-            if method == 'rk45':
-                message = self.ode_solver.rk45_step(epsilon)
-            else:
-                message = self.ode_solver.backward_euler_step(epsilon)
-            self.dt, self.time, self.abundances = self.ode_solver.dt, self.ode_solver.t, self.ode_solver.y
-        else:
-            raise IndexError("Time exceeds time span.")
-        return message
+    # def simulate_step(self, method='backward_euler', epsilon = 1e-06):
+    #     """Calculate concentrations between last time and `t_final`
+    #     """
+    #     # initialize solver
+    #     if self.times[-1] < self.t_span[-1]:
+    #         choices = ['backward_euler','rk45']
+    #         if method not in choices:
+    #             raise ValueError("Wrong method.")
+    #         if method == 'rk45':
+    #             message = self.ode_solver.rk45_step(epsilon)
+    #         else:
+    #             message = self.ode_solver.backward_euler_step(epsilon)
+    #         self.dt, self.times, self.abundances = self.ode_solver.dt, self.ode_solver.t, self.ode_solver.y
+    #     else:
+    #         raise IndexError("Time exceeds time span.")
+    #     return message
 
     def diff_func(self, t, y):
-        self.reaction_system.calculate_reaction_rate(y, self.temperature)
+        ''' Turn the calculate reaction rate function into the rhs of
+            the ODE.
 
-        
+        In order for the ode solver to work, we need a function with
+        t (time) and y as parameters. However, the original calculate reaction
+        rate function is a function of y and temperature. We need to
+        transform the original function.
+
+        Parameters
+        ==========
+        t: float
+           time
+        y: array
+           value of the variable we would like to integrate
+
+        Returns
+        =======
+        function: right hand side of the ODE function
+        '''
+        return self.reaction_system.calculate_reaction_rate(y, self.temperature)
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()       

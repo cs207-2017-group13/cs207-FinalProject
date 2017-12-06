@@ -4,14 +4,86 @@
 from IPython import embed
 
 import argparse
+import numpy as np
 import chemkin.chemkin as chemkin
 
 parser = argparse.ArgumentParser()
 parser.add_argument("xmlfile")
 args = parser.parse_args()
-
 xmlfile = chemkin.XMLReader(args.xmlfile)
 reaction_systems = xmlfile.get_reaction_systems()
+length = len(reaction_systems)
 
-embed(header="Available name: reaction_systems\n"
-      "  (a list of `ReactionSystem`s)")
+option = input('Do you wish to continue with the UI (y/n) : ')
+if(option == 'y'):
+	choice = '0'
+	while(choice != '4'):
+
+		print(' 1) Get Reaction System Information')
+		print(' 2) Calculate Reaction Rate')
+		print(' 3) Reaction Simulation')
+		print(' 4) Exit')
+		choice = input('Please enter your choice : ')
+
+
+		if(choice == '1'):
+			reactionChoice = input('There are {} reaction/s in the XML file. Please select any one of them to work on : '.format(length))
+			reactionChoice = int(reactionChoice)
+			reaction_info_choice = '0'
+			while(reaction_info_choice != '5'):
+				print(' 1) Get Reactant Coefficients')
+				print(' 2) Get Product Coefficients')
+				print(' 3) Get Rate Coefficient (k)')
+				print(' 4) Get Progress Rate')
+				print(' 5) Go to Previous Menu')
+
+				reaction_info_choice = input('Please enter your choice : ')
+				if(reaction_info_choice == '1'):
+					print('\033[1m' + '\033[4m'+'Reactant Coefficients:'+'\033[0m'+'\033[0m\n' ,reaction_systems[reactionChoice-1].reactant_coefficients,'\n')
+				if(reaction_info_choice == '2'):
+					print('\033[1m' + '\033[4m'+'Product Coefficients:'+'\033[0m'+'\033[0m\n' , reaction_systems[reactionChoice-1].product_coefficients,'\n')
+				if(reaction_info_choice == '3'):
+					temp = input('Please enter temperature : ')
+					temp = int(temp)
+					print('\033[1m' + '\033[4m'+'Rate Coefficient:'+'\033[0m'+'\033[0m\n', reaction_systems[reactionChoice-1].get_rate_coefficients(temp),'\n')
+				if(reaction_info_choice == '4'):
+					temp = input('Please enter temperature : ')
+					temp = int(temp)
+					species = len(reaction_systems[reactionChoice-1].reactant_coefficients)
+					conc = input('Please enter comma sepearated concentrations for each of the {} species in the reaction : '.format(species))
+					conc = np.fromstring(conc, dtype=int, sep=',')
+					print('\033[1m' + '\033[4m'+'Progress Rate:'+'\033[0m'+'\033[0m\n', reaction_systems[reactionChoice-1].calculate_progress_rate(conc,temp),'\n')
+
+		elif(choice == '2'):
+			reactionChoice = input('There are {} reaction/s in the XML file. Please select any one of them to work on : '.format(length))
+			reactionChoice = int(reactionChoice)
+			temp = input('Please enter temperature : ')
+			temp = int(temp)
+			species = len(reaction_systems[reactionChoice-1].reactant_coefficients)
+			conc = input('Please enter comma sepearated concentrations for each of the {} species in the reaction : '.format(species))
+			conc = np.fromstring(conc, dtype=int, sep=',')
+			print('\033[1m' + '\033[4m'+'Reaction Rate:'+'\033[0m'+'\033[0m\n', reaction_systems[reactionChoice-1].calculate_reaction_rate(conc,temp),'\n')
+
+		elif(choice == '3'):
+			print(' 1) Deterministic')
+			print(' 2) Stochastic')
+
+			sim_choice = input('Please enter your choice : ')
+
+			if(sim_choice == '1'):
+				print(' 1) Backward Euler')
+				print(' 2) Runge-Kutta-Fehlberg')
+				print(' 3) Backward Differentiation Formula')
+
+				det_choice = input('Please select your choice for ODE solver : ')
+				print('Yet to be implemented\n')
+
+			if(sim_choice == '2'):
+				print('Yet to be added\n')
+
+
+else:
+	embed(header="Available name: reaction_systems\n"
+	      "  (a list of `ReactionSystem`s)")
+
+	

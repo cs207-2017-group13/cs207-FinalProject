@@ -220,3 +220,44 @@ This class has three special methods:
  - `__get__(obj, objtype)`: Support instance methods
 
 
+### `ODE_solver` class: Solve ordinary differential equation with three methods
+
+Implemented three ode solvers: backward euler method, Runge-Kutta-Fehlberg, and backward differentiation formula. Backward euler method and backward differentiation formula can be used to solve stiff ODE problems, while Runge-Kutta-Fehlberg moethod is more accurate for non-stiff problems. For the purposed of solving ODE problems in chemical kinetics, our default method is backward differentiation formula.
+
+This class has five methods:
+ - `backward_euler()`: Solve the ODE using backward euler method. 
+ - `backward_euler_step()`: Solve the ODE one step/time forward using backward euler method. We use fixed point iterations to find the optimal root.
+ - `rk45()`: Solve the ODE using Runge-Kutta-Fehlberg method.
+ - `rk45_step()`: Solve the ODE one step/time forward using Runge-Kutta-Fehlberg method.
+ - `BDF()`: Solve the ODE using backward differentiation formula.
+
+Example:
+```python
+func = lambda t, y: 2*t
+obj = ODE_solver(func, 0.8, [1, 2], 0.1)
+obj.backward_euler()
+obj.backward_euler_step()
+obj.rk45()
+obj.rk45_step()
+obj.BDF()
+```
+
+
+### `DeterministicSimulator` class: Class for deterministic simulation
+
+This class is inherited from the `ReactionSimulator` class. It simulate species abundances deterministically.
+
+This class has two methods:
+ - simulate(method='bdf', epsilon = 1e-06): We implemented three methods to solve the ordinary differential equation. Backward differentiation formula and backward eulerare good for stiff functions, and rk45 is accurate for non-stiff functions. BDF is the most suitable for solving ODE problems in chemical kinetics, so our default method is set as BDF.
+ - diff_func(t, y): In order for the ode solver to work, we need a function with t (time) and y as parameters. However, the original calculate reaction rate function is a function of y and temperature. We need to transform the original function.
+
+Example:
+```python
+import chemkin.chemkin as chemkin
+import chemkin.simulator as simulator
+concs = np.array([1., 2., 1., 3., 1.])*1e-05
+reader = chemkin.XMLReader("tests/rxns.xml")
+reaction_system = reader.get_reaction_systems()[0]
+det_sim = simulator.DeterministicSimulator(reaction_system, concs, 800, [0, 1], dt=0.01)
+det_sim.simulate()
+```
