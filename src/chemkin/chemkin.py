@@ -707,9 +707,9 @@ class XMLReader():
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
- 
 
-# concs = np.random.rand(5)*1e-05
+
+# concs = np.array([1., 2., 1., 3., 1.])*1e-05
 # reader = XMLReader("../../tests/rxns.xml")
 # reaction_system = reader.get_reaction_systems()[0]
 # det_sim = simulator.DeterministicSimulator(reaction_system, concs, 800, [0, 0.01], dt=0.01)

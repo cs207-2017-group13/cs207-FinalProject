@@ -175,14 +175,14 @@ class DeterministicSimulator(ReactionSimulator):
         Examples
         ========
         >>> import chemkin.chemkin as chemkin
-        >>> concs = np.random.rand(5)*1e-05
+        >>> concs = np.array([1., 2., 1., 3., 1.])*1e-05
         >>> reader = chemkin.XMLReader("tests/rxns.xml")
         >>> reaction_system = reader.get_reaction_systems()[0]
         >>> det_sim = DeterministicSimulator(reaction_system, concs, 800, [0, 0.01], dt=0.01)
         >>> det_sim.simulate()
-        ([0, 0.01], [array([  5.08622935e-06,   3.49711077e-06,   1.52983288e-06,
-         1.88072277e-06,   7.68374835e-06]), array([  5.08783101e-06,   3.49550911e-06,   1.53699671e-06,
-         1.87634003e-06,   7.68096727e-06])])
+        ([0, 0.01], [array([  1.00000000e-05,   2.00000000e-05,   1.00000000e-05,
+         3.00000000e-05,   1.00000000e-05]), array([  1.03778637e-05,   1.96221363e-05,   1.03927707e-05,
+         2.96146828e-05,   9.99254648e-06])])
         """
         choices = ['backward_euler','rk45', 'bdf']
         if method not in choices:
