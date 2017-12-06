@@ -3,7 +3,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 # import ode_solver
-import chemkin.ode_solver as ode_solver
+import chemkin.od e_solver as ode_solver
 
 
 AVOGADRO = 6.022e23
@@ -15,14 +15,11 @@ class ReactionSimulator():
         pass
 
     def plot(self):
-        # plot y's
-        y = np.array(self.abundances)
-        y = y.transpose()
-        for i, species_name in enumerate(self.reaction_system.species):
-            plt.plot(self.times, y[i], label=species_name)
+        # plot abundances over times
+        plt.plot(self.times, self.abundances)
         plt.xlabel("Time")
         plt.ylabel("Concentration")
-        plt.legend(loc='best')
+        plt.legend(self.reaction_system.species, loc='best')
         # file_name = "examples/figures/"+name+".png"
         # plt.savefig(file_name, dpi=125)
         plt.show()
