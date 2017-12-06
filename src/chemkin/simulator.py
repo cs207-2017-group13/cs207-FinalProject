@@ -14,17 +14,19 @@ class ReactionSimulator():
         # need init function here?
         pass
 
-    def plot(self, t, y, species):
+    def plot(self, t, y, species, name):
         # plot y's
-        y = np.array(self.concentrations)
+        y = np.array(self.abundances)
         y = y.transpose()
         for i, species_name in enumerate(self.reaction_system.species):
             plt.plot(self.times, y[i], label=species_name)
         plt.xlabel("Time")
         plt.ylabel("Concentration")
         plt.legend(loc='best')
+        # file_name = "examples/figures/"+name+".png"
+        # plt.savefig(file_name, dpi=125)
         plt.show()
-        # maybe save figure?
+        
 
 
 class StochasticSimulator(ReactionSimulator):
@@ -173,12 +175,14 @@ class DeterministicSimulator(ReactionSimulator):
         Examples
         ========
         >>> import chemkin.chemkin as chemkin
-        >>> concs = [1., 2., 1., 3., 1.]
+        >>> concs = np.random.rand(5)*1e-05
         >>> reader = chemkin.XMLReader("tests/rxns.xml")
         >>> reaction_system = reader.get_reaction_systems()[0]
-        >>> det_sim = DeterministicSimulator(reaction_system, concs, 800, [0, 2], dt=1)
-        >>> det_sim.simulate('backward_euler')
-        ([0, 1.0, 2.0], [[1.0, 2.0, 1.0, 3.0, 1.0], array([ 1.,  2.,  1.,  3.,  1.]), array([ 1.,  2.,  1.,  3.,  1.])])
+        >>> det_sim = DeterministicSimulator(reaction_system, concs, 800, [0, 0.01], dt=0.01)
+        >>> det_sim.simulate()
+        ([0, 0.01], [array([  5.23111015e-06,   5.14843143e-07,   3.07278519e-06,
+         1.17359533e-06,   2.86007789e-06]), array([  5.23045057e-06,   5.15502724e-07,   3.07425376e-06,
+         1.17319083e-06,   2.85901381e-06])])
         """
         choices = ['backward_euler','rk45', 'bdf']
         if method not in choices:
