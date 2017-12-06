@@ -27,8 +27,7 @@ def test_sim_backward_euler():
     concs = np.array([1., 2., 1., 3., 1.])*1e-05
     reader = chemkin.XMLReader("tests/rxns.xml")
     reaction_system = reader.get_reaction_systems()[0]
-    det_sim = simulator.DeterministicSimulator(reaction_system,
-        concs, [0, 0.01], dt=0.01)
+    det_sim = simulator.DeterministicSimulator(reaction_system, concs, 800, [0, 0.01], dt=0.01)
     t, y = det_sim.simulate('backward_euler')
     y0 = y[0]
     y1 = y[1]
