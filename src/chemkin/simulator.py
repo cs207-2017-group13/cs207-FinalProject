@@ -180,9 +180,9 @@ class DeterministicSimulator(ReactionSimulator):
         >>> reaction_system = reader.get_reaction_systems()[0]
         >>> det_sim = DeterministicSimulator(reaction_system, concs, 800, [0, 0.01], dt=0.01)
         >>> det_sim.simulate()
-        ([0, 0.01], [array([  5.23111015e-06,   5.14843143e-07,   3.07278519e-06,
-         1.17359533e-06,   2.86007789e-06]), array([  5.23045057e-06,   5.15502724e-07,   3.07425376e-06,
-         1.17319083e-06,   2.85901381e-06])])
+        ([0, 0.01], [array([  2.52174188e-06,   5.52767525e-08,   3.60259019e-06,
+         9.02436230e-06,   1.17147401e-06]), array([  2.52186431e-06,   5.51543257e-08,   3.60313301e-06,
+         9.02402967e-06,   1.17126381e-06])])
         """
         choices = ['backward_euler','rk45', 'bdf']
         if method not in choices:
