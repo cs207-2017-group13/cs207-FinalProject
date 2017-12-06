@@ -3,7 +3,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 # import ode_solver
-import chemkin.od e_solver as ode_solver
+import chemkin.ode_solver as ode_solver
 
 
 AVOGADRO = 6.022e23
