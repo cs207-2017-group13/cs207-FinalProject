@@ -1,5 +1,3 @@
-# from scipy.optimize import newton
-# from scipy.optimize import root
 from scipy.integrate import ode
 from numpy.linalg import norm
 
@@ -57,11 +55,11 @@ class ODE_solver:
         while (self.t[-1]+self.dt) <= self.t_span[-1]:
             message = self.backward_euler_step(epsilon)
             if message == "Failure":
-                print("Step size too large.")
+                print("Fixed point iteration does not converge.")
         if self.t[-1] < self.t_span[-1]:
             message = self.backward_euler_step(epsilon)
             if message == "Failure":
-                print("Step size too large.")
+                print("Fixed point iteration does not converge.")
         return self.t, self.y
 
     def backward_euler_step(self, epsilon = 1e-06):
@@ -90,15 +88,12 @@ class ODE_solver:
             # fixed point iteration
             prev_y = self.y[-1]
             curr_y = self.y[-1]+ self.dt*self.diff_function(self.t[-1]+self.dt, prev_y)
+            # count number of iterations to avoid looping endlessly
             j = 1
             while (norm(abs(curr_y-prev_y)) > epsilon) & (j<=1000):
-                # print(curr_y)
                 j+=1
                 prev_y = curr_y
                 curr_y = self.y[-1]+ self.dt*self.diff_function(self.t[-1]+self.dt, prev_y)
-            # modified powell method to find root
-            # rhs = lambda update_y: (update_y - self.y[-1] - self.dt*self.diff_function(self.t[-1]+self.dt, update_y))
-            # y_curr = root(rhs, self.y[-1], tol = epsilon)
             if j > 1000:
                 return "Failure"
             self.y.append(curr_y)
@@ -145,7 +140,7 @@ class ODE_solver:
             message = self.rk45_step(epsilon)
         if message == "Failure":
             print("This ODE system should not be solved by RK45.",
-                " Try backward euler.")
+                " Try backward euler with small step size.")
         return self.t, self.y
 
     def rk45_step(self, epsilon = 1e-06):
@@ -170,11 +165,14 @@ class ODE_solver:
         'Success'
         """
         message = "Failure"
+        # count number of iterations to avoid looping endlessly
         j=1
         while ((self.t[-1]+self.dt) <= self.t_span[-1]) & (j<1000):
             j += 1
-            if self.dt < 1e-10:
+            warning_print = False
+            if (self.dt < 1e-10) & (warning_print == False):
                 print("Warning: Step size too small.")
+                warning_print = True
             k1 = self.dt*self.diff_function(self.t[-1], self.y[-1])
             k2 = self.dt*self.diff_function(self.t[-1]+self.dt/4, self.y[-1]+k1/2)
             k3 = self.dt*self.diff_function(self.t[-1]+3*self.dt/8, self.y[-1]+3*k1/32+9*k2/32)
@@ -193,6 +191,7 @@ class ODE_solver:
                 message = "Success"
                 return message
             q = 0.84 * (epsilon*self.dt/abs(w2-w1))**0.25
+            # adjust step size
             if q>=1:
                 self.y.append(w2)
                 self.t.append(self.t[-1]+self.dt)
