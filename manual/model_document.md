@@ -1,8 +1,8 @@
-# Chemical Kinetics (`chemical_kinetics`) Library User Manual
+# ``chemical_kinetics`` Library User Manual
 
 ## 1. Introduction
 
-`Chemical kinetics` is the study of chemical reactions with respect to reaction rates, effect of factors like  temperature, activation energy, stoichiometric coeffecients of reactants and products, etc. on these reactions.
+Chemical kinetics is the study of chemical reactions with respect to reaction rates, effect of factors like  temperature, activation energy, stoichiometric coeffecients of reactants and products, etc. on these reactions.
 
 The library `chemical_kinetics` is a simple library for handling such chemical reaction systems. A system of chemical reactions are input in a standard XML format and the library computes the reaction rates and progress rate of these reactions, based on the parameters passed in the XML.
 

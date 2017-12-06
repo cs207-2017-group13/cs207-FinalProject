@@ -33,7 +33,7 @@ class StochasticSimulator(ReactionSimulator):
     Inherits from base class `ReactionSimulator`.
 
     Note that a reversible elementary reaction represents two
-    reactions in stochastic simulation.
+    different reactions in a stochastic simulation.
 
     """
     def __init__(self, reaction_system, initial_abundances, temperature,
@@ -90,7 +90,8 @@ class StochasticSimulator(ReactionSimulator):
                 elif order == 2:
                     reaction_propensity = rate / AVOGADRO / self.system_volume
                 else:
-                    raise NotImplementedError
+                    raise NotImplementedError("Reaction order %d not valid for"
+                                              " stochastic simulation" % order)
                 reaction_propensities.append(reaction_propensity)
         return reaction_propensities
 
