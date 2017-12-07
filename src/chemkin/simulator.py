@@ -14,15 +14,12 @@ class ReactionSimulator():
         # need init function here?
         pass
 
-    def plot(self, t, y, species, name):
-        # plot y's
-        y = np.array(self.abundances)
-        y = y.transpose()
-        for i, species_name in enumerate(self.reaction_system.species):
-            plt.plot(self.times, y[i], label=species_name)
+    def plot(self):
+        # plot abundances over times
+        plt.plot(self.times, self.abundances)
         plt.xlabel("Time")
         plt.ylabel("Concentration")
-        plt.legend(loc='best')
+        plt.legend(self.reaction_system.species, loc='best')
         # file_name = "examples/figures/"+name+".png"
         # plt.savefig(file_name, dpi=125)
         plt.show()
@@ -134,7 +131,7 @@ class DeterministicSimulator(ReactionSimulator):
     diff_func(t, y)
     """
     def __init__(self, reaction_system, initial_abundances, temperature,
-                 t_span, dt=0.01):
+                 t_span, dt=0.001):
         self.reaction_system = reaction_system
         if temperature <=0:
             raise ValueError("Temperature must be positive.")
@@ -235,6 +232,16 @@ class DeterministicSimulator(ReactionSimulator):
         function: right hand side of the ODE function
         '''
         return self.reaction_system.calculate_reaction_rate(y, self.temperature)
+
+    def plot(self):
+        # plot abundances over times
+        plt.plot(self.times, self.abundances)
+        plt.xlabel("Time")
+        plt.ylabel("Concentration")
+        plt.legend(self.reaction_system.species, loc='best')
+        # file_name = "examples/figures/"+name+".png"
+        # plt.savefig(file_name, dpi=125)
+        plt.show()
 
 if __name__ == "__main__":
     import doctest

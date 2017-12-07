@@ -88,7 +88,29 @@ $\Delta H_{j}$: the enthalpy change of reaction $j$,
 $C_{p,i}$: specific heat at constant pressure (given by the NASA polynomial)
 
 The clients could call the chemkin package and obtained the right-hand-side of an ODE. They can then use it as the righ-hand-side of the ODE, or in a neural net code to learn new reaction pathways.
- 
+
+We offered two options for the user after obtaining the right-hand-side of an ODE. The user could choose to solve the ODE with the deterministic simulator or simulate the abundances of all species using the stochastic simulator. The simulation result will be presented by plots showing the trajectories of species abundances over time.
+
+For deterministic simulator, we implemented three ODE solvers, backward euler method, backward differentiation formula and Runge-Kutta-Fehlberg method. To solve ODE problems in chemical kinetics, however, Runge-Kutta-Fehlberg method (rk45) is NOT recommended as the functions we are dealing with are usually stiff. It is recommended that the user sets the step size to be small (eg. 0.01) to achieve higher simulation accuracy when using the backward euler method and the backward differentiation. If the abundances of species become negative in the simulation process, the simulation will raise a `ValueError` and stop as abundances should never be negative. 
+
+For stochastic simulator, we implemented the Gillespie algorithm. The principle behind the algorithm is that waiting times between reaction events are exponentially distributed; thus the time until the next reaction is drawn from an exponential distribution (the simulation is advanced in time by this amount). The particular reaction event that occurs is randomly selected from among the possible reactions in proportion to their probabilities.
+
+The following is a summary of the simulation process:
+1. Generate two random numbers $r_{1}$, $r_{2}$ uniformly distribution in (0,1).
+2. Compute the propensity function of each reaction and compute
+   $$ \alpha_0 = \sum_{i=1}^{q} \alpha_{i}(t) $$
+3. Compute the time interval until the next chemical reaction via
+   $$ \tau = \frac{1}{\alpha_{0}}ln[1/r_{1}] $$
+4. Compute which reaction occurs. Find j such that
+   $$ r_{2} \geq \frac{1}{\alpha_{0}} \sum_{i=1}^{j-1} \alpha_{i} $$
+   $$ r_{2} < \frac{1}{\alpha_{0}} \sum_{i=1}^{j} \alpha_{i} $$
+5. The $j$th reaction takes place. Update the numbers of chemical species accordingly.
+6. Continue simulation by returning to step 1.
+
+To elaborate, the propensity function for a chemical reaction describes the probability of a particular reaction happening. For instance, consider the following bimolecular reaction:
+ $$ A + A \rightarrow B;\quad rate\;k \qquad (1) $$
+The quantity of species `A` present at time `t` is given by `A(t)`. The propensity function for the above reaction is $A(t)(A(t)-1)k$. In a more complex reaction system, each elementary reaction will have its own propensity, and it is necessary to calculate the propensity of all
+elementary reactions in order to find the total "propensity" for a reaction to occur, in order to draw time $\tau$ until the next reaction from an exponential distribution.
 
 ### Stochastic reaction modeling
 gotta write something here.
@@ -102,7 +124,7 @@ You can obtain the `chemical-kinetics` Library [here](https://github.com/cs207-2
 Obtain the latest version from github, change to the directory, and install using pip.
 
     git clone https://github.com/cs207-2017-group13/cs207-FinalProject.git
-	cd cs207-FinalProject
+	  cd cs207-FinalProject
 
 	# Either
 	pip3 install ./
@@ -116,6 +138,10 @@ Users can run the test suite by calling pytest from the main directory, i.e.
 
     pytest --cov=src
 
+### Dependencies
+Our package depends on `scipy`, `numpy`, `xml`, and `matplotlib` packages.
+
+### Contributing to the development version
 
 Basic Usage and Examples
 ------------------------
