@@ -1,25 +1,47 @@
-# ``chemical_kinetics`` Library User Manual
+``chemical-kinetics`` Library User Manual
+=========================================
 
-## 1. Introduction
+Introduction
+------------
+Chemical kinetics studies the rates of chemical processes. Analyzing how reaction rates change with respect to reactant abundances, temperature, pressure, and other conditions gives insight into reaction mechanisms. 
 
-Chemical kinetics is the study of chemical reactions with respect to reaction rates, effect of factors like  temperature, activation energy, stoichiometric coeffecients of reactants and products, etc. on these reactions.
+The library `chemical-kinetics` is a simple Python 3 library for mathematical modeling of chemical reaction systems. Features include handling systems of elementary reactions, prediction of initial reaction rates, and modeling of reaction progress using deterministic and stochastic methods.
 
-The library `chemical_kinetics` is a simple library for handling such chemical reaction systems. A system of chemical reactions are input in a standard XML format and the library computes the reaction rates and progress rate of these reactions, based on the parameters passed in the XML.
+Reaction systems are specified in a standard XML format. The user may choose to use the provided interactive interface or program using the library directly.
 
-In a system of $N$ species undergoing $M$ **elementary** reactions, the reaction rate of species $i$ is computed by - 
+Scientific background
+---------------------
+A chemical equation describes a chemical reaction, relating the stoichiochetric ratios of reactants and products. For example, this is the equation for the combustion of hydrogen gas:
+
+$$
+\begin{align}
+2\text{H}_{2(g)} + \text{O}_{2(g)} \rightarrow 2\text{H}_2\text{O}_{(l)}
+\end{align}
+$$
+
+A chemical equation may describe an overall net reaction, indicating the ratio of reactants consumed to products produced. On the other hand, such a net reaction may occur by way of several *elementary* reaction steps, each of which can be written as a separate chemical equation. A set of elementary reactions that together add up to yield the net reaction represents a *reaction mechanism*. Such a mechanism describes the exact reactions that lead to formation of the reaction products. An elementary reaction step describes a specific chemical reaction that occurs; i.e. which chemical species collide to produce which reaction products.
+
+*optional text here*: say something about rate determining steps.
+
+### Deterministic reaction modeling
+In a system of $N$ species undergoing $M$ *elementary* reactions, the reaction rate of species $i$ is computed by 
 
 $$
 \begin{align}
   f_{i} &= \sum_{j=1}^{M}{\nu_{ij}\omega_{j}}, \qquad i = 1, \ldots, N
 \end{align}
 $$
-The progress rate for each reaction is computed by 
+
+where $\omega_j$ is the *progress rate* of the *j*th reaction and $\nu_{ij}$ is [...]. The progress rate for each reaction is computed by 
+
 $$
 \begin{align}
   \omega_{j} &= k_{j}^{\left(f\right)}\prod_{i=1}^{N}{x_{i}^{\nu_{ij}^{\prime}}} - k_{j}^{\left(b\right)}\prod_{i=1}^{N}{x_{i}^{\nu_{ij}^{\prime\prime}}}, \qquad j = 1,\ldots, M
 \end{align}
 $$
+
 where,
+
 $$
 \begin{align}
   k_{j}^{\left(b\right)} &= \frac{k_{j}^{\left(f\right)}}{k_{j}^{e}}, \qquad j =1, \ldots, M\\
@@ -34,8 +56,11 @@ $$
 
 The $7$th order NASA polynomials are given by 
 $$\frac{C_{p,i}}{R} = a_{i1} + a_{i2}T + a_{i3}T^{2} + a_{i4}T^{3} + a_{i5}T^{4}$$
+
 $$\frac{H_{i}}{RT} = a_{i1} + \frac{1}{2}a_{i2}T + \frac{1}{3}a_{i3}T^{2} + \frac{1}{4}a_{i4}T^{3} + \frac{1}{5}a_{i5}T^{4} + \frac{a_{i6}}{T}$$
+
 $$\frac{S_{i}}{R} = a_{i1}\ln\left(T\right) + a_{i2}T + \frac{1}{2}a_{i3}T^{2} + \frac{1}{3}a_{i4}T^{3} + \frac{1}{4}a_{i5}T^{4} + a_{i7}$$
+
 for $i = 1,\dots, N$.
 
 Notation:
@@ -65,8 +90,13 @@ $C_{p,i}$: specific heat at constant pressure (given by the NASA polynomial)
 The clients could call the chemkin package and obtained the right-hand-side of an ODE. They can then use it as the righ-hand-side of the ODE, or in a neural net code to learn new reaction pathways.
  
 
-## 2. Installation
-You can obtain the `chemical_kinetics` Library [here](https://github.com/cs207-2017-group13/cs207-FinalProject).
+### Stochastic reaction modeling
+gotta write something here.
+
+Installation
+------------
+
+You can obtain the `chemical-kinetics` Library [here](https://github.com/cs207-2017-group13/cs207-FinalProject).
 
 ### Installation instructions
 Obtain the latest version from github, change to the directory, and install using pip.
@@ -87,7 +117,8 @@ Users can run the test suite by calling pytest from the main directory, i.e.
     pytest --cov=src
 
 
-## 3. Basic Usage and Examples
+Basic Usage and Examples
+------------------------
 ### `XMLReader` class: Read and parse XML input file
 
 The user should have an XML input file containing all the chemical reactions. `XMLReader` will read in the file and parse the file with the `xml.etree` library. It will output a list of dictionaries containing all the elements needed to calculate reaction rate coefficients, progress rates and reaction rates. It will create `ElementaryReaction` objects inside the `get_reaction_systems` function, and then put all `ElementaryReaction` objects in a reaction system into a list. It will then create `ReactionSystem` objects.
