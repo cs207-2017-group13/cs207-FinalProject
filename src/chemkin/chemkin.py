@@ -550,7 +550,7 @@ class ReactionSystem():
         reversible = [i.reversible for i in self.elementary_reactions]
         return reversible
 
-    def setup_reaction_simulator(self, simulation_type, abundances, temperature, t_span):
+    def setup_reaction_simulator(self, simulation_type, abundances, temperature, t_span, dt=0.01):
         # based on simulation_type, build simulator class
         choices = ['stochastic', 'deterministic']
         if simulation_type not in choices:
@@ -558,7 +558,7 @@ class ReactionSystem():
 
         if simulation_type == 'deterministic':
             determine_sim = simulator.DeterministicSimulator(
-                self, abundances, temperature, t_span)
+                self, abundances, temperature, t_span, dt)
             return determine_sim.simulate()
         else:
             pass
@@ -706,13 +706,3 @@ class XMLReader():
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
-
-# if __name__ == "__main__":
-#     import matplotlib
-#     import matplotlib.pyplot as plt
-#     concs = np.array([1., 2., 1., 3., 1.])*1e-05
-#     reader = XMLReader("../../tests/rxns.xml")
-#     reaction_system = reader.get_reaction_systems()[0]
-#     det_sim = simulator.DeterministicSimulator(reaction_system, concs, 800, [0, 1], dt=0.001)
-#     t, y = det_sim.simulate()
-#     print(det_sim.plot())
