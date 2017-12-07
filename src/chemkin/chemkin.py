@@ -559,7 +559,7 @@ class ReactionSystem():
         if simulation_type == 'deterministic':
             determine_sim = simulator.DeterministicSimulator(
                 self, abundances, temperature, t_span, dt)
-            return determine_sim.simulate()
+            return determine_sim
         else:
             pass
         pass
