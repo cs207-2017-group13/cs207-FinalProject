@@ -32,7 +32,7 @@ In a system of $N$ chemical species undergoing $M$ *elementary* reactions, the r
   f_{i} &= \sum_{j=1}^{M}{\nu_{ij}\omega_{j}}, \qquad i = 1, \ldots, N
 \end{align}
 
-where $\omega_j$ is the *progress rate* of the *j*th reaction and $\nu_{ij}$ is the net stoichiometric coefficient for species $i$ in the *j*th reaction. The progress rate ($\omega$) for each reaction is computed by
+where $\omega_j$ is the *progress rate* of the *j*th reaction and $\nu_{ij}$ is the net stoichiometric coefficient for species $i$ in the *j*th reaction. The progress rate ($\omega$) for each reaction $j$ is computed by
 
 \begin{align}
   \omega_{j} &= k_{j}^{\left(f\right)}\prod_{i=1}^{N}{x_{i}^{\nu_{ij}^{\prime}}} - k_{j}^{\left(b\right)}\prod_{i=1}^{N}{x_{i}^{\nu_{ij}^{\prime\prime}}}, \qquad j = 1,\ldots, M
@@ -48,7 +48,7 @@ k &= AT^b\exp[-E^\ddag/RT]
 
 where $A$ is the pre-exponential factor, $b$ gives the temperature dependent of the pre-exponential factor ($b=0$ indicating no dependence), and $R$ is the universal gas constant.
 
-The forward and reverse reaction rate coefficients for a chemical reaction are related to each other through the reaction equilibrium constant, $K$:
+The forward and reverse reaction rate coefficients for a chemical reaction $j$ are related to each other through the reaction equilibrium constant, $K$:
 
 \begin{align}
   K_j &= \frac{k_{j}^{(f)}}{k_{j}^{(b)}}, \qquad j =1, \ldots, M
@@ -61,7 +61,7 @@ The equilibrium constant depends on temperature and the thermodynamic properties
   \gamma_{j} &= \sum_{i=1}^{N}{\nu_{ij}}
 \end{align}
 
-In particular, the equilibrium constant depends on the entropy and enthalpy change of the reaction, respectively $\Delta S$ and $\Delta H$, which are calculated from entropy and enthalpy values of the chemical species. The change in entropy (enthalpy) is the sum of product entropies (enthalpies) minus the sum of reactant entropies (enthalpies).
+In particular, the equilibrium constant depends on the entropy and enthalpy change of the reaction, respectively $\Delta S$ and $\Delta H$, which are calculated from entropy and enthalpy values of the chemical species: the change in entropy (enthalpy) is the sum of product entropies (enthalpies) minus the sum of reactant entropies (enthalpies).
 
 \begin{align}
   \Delta S_{j} &= \sum_{i=1}^{N}{\nu_{ij}S_{i}} \quad \textrm{and} \quad \Delta H_{j} = \sum_{i=1}^{N}{\nu_{ij}H_{i}}, , \qquad j =1, \ldots, M
@@ -74,7 +74,7 @@ Entropy and enthalpy are thermodynamic quantities that are defined as follows, w
   S_{i} &= \int_{T_{0}}^{T}{\frac{C_{p,i}\left(T\right)}{T} \ \mathrm{d}T}, \qquad i = 1, \ldots, N
 \end{align}
 
-Instead of determining the heat capacity of each chemical species from first principles, we approximate the heat capacity as well as integrated values of enthalpy and entropy using the 7th order NASA polynomials, which are are given by 
+Instead of determining the heat capacity of each chemical species from first principles, we approximate the heat capacity using the 7th order NASA polynomials (whose straighforward yields entropy and enthalpy):
 
 $$\frac{C_{p,i}}{R} = a_{i1} + a_{i2}T + a_{i3}T^{2} + a_{i4}T^{3} + a_{i5}T^{4}$$
 
@@ -110,12 +110,16 @@ $C_{p,i}$: specific heat at constant pressure (given by the NASA polynomial)
 
 ### Quantitative modeling of chemical reactions
 
+There are two methods for modeling chemical reactions ...
+
+#### Deterministic
 The clients could call the chemkin package and obtained the right-hand-side of an ODE. They can then use it as the righ-hand-side of the ODE, or in a neural net code to learn new reaction pathways.
 
 We offered two options for the user after obtaining the right-hand-side of an ODE. The user could choose to solve the ODE with the deterministic simulator or simulate the abundances of all species using the stochastic simulator. The simulation result will be presented by plots showing the trajectories of species abundances over time.
 
 For deterministic simulator, we implemented three ODE solvers, backward euler method, backward differentiation formula and Runge-Kutta-Fehlberg method. To solve ODE problems in chemical kinetics, however, Runge-Kutta-Fehlberg method (rk45) is NOT recommended as the functions we are dealing with are usually stiff. It is recommended that the user sets the step size to be small (eg. 0.01) to achieve higher simulation accuracy when using the backward euler method and the backward differentiation. If the abundances of species become negative in the simulation process, the simulation will raise a `ValueError` and stop as abundances should never be negative. 
 
+#### Stochastic
 For stochastic simulator, we implemented the Gillespie algorithm. The principle behind the algorithm is that waiting times between reaction events are exponentially distributed; thus the time until the next reaction is drawn from an exponential distribution (the simulation is advanced in time by this amount). The particular reaction event that occurs is randomly selected from among the possible reactions in proportion to their probabilities.
 
 The following is a summary of the simulation process:
@@ -123,7 +127,7 @@ The following is a summary of the simulation process:
 2. Compute the propensity function of each reaction and compute
    $$ \alpha_0 = \sum_{i=1}^{q} \alpha_{i}(t) $$
 3. Compute the time interval until the next chemical reaction via
-   $$ \tau = \frac{1}{\alpha_{0}}ln[1/r_{1}] $$
+   $$ \tau = \frac{1}{\alpha_{0}}\ln[1/r_{1}] $$
 4. Compute which reaction occurs. Find j such that
    $$ r_{2} \geq \frac{1}{\alpha_{0}} \sum_{i=1}^{j-1} \alpha_{i} $$
    $$ r_{2} < \frac{1}{\alpha_{0}} \sum_{i=1}^{j} \alpha_{i} $$
