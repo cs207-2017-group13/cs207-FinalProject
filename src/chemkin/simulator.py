@@ -23,7 +23,6 @@ class ReactionSimulator():
         # file_name = "examples/figures/"+name+".png"
         # plt.savefig(file_name, dpi=125)
         plt.show()
-        
 
 
 class StochasticSimulator(ReactionSimulator):
@@ -38,15 +37,16 @@ class StochasticSimulator(ReactionSimulator):
     def __init__(self, reaction_system, initial_abundances, temperature,
                  system_volume):
         self.reaction_system = reaction_system
-        self.abundances = [initial_abundances]
+        self.abundances = [np.array(initial_abundances)]
         self.times = [0.]
         self.temperature = temperature
         self.system_volume = system_volume
-        self.state_change_matrix = self.calculate_state_change_vectors()
-        self.reaction_propensities = self.calculate_reaction_propensities(
+        self.state_change_matrix = self.calculate_state_change_matrix()
+        self.stochastic_constants = self.calculate_stochastic_constants(
             temperature)
+        # self.reaction_propensities = self.calculate_reaction_propensities()
 
-    def calculate_state_change_vectors(self):
+    def calculate_state_change_matrix(self):
         """Set vectors that determine how abundances change.
 
         `self.state_change_matrix` is a 2D matrix of n_reactions x
@@ -66,13 +66,13 @@ class StochasticSimulator(ReactionSimulator):
                 state_change_matrix.append(-1*state_change_vector)
         return np.array(state_change_matrix)
 
-    def calculate_reaction_propensities(self, temperature):
-        """
+    def calculate_stochastic_constants(self, temperature):
+        """Compute stochastic rate constants.
 
-        Reaction propensity * dt gives probability.
+        stochastic constant * abundance * dt gives probability.
 
         """
-        reaction_propensities = []
+        stochastic_constants = []
         # First, obtain deterministic rate constants
         rate_constants = self.reaction_system.get_rate_coefficients(
             temperature)
@@ -85,14 +85,34 @@ class StochasticSimulator(ReactionSimulator):
             for rate, order in zip(
                     [forward_rate, backward_rate], reaction_order):
                 if order == 1:
-                    reaction_propensity = rate
+                    stochastic_constant = rate
                 elif order == 2:
-                    reaction_propensity = rate / AVOGADRO / self.system_volume
+                    stochastic_constant = rate / AVOGADRO / self.system_volume
                 else:
                     raise NotImplementedError("Reaction order %d not valid for"
                                               " stochastic simulation" % order)
-                reaction_propensities.append(reaction_propensity)
-        return reaction_propensities
+                stochastic_constants.append(stochastic_constant)
+        return stochastic_constants
+
+    def calculate_reaction_propensities(self):
+        """
+        Reaction propensities are determined by
+
+        """
+        reaction_propensities = []
+        for state_change_vector, stochastic_constant in zip(
+                self.state_change_matrix, self.stochastic_constants):
+            propensity = stochastic_constant
+            for change, species_abundance in zip(
+                    state_change_vector, self.abundances[-1]):
+                if change >= 0:
+                    continue
+                elif change == -1:
+                    propensity *= species_abundance
+                elif change == -2:
+                    propensity *= species_abundance * (species_abundance - 1)
+            reaction_propensities.append(stochastic_constant)
+        return np.array(reaction_propensities)
 
     def simulate_system(self, t_final, seed=None):
         np.random.seed(seed)
@@ -102,9 +122,15 @@ class StochasticSimulator(ReactionSimulator):
 
     # I am imagining multiple possible methods
     def advance_simulation(self):
+        reaction_propensities = self.calculate_reaction_propensities()
+        propensity_cumsum = np.cumsum(reaction_propensities)
+        propensity_sum = propensity_cumsum[-1]
         r1 = np.random.rand()
-        r2 = np.random.rand()
-        pass
+        r2 = np.random.rand()*propensity_sum
+        self.times.append((1/propensity_sum) * np.log(1/r1))
+        reaction_index = np.where(propensity_cumsum > r2)[0][0]
+        state_change_vector = self.state_change_matrix[reaction_index]
+        self.abundances.append(self.abundances[-1] + state_change_vector)
 
 
 class DeterministicSimulator(ReactionSimulator):
