@@ -10,10 +10,6 @@ AVOGADRO = 6.022e23
 
 
 class ReactionSimulator():
-    def __init__(self):
-        # need init function here?
-        pass
-
     def plot(self):
         # plot abundances over times
         plt.plot(self.times, self.abundances)
@@ -33,12 +29,40 @@ class StochasticSimulator(ReactionSimulator):
     Note that a reversible elementary reaction represents two
     different reactions in a stochastic simulation.
 
+    Parameters
+    ----------
+    reaction_system : ReactionSystem
+        blah blah
+    initial_abundances : list
+        blah blah
+    temperature : float
+        blah blah
+    t_span : tuple
+        blah blah
+    system_volume : float
+        blah blahx
+
+    Methods
+    -------
+    calculate_state_change_matrix()
+        blah
+    calculate_stochastic_constants(temperature)
+        blah
+    calculate_reaction_propensities()
+        blah
+    simulate()
+        blah
+
+    Examples
+    --------
+
     """
     def __init__(self, reaction_system, initial_abundances, temperature,
-                 system_volume):
+                 t_span, system_volume):
         self.reaction_system = reaction_system
         self.abundances = [np.array(initial_abundances)]
-        self.times = [0.]
+        self.times = [t_span[0]]
+        self.t_span = t_span
         self.temperature = temperature
         self.system_volume = system_volume
         self.state_change_matrix = self.calculate_state_change_matrix()
@@ -49,8 +73,15 @@ class StochasticSimulator(ReactionSimulator):
     def calculate_state_change_matrix(self):
         """Set vectors that determine how abundances change.
 
-        `self.state_change_matrix` is a 2D matrix of n_reactions x
-        n_species.
+        A 2D matrix with dimension n_reactions x n_species is
+        calculated. Each row gives the change in abundance if the
+        reaction corresponding to the row happens as the stochastic
+        event.
+
+        Returns
+        -------
+        state_change_matrix : np.ndarray
+            A 2D matrix with dimension n_reactions x n_species.
 
         """
         n_species = len(self.reaction_system)
@@ -77,7 +108,8 @@ class StochasticSimulator(ReactionSimulator):
         rate_constants = self.reaction_system.get_rate_coefficients(
             temperature)
         backward_rate_constants = (
-            self.reaction_system.get_backward_rate_coefficients())
+            self.reaction_system.get_backward_rate_coefficients(
+                self.temperature))
         for forward_rate, backward_rate, reaction in zip(
                 rate_constants, backward_rate_constants,
                 self.reaction_system.elementary_reactions):
@@ -114,14 +146,14 @@ class StochasticSimulator(ReactionSimulator):
             reaction_propensities.append(stochastic_constant)
         return np.array(reaction_propensities)
 
-    def simulate_system(self, t_final, seed=None):
+    def simulate(self, seed=None):
         np.random.seed(seed)
-        while self.times[-1] < t_final:
-            self.advance_simulation()
+        while self.times[-1] < self.t_span[-1]:
+            self._advance_simulation()
         return
 
-    # I am imagining multiple possible methods
-    def advance_simulation(self):
+    # this is the simplest algorithm
+    def _advance_simulation(self):
         reaction_propensities = self.calculate_reaction_propensities()
         propensity_cumsum = np.cumsum(reaction_propensities)
         propensity_sum = propensity_cumsum[-1]

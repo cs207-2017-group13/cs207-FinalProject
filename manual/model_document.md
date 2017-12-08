@@ -1,31 +1,60 @@
-``chemical-kinetics`` User Manual
-=================================
+% ``chemical-kinetics`` User Manual
+% Divyam Misra; Shiyun Qiu; Victor Zhao
+% 2017-12-11
 
-Introduction
-------------
+<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
+**Table of Contents**
+
+- [Introduction](#introduction)
+- [Scientific background](#scientific-background)
+    - [Calculating reaction rates](#calculating-reaction-rates)
+        - [Summary of notation](#summary-of-notation)
+    - [Quantitative modeling of chemical reactions](#quantitative-modeling-of-chemical-reactions)
+        - [Deterministic](#deterministic)
+        - [Stochastic](#stochastic)
+- [Installation](#installation)
+    - [Installation instructions](#installation-instructions)
+        - [Testing](#testing)
+    - [Dependencies](#dependencies)
+    - [Contributing to the development version](#contributing-to-the-development-version)
+- [Basic Usage and Examples](#basic-usage-and-examples)
+    - [`XMLReader` class: Read and parse XML input file](#xmlreader-class-read-and-parse-xml-input-file)
+    - [`ElementaryReaction` class: Class for each elementary reaction](#elementaryreaction-class-class-for-each-elementary-reaction)
+    - [`ReactionSystem` class: Class for a system of reactions](#reactionsystem-class-class-for-a-system-of-reactions)
+    - [`Thermochem` class: Class for calculating the backward reaction rate](#thermochem-class-class-for-calculating-the-backward-reaction-rate)
+    - [`Rxnset` class: Read and store NASA polynomial coefficients](#rxnset-class-read-and-store-nasa-polynomial-coefficients)
+    - [`memoized` class: Caches a function's return value each time it is called](#memoized-class-caches-a-functions-return-value-each-time-it-is-called)
+    - [`ODE_solver` class: Solve ordinary differential equation with three methods](#odesolver-class-solve-ordinary-differential-equation-with-three-methods)
+    - [`DeterministicSimulator` class: Class for deterministic simulation](#deterministicsimulator-class-class-for-deterministic-simulation)
+
+<!-- markdown-toc end -->
+
+
+# Introduction
+
 The subject of chemical kinetics studies the rates of chemical processes. Analyzing how reaction rates change with respect to reactant abundances, temperature, pressure, and other conditions gives insight into reaction mechanisms.
 
 The present library, ``chemical-kinetics``, is a Python 3 library for mathematical modeling of chemical reaction systems. Features include handling systems of elementary reactions, prediction of initial reaction rates, and simulation of reaction progress using deterministic and stochastic methods.
 
 Reaction systems are specified in a standard XML format. The user may choose to use the provided interactive interface or program using the library directly.
 
-Scientific background
----------------------
-A chemical equation describes a chemical reaction, relating the stoichiochetric ratios of reactants and products. For example, this is the equation for the combustion of hydrogen gas:
+# Scientific background
+
+A chemical equation describes a chemical reaction, relating the stoichiochetric ratios of reactants and products. For example, the following is the equation for the combustion of hydrogen gas:
 
 \begin{align}
 2\text{H}_{2(g)} + \text{O}_{2(g)} &\rightarrow 2\text{H}_2\text{O}_{(l)}
 \end{align}
 
-A chemical equation may describe an overall net reaction, indicating the ratio of reactants consumed to products produced. On the other hand, such a net reaction may occur by way of several *elementary* reaction steps, each of which can be written as a separate chemical equation. A set of elementary reactions that together add up to yield the net reaction represents a *reaction mechanism*. Such a mechanism describes the exact reactions that lead to formation of the reaction products. An elementary reaction step describes a specific chemical reaction that occurs; i.e. which chemical species collide to produce which reaction products.
+A chemical equation may describe an overall net reaction, indicating the ratio of reactants consumed to products produced. On the other hand, such a net reaction may occur by way of several *elementary* reaction steps, each of which can be written as a separate chemical equation. An elementary reaction step describes exactly which chemical species collide to produce which reaction products. A set of elementary reactions that together add up to yield the net reaction represents a *reaction mechanism* describing the exact reactions that lead to products of the overall reaction. 
 
-[still work in progress] Laboratory and computational experiments studying chemical kinetics have several reasons. They include.
+Laboratory and computational experiments studying chemical kinetics have several motivations, including...
 
-- Reaction mechanisms: proposed mechanisms can be validated and tested.
-- Equilibrium: 
-- Rate-determining steps can be determined 
+- Determining reaction mechanisms; proposed mechanisms can be validated and tested.
+- Determining rate-determining steps, the reaction step that controls the overall reaction rate.
+- Finding equilibrium: the concentrations that represent reaction equilibrium and how quickly equilibrium is reached.
 
-### Predicting reaction rates
+## Calculating reaction rates
 In a system of $N$ chemical species undergoing $M$ *elementary* reactions, the reaction rate of species $i$, $f_i$, is computed by
 
 \begin{align}
@@ -84,7 +113,7 @@ $$\frac{S_{i}}{R} = a_{i1}\ln\left(T\right) + a_{i2}T + \frac{1}{2}a_{i3}T^{2} +
 
 for species $i = 1,\dots, N$.
 
-#### Summary of notation
+### Summary of notation
 
 $\nu_{ij}^{\prime}$ : Stoichiometric coefficients of reactants,
 
@@ -108,18 +137,18 @@ $\Delta H_{j}$: the enthalpy change of reaction $j$,
 
 $C_{p,i}$: specific heat at constant pressure (given by the NASA polynomial)
 
-### Quantitative modeling of chemical reactions
+## Quantitative modeling of chemical reactions
 
-There are two methods for modeling chemical reactions ...
+There are two main methods for modeling the time evolution of a system of chemically reacting species: deterministic modeling, using ordinary differential equations and treating chemical abundances as continuous variables, and stochastic modeling, which accounts for the discrete nature of chemical species and the random nature of reactions. The latter case becomes relevant when chemical abundances []
 
-#### Deterministic
+### Deterministic
 The clients could call the chemkin package and obtained the right-hand-side of an ODE. They can then use it as the righ-hand-side of the ODE, or in a neural net code to learn new reaction pathways.
 
 We offered two options for the user after obtaining the right-hand-side of an ODE. The user could choose to solve the ODE with the deterministic simulator or simulate the abundances of all species using the stochastic simulator. The simulation result will be presented by plots showing the trajectories of species abundances over time.
 
 For deterministic simulator, we implemented three ODE solvers, backward euler method, backward differentiation formula and Runge-Kutta-Fehlberg method. To solve ODE problems in chemical kinetics, however, Runge-Kutta-Fehlberg method (rk45) is NOT recommended as the functions we are dealing with are usually stiff. It is recommended that the user sets the step size to be small (eg. 0.01) to achieve higher simulation accuracy when using the backward euler method and the backward differentiation. If the abundances of species become negative in the simulation process, the simulation will raise a `ValueError` and stop as abundances should never be negative. 
 
-#### Stochastic
+### Stochastic
 For stochastic simulator, we implemented the Gillespie algorithm. The principle behind the algorithm is that waiting times between reaction events are exponentially distributed; thus the time until the next reaction is drawn from an exponential distribution (the simulation is advanced in time by this amount). The particular reaction event that occurs is randomly selected from among the possible reactions in proportion to their probabilities.
 
 The following is a summary of the simulation process:
@@ -139,12 +168,12 @@ To elaborate, the propensity function for a chemical reaction describes the prob
 The quantity of species `A` present at time `t` is given by `A(t)`. The propensity function for the above reaction is $A(t)(A(t)-1)k$. In a more complex reaction system, each elementary reaction will have its own propensity, and it is necessary to calculate the propensity of all
 elementary reactions in order to find the total "propensity" for a reaction to occur, in order to draw time $\tau$ until the next reaction from an exponential distribution.
 
-Installation
-------------
+# Installation
+
 
 A latest version of `chemical-kinetics` can downloaded from Github [here](https://github.com/cs207-2017-group13/cs207-FinalProject).
 
-### Installation instructions
+## Installation instructions
 Obtain the latest version from github, change to the directory, and install using pip.
 
     git clone https://github.com/cs207-2017-group13/cs207-FinalProject.git
@@ -152,20 +181,20 @@ Obtain the latest version from github, change to the directory, and install usin
 	pip3 install ./
 
 ### Testing
-Users can run the test suite by calling pytest from the main directory, i.e. 
+sers can run the test suite by calling pytest from the main directory, i.e. 
 
     pytest --cov=src
 
-### Dependencies
+## Dependencies
 Our package depends on `scipy`, `numpy`, `xml`, and `matplotlib` packages.
 
-### Contributing to the development version
+## Contributing to the development version
 (Fork and pull request)
 
 
-Basic Usage and Examples
-------------------------
-### `XMLReader` class: Read and parse XML input file
+# Basic Usage and Examples
+
+## `XMLReader` class: Read and parse XML input file
 
 The user should have an XML input file containing all the chemical reactions. `XMLReader` will read in the file and parse the file with the `xml.etree` library. It will output a list of dictionaries containing all the elements needed to calculate reaction rate coefficients, progress rates and reaction rates. It will create `ElementaryReaction` objects inside the `get_reaction_systems` function, and then put all `ElementaryReaction` objects in a reaction system into a list. It will then create `ReactionSystem` objects.
 
@@ -179,7 +208,7 @@ reaction_systems = reader.get_reaction_systems()
 `reaction_systems` is a list containing multiple `ReactionSystem` instances. The length of `reaction_systems` is the number of reaction systems, and the length of each list element is the number of reactions in a reaction system.
 
 
-### `ElementaryReaction` class: Class for each elementary reaction
+## `ElementaryReaction` class: Class for each elementary reaction
 
 Takes a dictionary of properties from the XMLReader class for each elementary reaction. Calculates the rate coefficient for each elementary reaction and passes it to the ReactionSystem class. It also returns a dictionary of recatants and products to the ReactionSystem class.
 
@@ -214,7 +243,7 @@ repr(elementary_reaction)
  ```
 
 
-### `ReactionSystem` class: Class for a system of reactions
+## `ReactionSystem` class: Class for a system of reactions
 
 Takes a list of ElementaryReaction instances and a list of species. Builds stoichiometric coefficient matrices for the reactants and products and calculates the corresponding progress rates and reaction rates.
 
@@ -240,7 +269,7 @@ reaction_system[0].calculate_reaction_rate(concs, 300)
 ```
 
 
-### `Thermochem` class: Class for calculating the backward reaction rate
+## `Thermochem` class: Class for calculating the backward reaction rate
 
 Construct with Rxnset class object, the default pressure of the reactor and the default ideal gas constant. The values of pressure of the reactor and ideal gas constant can be changed. It calculates backward reaction rate using the temperature passed into the functions and the corresponding NASA polynomial coefficients.
 
@@ -265,7 +294,7 @@ thermo.backward_coeffs(kf, 800)
 ```
 
 
-### `Rxnset` class: Read and store NASA polynomial coefficients 
+## `Rxnset` class: Read and store NASA polynomial coefficients 
 
 This class reads the NASA polynomial coefficients for all species in the reaction system from the SQL database which contains coefficients for all species. It stores the coefficients and temperature ranges in a dictionary of dictionaries where the name of species is the key. For each reaction system, the class just need to read from the database once, and check the range the given temperature is in every time the temperature of the reaction system changes afterwards. If the `get_nasa_coefficients` function is called twice for the same reaction system and the same temperature, the cached value is returned.
 
@@ -283,7 +312,7 @@ rxnset.get_nasa_coefficients(800)
 ```
 
 
-### `memoized` class: Caches a function's return value each time it is called
+## `memoized` class: Caches a function's return value each time it is called
 
 Decorator class. Caches a function's return value each time it is called. If called later with the same arguments, the cached value is returned (not reevaluated).
 
@@ -293,7 +322,7 @@ This class has three special methods:
  - `__get__(obj, objtype)`: Support instance methods
 
 
-### `ODE_solver` class: Solve ordinary differential equation with three methods
+## `ODE_solver` class: Solve ordinary differential equation with three methods
 
 Implemented three ode solvers: backward euler method, Runge-Kutta-Fehlberg, and backward differentiation formula. Backward euler method and backward differentiation formula can be used to solve stiff ODE problems, while Runge-Kutta-Fehlberg moethod is more accurate for non-stiff problems. For the purposed of solving ODE problems in chemical kinetics, our default method is backward differentiation formula.
 
@@ -316,7 +345,7 @@ obj.BDF()
 ```
 
 
-### `DeterministicSimulator` class: Class for deterministic simulation
+## `DeterministicSimulator` class: Class for deterministic simulation
 
 This class is inherited from the `ReactionSimulator` class. It simulate species abundances deterministically.
 

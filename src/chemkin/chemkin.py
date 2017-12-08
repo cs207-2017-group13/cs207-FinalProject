@@ -73,10 +73,10 @@ class ElementaryReaction():
         =======
         info : str
         """
-        info = "Reactants: {} \nProducts: {} \nRate Params: {} "
-        "\nRate Type: {} \nReversible: {}".format(
-            self.reactants, self.products, self.rate_params,
-            self.rate_type, self.reversible)
+        info = ("Reactants: {} \nProducts: {} \nRate Params: {} "
+                "\nRate Type: {} \nReversible: {}".format(
+                    self.reactants, self.products, self.rate_params,
+                    self.rate_type, self.reversible))
         return info
 
     def get_reactants(self):
@@ -551,7 +551,7 @@ class ReactionSystem():
         reversible = [i.reversible for i in self.elementary_reactions]
         return reversible
 
-    def setup_reaction_simulator(self, simulation_type, abundances, temperature, t_span, dt=0.01):
+    def setup_reaction_simulator(self, simulation_type, abundances, temperature, t_span, dt=0.01, system_volume=1e-15):
         # based on simulation_type, build simulator class
         choices = ['stochastic', 'deterministic']
         if simulation_type not in choices:
@@ -562,8 +562,9 @@ class ReactionSystem():
                 self, abundances, temperature, t_span, dt)
             return determine_sim
         else:
-            pass
-        pass
+            stochastic_simulator = simulator.StochasticSimulator(
+                self, abundances, temperature, t_span, system_volume)
+            return stochastic_simulator
 
 
 class XMLReader():
@@ -658,7 +659,7 @@ class XMLReader():
             properties["reactants"] = {}
             for reactant in reactants:
                 species, coefficient = reactant.split(':')
-                properties['reactants'][species] = coefficient
+                properties['reactants'][species] = float(coefficient)
 
             products = reaction_elt.find("products").text.split()
             properties["products"] = {}

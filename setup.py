@@ -10,5 +10,6 @@ setup(
     packages=find_packages('src'),
     package_dir={"": "src"},
     package_data={'chemkin': ["*.sqlite"]},
-    scripts=['src/bin/process_reaction_system']
+    scripts=['src/bin/process_reaction_system'],
+    install_requires=["scipy"]
 )
