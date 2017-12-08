@@ -142,3 +142,24 @@ def test_reversible_reaction_rate():
     assert np.allclose(list(reaction_system[0].calculate_reaction_rate([1, 2, 3, 1, 2, 3, 1, 2], 800)), 
         [2.3553537901231184e+17, -2.2321034840197091e+17, -2.6059674644924278e+17, 37395259554341.125, 
         12661546307481366.0, 2.3584012306405293e+17, -198181887233104.84, -69166904953671.859])
+
+def test_deterministic_flow():
+    concs = np.array([1., 2., 1., 3., 1.])*1e-05
+    reader = chemkin.XMLReader("tests/rxns.xml")
+    reaction_system = reader.get_reaction_systems()[0]
+    det_sim = reaction_system.setup_reaction_simulator('deterministic', concs, 800, [0, 0.01], dt=0.01)
+    t, y = det_sim.simulate()
+    y0 = y[0]
+    y1 = y[1]
+    assert np.allclose(t, [0, 0.01])
+    assert np.allclose(y0, [1.00000000e-05, 2.00000000e-05, 1.00000000e-05, 3.00000000e-05, 1.00000000e-05])
+    assert np.allclose(y1, [1.03778637e-05, 1.96221363e-05, 1.03927707e-05, 2.96146828e-05, 9.99254648e-06])
+
+def test_other_simulate_type():
+    concs = np.array([1., 2., 1., 3., 1.])*1e-05
+    reader = chemkin.XMLReader("tests/rxns.xml")
+    reaction_system = reader.get_reaction_systems()[0]
+    try:
+        det_sim = reaction_system.setup_reaction_simulator('other', concs, 800, [0, 0.01], dt=0.01)
+    except ValueError as err:
+        assert type(err) == ValueError

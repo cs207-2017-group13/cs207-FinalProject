@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib
-matplotlib.use('Agg')
+# matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 # import ode_solver
 import chemkin.ode_solver as ode_solver
@@ -131,7 +131,7 @@ class DeterministicSimulator(ReactionSimulator):
     diff_func(t, y)
     """
     def __init__(self, reaction_system, initial_abundances, temperature,
-                 t_span, dt=0.001):
+                 t_span, dt=0.01):
         self.reaction_system = reaction_system
         if temperature <=0:
             raise ValueError("Temperature must be positive.")
