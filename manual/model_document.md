@@ -1,11 +1,11 @@
-``chemical-kinetics`` Library User Manual
-=========================================
+``chemical-kinetics`` User Manual
+=================================
 
 Introduction
 ------------
-Chemical kinetics studies the rates of chemical processes. Analyzing how reaction rates change with respect to reactant abundances, temperature, pressure, and other conditions gives insight into reaction mechanisms. 
+The subject of chemical kinetics studies the rates of chemical processes. Analyzing how reaction rates change with respect to reactant abundances, temperature, pressure, and other conditions gives insight into reaction mechanisms.
 
-The library `chemical-kinetics` is a simple Python 3 library for mathematical modeling of chemical reaction systems. Features include handling systems of elementary reactions, prediction of initial reaction rates, and modeling of reaction progress using deterministic and stochastic methods.
+The present library, ``chemical-kinetics``, is a Python 3 library for mathematical modeling of chemical reaction systems. Features include handling systems of elementary reactions, prediction of initial reaction rates, and simulation of reaction progress using deterministic and stochastic methods.
 
 Reaction systems are specified in a standard XML format. The user may choose to use the provided interactive interface or program using the library directly.
 
@@ -13,57 +13,78 @@ Scientific background
 ---------------------
 A chemical equation describes a chemical reaction, relating the stoichiochetric ratios of reactants and products. For example, this is the equation for the combustion of hydrogen gas:
 
-$$
 \begin{align}
-2\text{H}_{2(g)} + \text{O}_{2(g)} \rightarrow 2\text{H}_2\text{O}_{(l)}
+2\text{H}_{2(g)} + \text{O}_{2(g)} &\rightarrow 2\text{H}_2\text{O}_{(l)}
 \end{align}
-$$
 
 A chemical equation may describe an overall net reaction, indicating the ratio of reactants consumed to products produced. On the other hand, such a net reaction may occur by way of several *elementary* reaction steps, each of which can be written as a separate chemical equation. A set of elementary reactions that together add up to yield the net reaction represents a *reaction mechanism*. Such a mechanism describes the exact reactions that lead to formation of the reaction products. An elementary reaction step describes a specific chemical reaction that occurs; i.e. which chemical species collide to produce which reaction products.
 
-*optional text here*: say something about rate determining steps.
+[still work in progress] Laboratory and computational experiments studying chemical kinetics have several reasons. They include.
 
-### Deterministic reaction modeling
-In a system of $N$ species undergoing $M$ *elementary* reactions, the reaction rate of species $i$ is computed by 
+- Reaction mechanisms: proposed mechanisms can be validated and tested.
+- Equilibrium: 
+- Rate-determining steps can be determined 
 
-$$
+### Predicting reaction rates
+In a system of $N$ chemical species undergoing $M$ *elementary* reactions, the reaction rate of species $i$, $f_i$, is computed by
+
 \begin{align}
   f_{i} &= \sum_{j=1}^{M}{\nu_{ij}\omega_{j}}, \qquad i = 1, \ldots, N
 \end{align}
-$$
 
-where $\omega_j$ is the *progress rate* of the *j*th reaction and $\nu_{ij}$ is [...]. The progress rate for each reaction is computed by 
+where $\omega_j$ is the *progress rate* of the *j*th reaction and $\nu_{ij}$ is the net stoichiometric coefficient for species $i$ in the *j*th reaction. The progress rate ($\omega$) for each reaction is computed by
 
-$$
 \begin{align}
   \omega_{j} &= k_{j}^{\left(f\right)}\prod_{i=1}^{N}{x_{i}^{\nu_{ij}^{\prime}}} - k_{j}^{\left(b\right)}\prod_{i=1}^{N}{x_{i}^{\nu_{ij}^{\prime\prime}}}, \qquad j = 1,\ldots, M
 \end{align}
-$$
 
-where,
+where, for the *j*th reaction, $k_j^{(f)}$ is the forward reaction rate coefficient and $k_j^{(b)}$ is the corresponding backward reaction rate cofficient. The $x_i$'s represent abundances (usually concentrations) of the chemical species.
 
-$$
+Given the particular nature of a chemical reaction, the reaction rate coefficient, $k$, can be a constant value or exhibit dependence on an activation energy, $E^\ddag$, and reaction temperature, $T$. In the latter case, the reaction rate coefficient is often modeled using the Arrhenius equation:
+
 \begin{align}
-  k_{j}^{\left(b\right)} &= \frac{k_{j}^{\left(f\right)}}{k_{j}^{e}}, \qquad j =1, \ldots, M\\
-  k_{j}^{e} &= \left(\frac{p_{0}}{RT}\right)^{\gamma_{j}}\exp\left(\frac{\Delta S_{j}}{R} - \frac{\Delta H_{j}}{RT}\right), \qquad j =1, \ldots, M\\
-  \gamma_{j} &= \sum_{i=1}^{N}{\nu_{ij}}\\
-  \Delta S_{j} &= \sum_{i=1}^{N}{\nu_{ij}S_{i}} \quad \textrm{and} \quad \Delta H_{j} = \sum_{i=1}^{N}{\nu_{ij}H_{i}}, , \qquad j =1, \ldots, M\\
-  H_{i} &= \int_{T_{0}}^{T}{C_{p,i}\left(T\right) \ \mathrm{d}T}, \qquad i = 1, \ldots, N \\
-  S_{i} &= \int_{T_{0}}^{T}{\frac{C_{p,i}\left(T\right)}{T} \ \mathrm{d}T}, \qquad i = 1, \ldots, N\\
-  C_{p,i} &= \left(\sum_{k=1}^{5}{a_{ik}T^{k-1}}\right)R, \qquad i = 1, \ldots, N
+k &= AT^b\exp[-E^\ddag/RT]
 \end{align}
-$$
 
-The $7$th order NASA polynomials are given by 
+where $A$ is the pre-exponential factor, $b$ gives the temperature dependent of the pre-exponential factor ($b=0$ indicating no dependence), and $R$ is the universal gas constant.
+
+The forward and reverse reaction rate coefficients for a chemical reaction are related to each other through the reaction equilibrium constant, $K$:
+
+\begin{align}
+  K_j &= \frac{k_{j}^{(f)}}{k_{j}^{(b)}}, \qquad j =1, \ldots, M
+\end{align}
+
+The equilibrium constant depends on temperature and the thermodynamic properties of the reactants and products in the following way:
+
+\begin{align}
+  K_{j} &= \left(\frac{p_{0}}{RT}\right)^{\gamma_{j}}\exp\left(\frac{\Delta S_{j}}{R} - \frac{\Delta H_{j}}{RT}\right), \qquad j =1, \ldots, M\\
+  \gamma_{j} &= \sum_{i=1}^{N}{\nu_{ij}}
+\end{align}
+
+In particular, the equilibrium constant depends on the entropy and enthalpy change of the reaction, respectively $\Delta S$ and $\Delta H$, which are calculated from entropy and enthalpy values of the chemical species. The change in entropy (enthalpy) is the sum of product entropies (enthalpies) minus the sum of reactant entropies (enthalpies).
+
+\begin{align}
+  \Delta S_{j} &= \sum_{i=1}^{N}{\nu_{ij}S_{i}} \quad \textrm{and} \quad \Delta H_{j} = \sum_{i=1}^{N}{\nu_{ij}H_{i}}, , \qquad j =1, \ldots, M
+\end{align}
+
+Entropy and enthalpy are thermodynamic quantities that are defined as follows, where $C_p$ is the heat capacity at constant pressure.
+
+\begin{align}
+  H_{i} &= \int_{T_{0}}^{T}{C_{p,i}\left(T\right) \ \mathrm{d}T}, \qquad i = 1, \ldots, N \\
+  S_{i} &= \int_{T_{0}}^{T}{\frac{C_{p,i}\left(T\right)}{T} \ \mathrm{d}T}, \qquad i = 1, \ldots, N
+\end{align}
+
+Instead of determining the heat capacity of each chemical species from first principles, we approximate the heat capacity as well as integrated values of enthalpy and entropy using the 7th order NASA polynomials, which are are given by 
+
 $$\frac{C_{p,i}}{R} = a_{i1} + a_{i2}T + a_{i3}T^{2} + a_{i4}T^{3} + a_{i5}T^{4}$$
 
 $$\frac{H_{i}}{RT} = a_{i1} + \frac{1}{2}a_{i2}T + \frac{1}{3}a_{i3}T^{2} + \frac{1}{4}a_{i4}T^{3} + \frac{1}{5}a_{i5}T^{4} + \frac{a_{i6}}{T}$$
 
 $$\frac{S_{i}}{R} = a_{i1}\ln\left(T\right) + a_{i2}T + \frac{1}{2}a_{i3}T^{2} + \frac{1}{3}a_{i4}T^{3} + \frac{1}{4}a_{i5}T^{4} + a_{i7}$$
 
-for $i = 1,\dots, N$.
+for species $i = 1,\dots, N$.
 
-Notation:
+#### Summary of notation
 
 $\nu_{ij}^{\prime}$ : Stoichiometric coefficients of reactants,
 
@@ -77,7 +98,7 @@ $k_{j}^{\left(f\right)}$: forward reaction rate coefficient for reaction $j$,
 
 $k_{j}^{\left(b\right)}$: backward reaction rate coefficient for reaction $j$,
 
-$k_{j}^{e}$: *equilibrium coefficient* for reaction $j$,
+$K_{j}$: *equilibrium coefficient* for reaction $j$,
 
 $p_{0}$: pressure of the reactor (usually $10^{5}$ Pa),
 
@@ -86,6 +107,8 @@ $\Delta S_{j}$: the entropy change of reaction $j$,
 $\Delta H_{j}$: the enthalpy change of reaction $j$,
 
 $C_{p,i}$: specific heat at constant pressure (given by the NASA polynomial)
+
+### Quantitative modeling of chemical reactions
 
 The clients could call the chemkin package and obtained the right-hand-side of an ODE. They can then use it as the righ-hand-side of the ODE, or in a neural net code to learn new reaction pathways.
 
@@ -112,26 +135,17 @@ To elaborate, the propensity function for a chemical reaction describes the prob
 The quantity of species `A` present at time `t` is given by `A(t)`. The propensity function for the above reaction is $A(t)(A(t)-1)k$. In a more complex reaction system, each elementary reaction will have its own propensity, and it is necessary to calculate the propensity of all
 elementary reactions in order to find the total "propensity" for a reaction to occur, in order to draw time $\tau$ until the next reaction from an exponential distribution.
 
-### Stochastic reaction modeling
-gotta write something here.
-
 Installation
 ------------
 
-You can obtain the `chemical-kinetics` Library [here](https://github.com/cs207-2017-group13/cs207-FinalProject).
+A latest version of `chemical-kinetics` can downloaded from Github [here](https://github.com/cs207-2017-group13/cs207-FinalProject).
 
 ### Installation instructions
 Obtain the latest version from github, change to the directory, and install using pip.
 
     git clone https://github.com/cs207-2017-group13/cs207-FinalProject.git
-	  cd cs207-FinalProject
-
-	# Either
+	cd cs207-FinalProject
 	pip3 install ./
-	# or alternatively
-	pip3 install -e ./
-
-The latter install command invokes "editable" mode. Package files will not be copied to your Python package directory, and source files may be edited from the installation directory.
 
 ### Testing
 Users can run the test suite by calling pytest from the main directory, i.e. 
@@ -142,6 +156,8 @@ Users can run the test suite by calling pytest from the main directory, i.e.
 Our package depends on `scipy`, `numpy`, `xml`, and `matplotlib` packages.
 
 ### Contributing to the development version
+(Fork and pull request)
+
 
 Basic Usage and Examples
 ------------------------
@@ -173,19 +189,15 @@ This class has thee public methods, two private methods a special method:
       
 A nonzero value for b gives the modified Arrhenius equation.
 
-$$
 \begin{align}
   &k_{\textrm{mod arr}} = A T^{b} \exp\left(-\frac{E}{RT}\right) \tag{Modified Arrhenius}
 \end{align}
-$$ 
 
 When b = 0, the above formula corresponds to the Arrhenius equation.
 
-$$ 
 \begin{align}
   &k_{\textrm{arr}}     = A \exp\left(-\frac{E}{RT}\right) \tag{Arrhenius}
 \end{align}
-$$
 
 Example:
 
