@@ -49,7 +49,7 @@ class ODE_solver:
         EXAMPLES:
         ---------
         >>> func = lambda t, y: 2*t
-        >>> ode = ODE_solver(func, 0.8, [1, 2], 0.5)
+        >>> ode = ODE_solver(func, 0.8, [1, 2], 0.5, allow_neg_y = True)
         >>> ode.backward_euler()
         ([1, 1.5, 2.0], [0.8, 2.3, 4.3])
         """
@@ -81,7 +81,7 @@ class ODE_solver:
         EXAMPLES:
         ---------
         >>> func = lambda t, y: 2*t
-        >>> ode = ODE_solver(func, 0.8, [1, 2], 0.1)
+        >>> ode = ODE_solver(func, 0.8, [1, 2], 0.1, allow_neg_y = True)
         >>> ode.backward_euler_step()
         'Success'
         """
@@ -135,7 +135,7 @@ class ODE_solver:
         EXAMPLES:
         ---------
         >>> func = lambda t, y: 2*t
-        >>> ode = ODE_solver(func, 0.8, [1, 2], 0.1)
+        >>> ode = ODE_solver(func, 0.8, [1, 2], 0.1, allow_neg_y = True)
         >>> ode.rk45()
         ([1, 1.1, 1.5, 2], [0.8, 1.01, 2.0500000000000003, 3.8000000000000003])
         """
@@ -165,7 +165,7 @@ class ODE_solver:
         EXAMPLES:
         ---------
         >>> func = lambda t, y: 2*t
-        >>> ode = ODE_solver(func, 0.8, [1, 2], 0.1)
+        >>> ode = ODE_solver(func, 0.8, [1, 2], 0.1, allow_neg_y = True)
         >>> ode.rk45_step()
         'Success'
         """
@@ -251,7 +251,7 @@ class ODE_solver:
         EXAMPLES:
         ---------
         >>> func = lambda t, y: 2*t
-        >>> obj = ODE_solver(func, 0.8, [1, 2], 0.5)
+        >>> obj = ODE_solver(func, 0.8, [1, 2], 0.5, allow_neg_y = True)
         >>> obj.BDF()
         ([1, 1.5, 2.0], [0.8, 2.0500030861821203, 3.8000031911685124])
         """
