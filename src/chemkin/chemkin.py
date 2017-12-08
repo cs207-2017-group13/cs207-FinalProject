@@ -614,9 +614,6 @@ class ReactionSystem():
         >>> concs = np.array([1., 2., 1., 3., 1.])*1e-05
         >>> det_sim = reaction_system.setup_reaction_simulator('deterministic', concs, 800, [0, 0.1], dt=0.1)
         >>> det_sim.simulate()
-        ([0, 0.1], [array([  1.00000000e-05,   2.00000000e-05,   1.00000000e-05,
-         3.00000000e-05,   1.00000000e-05]), array([  1.31232803e-05,   1.68767197e-05,   1.33004078e-05,
-         2.67881559e-05,   9.91143627e-06])])
         """
         choices = ['stochastic', 'deterministic']
         if simulation_type not in choices:
