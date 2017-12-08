@@ -9,11 +9,19 @@ class ODE_solver:
 
     Parameters
     ----------
-    func :   ordinary differential equation to be integrated
-    y0 :     initial value of the variable y
-    t_span : time span, first element indicating the initial time,
-            second element indicating the stopping time
-    dt:     size of time step
+    func :   function
+             ordinary differential equation to be integrated
+    y0 :     array of floats
+             initial value of the variable y
+    t_span : tuple of floats
+             time span, first element indicating the initial time,
+             second element indicating the stopping time
+    dt :     float
+             size of time step
+    neg_y_allowed : bool
+             default True
+             indicating if negative y values are allowed to be passed
+             to the function the user want to integrate
 
     Methods
     -------

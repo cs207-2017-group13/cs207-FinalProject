@@ -289,6 +289,8 @@ class DeterministicSimulator(ReactionSimulator):
         =======
         function: right hand side of the ODE function
         '''
+        if (y<0).any():
+            y = [0 if i<0 else i for i in y]
         return self.reaction_system.calculate_reaction_rate(y, self.temperature)
 
     # def plot(self):
