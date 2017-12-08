@@ -8,45 +8,46 @@ class ODE_solver:
     Runge-Kutta-Fehlberg, and backward differentiation formula.
 
     Parameters:
-    ===========
-    func:   ordinary differential equation to be integrated
-    y0:     initial value of the variable y
-    t_span: time span, first element indicating the initial time,
+    -----------
+    func :   ordinary differential equation to be integrated
+    y0 :     initial value of the variable y
+    t_span : time span, first element indicating the initial time,
             second element indicating the stopping time
     dt:     size of time step
 
     Methods:
-    ========
+    --------
     backward_euler()
     backward_euler_step()
     rk45()
     rk45_step()
     BDF()
     """
-    def __init__(self, func, y0, t_span, dt):
+    def __init__(self, func, y0, t_span, dt, allow_neg_y = False):
         self.diff_function = func
         self.t_span = t_span
         self.dt = dt
         self.t = [self.t_span[0]]
         self.y = [y0]
+        self.neg_y_allowed = allow_neg_y
 
     def backward_euler(self, epsilon = 1e-06):
         """Solve the ODE using backward euler method.
 
         INPUTS:
-        =======
-        epsilon: float
+        ------
+        epsilon : float
                  tolerance of error of the zero value
 
         RETURNS:
-        ========
-        self.t:  array
+        --------
+        self.t :  array
                  all times evaluated
-        self.y:  array
+        self.y :  array
                  variable values at each time t
 
         EXAMPLES:
-        =========
+        ---------
         >>> func = lambda t, y: 2*t
         >>> ode = ODE_solver(func, 0.8, [1, 2], 0.5)
         >>> ode.backward_euler()
@@ -68,17 +69,17 @@ class ODE_solver:
            
 
         INPUTS:
-        =======
-        epsilon: float
+        -------
+        epsilon : float
                  tolerance of error of the zero value
 
         RETURNS:
-        ========
-        message: "Success"
+        --------
+        message : "Success"
                  indicating if the integration is successful
 
         EXAMPLES:
-        =========
+        ---------
         >>> func = lambda t, y: 2*t
         >>> ode = ODE_solver(func, 0.8, [1, 2], 0.1)
         >>> ode.backward_euler_step()
@@ -96,6 +97,8 @@ class ODE_solver:
                 curr_y = self.y[-1]+ self.dt*self.diff_function(self.t[-1]+self.dt, prev_y)
             if j > 1000:
                 return "Failure"
+            if (not self.neg_y_allowed) & (curr_y.any() < 0):
+                curr_y = [0 if i<0 else i for i in curr_y]
             self.y.append(curr_y)
             self.t.append(self.t[-1]+self.dt)
         elif self.t[-1] < self.t_span[-1]:
@@ -108,6 +111,8 @@ class ODE_solver:
                 curr_y = self.y[-1] + self.dt*self.diff_function(self.t[-1]+self.dt, prev_y)
             if j > 1000:
                 return "Failure"
+            if (not self.neg_y_allowed) & (curr_y.any() < 0):
+                curr_y = [0 if i<0 else i for i in curr_y]
             self.y.append(curr_y)
             self.t.append(self.t_span[-1])
         return "Success"
@@ -116,19 +121,19 @@ class ODE_solver:
         """Solve the ODE using Runge-Kutta-Fehlberg method.
 
         INPUTS:
-        =======
-        epsilon: float
+        -------
+        epsilon : float
                  tolerance of error of the zero value
 
         RETURNS:
-        ========
-        self.t:  array
+        --------
+        self.t  : array
                  all times evaluated
-        self.y:  array
+        self.y  : array
                  variable values at each time t
 
         EXAMPLES:
-        =========
+        ---------
         >>> func = lambda t, y: 2*t
         >>> ode = ODE_solver(func, 0.8, [1, 2], 0.1)
         >>> ode.rk45()
@@ -148,17 +153,17 @@ class ODE_solver:
             using Runge-Kutta-Fehlberg method.
 
         INPUTS:
-        =======
-        epsilon: float
+        -------
+        epsilon : float
                  tolerance of error of the zero value
 
         RETURNS:
-        ========
-        message: "Success"
+        --------
+        message : "Success"
                  indicating if the integration is successful
 
         EXAMPLES:
-        =========
+        ---------
         >>> func = lambda t, y: 2*t
         >>> ode = ODE_solver(func, 0.8, [1, 2], 0.1)
         >>> ode.rk45_step()
@@ -184,15 +189,19 @@ class ODE_solver:
                 self.y[-1]-8*k1/27+2*k2-3544*k3/2565+1859*k4*4104-11*k5/40)
             w1 = self.y[-1] + 25*k1/216 + 1408*k3/2565 + 2197*k4/4104 - k5/5
             w2 = self.y[-1] + 16*k1/135 + 6656*k3/12825 + 28561*k4/56430 -9*k5/50 + 2*k6/55
-            if abs(w2-w1)==0:
+            if norm(abs(w2-w1))==0:
+                if (not self.neg_y_allowed) & (w2.any() < 0):
+                    w2 = [0 if i<0 else i for i in w2]
                 self.y.append(w2)
                 self.t.append(self.t[-1]+self.dt)
                 self.dt = 4*self.dt
                 message = "Success"
                 return message
-            q = 0.84 * (epsilon*self.dt/abs(w2-w1))**0.25
+            q = norm(0.84 * (epsilon*self.dt/abs(w2-w1))**0.25)
             # adjust step size
             if q>=1:
+                if (not self.neg_y_allowed) & (w2.any() < 0):
+                    w2 = [0 if i<0 else i for i in w2]
                 self.y.append(w2)
                 self.t.append(self.t[-1]+self.dt)
                 if q>= 4:
@@ -217,6 +226,8 @@ class ODE_solver:
             k6 = self.dt*self.diff_function(self.t[-1]+self.dt/2, 
                 self.y[-1]-8*k1/27+2*k2-3544*k3/2565+1859*k4*4104-11*k5/40)
             w2 = self.y[-1] + 16*k1/135 + 6656*k3/12825 + 28561*k4/56430 -9*k5/50 + 2*k6/55
+            if (not self.neg_y_allowed) & (w2.any() < 0):
+                w2 = [0 if i<0 else i for i in w2]
             self.t.append(self.t_span[-1])
             self.y.append(w2)
             message = "Success"
@@ -226,19 +237,19 @@ class ODE_solver:
         """Solve the ODE using backward differentiation formula.
 
         INPUTS:
-        =======
-        epsilon: float
+        -------
+        epsilon : float
                  tolerance of error of the zero value
 
         RETURNS:
-        ========
-        self.t:  array
+        --------
+        self.t :  array
                  all times evaluated
-        self.y:  array
+        self.y :  array
                  variable values at each time t
 
         EXAMPLES:
-        =========
+        ---------
         >>> func = lambda t, y: 2*t
         >>> obj = ODE_solver(func, 0.8, [1, 2], 0.5)
         >>> obj.BDF()
@@ -253,6 +264,8 @@ class ODE_solver:
                 y_val=r.y[0]
             else:
                 y_val = r.y
+            if (not self.neg_y_allowed) & (y_val.any() < 0):
+                y_val = [0 if i<0 else i for i in y_val]
             self.y.append(y_val)
             self.t.append(r.t)
         return self.t, self.y
