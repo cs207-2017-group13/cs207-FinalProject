@@ -233,15 +233,15 @@ class DeterministicSimulator(ReactionSimulator):
         '''
         return self.reaction_system.calculate_reaction_rate(y, self.temperature)
 
-    def plot(self):
-        # plot abundances over times
-        plt.plot(self.times, self.abundances)
-        plt.xlabel("Time")
-        plt.ylabel("Concentration")
-        plt.legend(self.reaction_system.species, loc='best')
-        # file_name = "examples/figures/"+name+".png"
-        # plt.savefig(file_name, dpi=125)
-        plt.show()
+    # def plot(self):
+    #     # plot abundances over times
+    #     plt.plot(self.times, self.abundances)
+    #     plt.xlabel("Time")
+    #     plt.ylabel("Concentration")
+    #     plt.legend(self.reaction_system.species, loc='best')
+    #     # file_name = "examples/figures/"+name+".png"
+    #     # plt.savefig(file_name, dpi=125)
+    #     plt.show()
 
 if __name__ == "__main__":
     import doctest
