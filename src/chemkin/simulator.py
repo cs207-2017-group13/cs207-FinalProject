@@ -200,8 +200,8 @@ class DeterministicSimulator(ReactionSimulator):
         self.abundances = [initial_abundances]
         self.t_span = t_span
         self.dt = dt
-        self.ode_solver = ode_solver.ODE_solver(
-            self.diff_func, initial_abundances, t_span, self.dt)
+        self.ode_integrator = ode_solver.ODE_solver(
+            self.diff_func, initial_abundances, t_span, self.dt, False)
 
     def simulate(self, method='bdf', epsilon = 1e-06):
         """Simulate species abundances deterministically.
@@ -245,11 +245,11 @@ class DeterministicSimulator(ReactionSimulator):
             raise ValueError("Wrong method.")
 
         if method == 'bdf':
-            self.times, self.abundances = self.ode_solver.BDF(epsilon)
+            self.times, self.abundances = self.ode_integrator.BDF(epsilon)
         elif method == 'rk45':
-            self.times, self.abundances = self.ode_solver.rk45(epsilon)
+            self.times, self.abundances = self.ode_integrator.rk45(epsilon)
         else:
-            self.times, self.abundances = self.ode_solver.backward_euler(epsilon)
+            self.times, self.abundances = self.ode_integrator.backward_euler(epsilon)
         return self.times, self.abundances
 
     # def simulate_step(self, method='backward_euler', epsilon = 1e-06):

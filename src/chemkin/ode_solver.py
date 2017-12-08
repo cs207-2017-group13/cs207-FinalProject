@@ -23,12 +23,13 @@ class ODE_solver:
     rk45_step()
     BDF()
     """
-    def __init__(self, func, y0, t_span, dt):
+    def __init__(self, func, y0, t_span, dt, neg_y_allowed=True):
         self.diff_function = func
         self.t_span = t_span
         self.dt = dt
         self.t = [self.t_span[0]]
         self.y = [y0]
+        self.neg_y_allowed =neg_y_allowed
 
     def backward_euler(self, epsilon = 1e-06):
         """Solve the ODE using backward euler method.
@@ -96,6 +97,12 @@ class ODE_solver:
                 curr_y = self.y[-1]+ self.dt*self.diff_function(self.t[-1]+self.dt, prev_y)
             if j > 1000:
                 return "Failure"
+            if type(curr_y) is float:
+                if (not self.neg_y_allowed) and (curr_y < 0):
+                    curr_y = 0
+            else:
+                if (not self.neg_y_allowed) and (curr_y < 0).any():
+                    curr_y = [0 if i <0 else i for i in curr_y]
             self.y.append(curr_y)
             self.t.append(self.t[-1]+self.dt)
         elif self.t[-1] < self.t_span[-1]:
@@ -108,6 +115,12 @@ class ODE_solver:
                 curr_y = self.y[-1] + self.dt*self.diff_function(self.t[-1]+self.dt, prev_y)
             if j > 1000:
                 return "Failure"
+            if type(curr_y) is float:
+                if (not self.neg_y_allowed) and (curr_y < 0):
+                    curr_y = 0
+            else:
+                if (not self.neg_y_allowed) and (curr_y < 0).any():
+                    curr_y = [0 if i <0 else i for i in curr_y]
             self.y.append(curr_y)
             self.t.append(self.t_span[-1])
         return "Success"
@@ -185,6 +198,12 @@ class ODE_solver:
             w1 = self.y[-1] + 25*k1/216 + 1408*k3/2565 + 2197*k4/4104 - k5/5
             w2 = self.y[-1] + 16*k1/135 + 6656*k3/12825 + 28561*k4/56430 -9*k5/50 + 2*k6/55
             if norm(abs(w2-w1))==0:
+                if type(w2) is float:
+                    if (not self.neg_y_allowed) and (w2 < 0):
+                        w2 = 0
+                else:
+                    if (not self.neg_y_allowed) and (w2 < 0).any():
+                        w2 = [0 if i <0 else i for i in w2]
                 self.y.append(w2)
                 self.t.append(self.t[-1]+self.dt)
                 self.dt = 4*self.dt
@@ -193,6 +212,12 @@ class ODE_solver:
             q = norm(0.84 * (epsilon*self.dt/abs(w2-w1))**0.25)
             # adjust step size
             if q>=1:
+                if type(w2) is float:
+                    if (not self.neg_y_allowed) and (w2 < 0):
+                        w2 = 0
+                else:
+                    if (not self.neg_y_allowed) and (w2 < 0).any():
+                        w2 = [0 if i <0 else i for i in w2]
                 self.y.append(w2)
                 self.t.append(self.t[-1]+self.dt)
                 if q>= 4:
@@ -217,6 +242,12 @@ class ODE_solver:
             k6 = self.dt*self.diff_function(self.t[-1]+self.dt/2, 
                 self.y[-1]-8*k1/27+2*k2-3544*k3/2565+1859*k4*4104-11*k5/40)
             w2 = self.y[-1] + 16*k1/135 + 6656*k3/12825 + 28561*k4/56430 -9*k5/50 + 2*k6/55
+            if type(w2) is float:
+                if (not self.neg_y_allowed) and (w2 < 0):
+                    w2 = 0
+            else:
+                if (not self.neg_y_allowed) and (w2 < 0).any():
+                    w2 = [0 if i <0 else i for i in w2]
             self.t.append(self.t_span[-1])
             self.y.append(w2)
             message = "Success"
@@ -253,6 +284,12 @@ class ODE_solver:
                 y_val=r.y[0]
             else:
                 y_val = r.y
+            if type(y_val) is float:
+                if (not self.neg_y_allowed) and (y_val < 0):
+                    y_val = 0
+            else:
+                if (not self.neg_y_allowed) and (y_val < 0).any():
+                    y_val = [0 if i <0 else i for i in y_val]
             self.y.append(y_val)
             self.t.append(r.t)
         return self.t, self.y
