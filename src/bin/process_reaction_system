@@ -6,6 +6,7 @@ from IPython import embed
 import argparse
 import numpy as np
 import chemkin.chemkin as chemkin
+import chemkin.simulator  as simulator
 
 parser = argparse.ArgumentParser()
 parser.add_argument("xmlfile")
@@ -65,18 +66,56 @@ if(option == 'y'):
 			print('\033[1m' + '\033[4m'+'Reaction Rate:'+'\033[0m'+'\033[0m\n', reaction_systems[reactionChoice-1].calculate_reaction_rate(conc,temp),'\n')
 
 		elif(choice == '3'):
+			reactionChoice = input('There are {} reaction/s in the XML file. Please select any one of them to work on : '.format(length))
+			reactionChoice = int(reactionChoice)
+			species = len(reaction_systems[reactionChoice-1].reactant_coefficients)
 			print(' 1) Deterministic')
 			print(' 2) Stochastic')
 
 			sim_choice = input('Please enter your choice : ')
 
-			if(sim_choice == '1'):
-				print(' 1) Backward Euler')
-				print(' 2) Runge-Kutta-Fehlberg')
-				print(' 3) Backward Differentiation Formula')
 
-				det_choice = input('Please select your choice for ODE solver : ')
-				print('Yet to be implemented\n')
+			if(sim_choice == '1'):
+
+				print(' Default solver set as Backward Differentiation Formula, press any key to continue.')
+				print(' 1) Backward Differentiation Formula')
+				print(' 2) Backward Euler')
+				print(' 3) Runge-Kutta-Fehlberg')
+
+				det_choice = input('Please input your choice for ODE solver : ')
+				abundance = input('Please enter initial abundances for each of the {} species in the reaction in the form {} : '.format(species, '`1E-05, 2E-05, ...`'))
+				abundance = np.fromstring(abundance, dtype=float, sep=',')
+				temp = input('Please enter temperature : ')
+				temp = int(temp)
+				t_span = input('Please enter comma separate time span (start time, end time) of the reactions to be simulated : ')
+				t_span = np.fromstring(t_span, dtype=float, sep=',')
+				dt = input('Please enter size of time steps. Default is 0.01 : ')
+				if dt:
+					dt = float(dt)
+					det_sim = simulator.DeterministicSimulator(reaction_systems[reactionChoice-1], abundance, temp, t_span, dt)
+				else:
+					det_sim = simulator.DeterministicSimulator(reaction_systems[reactionChoice-1], abundance, temp, t_span)
+
+
+
+				if det_choice == '1':
+					error_tolerance  = input('Please enter tolerance of error. Default value is `1E-06` : ')
+					if error_tolerance:
+						error_tolerance = float(error_tolerance)
+						print('\033[1m' + '\033[4m'+ 'Solution'+'\033[0m'+'\033[0m\n', det_sim.simulate('bdf', error_tolerance),'\n')
+					print('\033[1m' + '\033[4m'+ 'Solution'+'\033[0m'+'\033[0m\n', det_sim.simulate('bdf'),'\n')
+
+				elif det_choice == '2':
+					error_tolerance  = input('Please enter tolerance of error. Default value is `1E-06` : ')
+					if error_tolerance:
+						error_tolerance = float(error_tolerance)
+					print('\033[1m' + '\033[4m'+ 'Solution'+'\033[0m'+'\033[0m\n', det_sim.simulate('backward_euler', error_tolerance),'\n')
+
+				elif det_choice == '3':
+					error_tolerance  = input('Please enter tolerance of error. Default value is `1E-06` : ')
+					if error_tolerance:
+						error_tolerance = float(error_tolerance)
+					print('\033[1m' + '\033[4m'+ 'Solution'+'\033[0m'+'\033[0m\n', det_sim.simulate('rk45', error_tolerance),'\n')
 
 			if(sim_choice == '2'):
 				print('Yet to be added\n')
