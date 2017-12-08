@@ -59,8 +59,8 @@ class StochasticSimulator(ReactionSimulator):
         for reaction in self.reaction_system.elementary_reactions:
             for i, species in enumerate(self.reaction_system.species):
                 state_change_vector[i] = (
-                    reaction.get_products()[species]
-                    - reaction.get_reactants()[species])
+                    reaction.get_products().get(species, 0)
+                    - reaction.get_reactants().get(species, 0))
             state_change_matrix.append(state_change_vector)
             if reaction.reversible:
                 state_change_matrix.append(-1*state_change_vector)
