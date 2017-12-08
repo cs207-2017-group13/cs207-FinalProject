@@ -253,8 +253,6 @@ class ODE_solver:
                 y_val=r.y[0]
             else:
                 y_val = r.y
-            if (not self.neg_y_allowed) & (y_val.any() < 0):
-                y_val = [0 if i<0 else i for i in y_val]
             self.y.append(y_val)
             self.t.append(r.t)
         return self.t, self.y
