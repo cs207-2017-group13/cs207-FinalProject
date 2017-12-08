@@ -177,8 +177,7 @@ class ElementaryReaction():
                              'Pass a value to get the reaction coeff.')
 
     def _constant_rate(self, k=1.0):
-        """
-        Returns a constant reaction rate coefficient.
+        """Return a constant reaction rate coefficient.
 
         In zeroth-order reactions, k = constant.
 
@@ -213,12 +212,14 @@ class ElementaryReaction():
         return k
 
     def _k_arrhenius(self, A, E, T, b=0.0, R=8.314):
-        """Return a reaction rate coefficient according to the Arrhenius equation.
+        """Calculate a reaction rate coefficient according to the
+        Arrhenius equation.
 
-        The Arrhenius equation relates the rate constant, k, of a chemical
-        reaction to parameters A (pre-exponential factor), E (activation
-        energy), T (absolute temperature), and b (exponential indicating
-        temperature-dependence of pre-exponential factor)::
+        The Arrhenius equation relates the rate constant, k, of a
+        chemical reaction to parameters A (pre-exponential factor), E
+        (activation energy), T (absolute temperature), and b
+        (exponential indicating temperature-dependence of
+        pre-exponential factor)::
 
             k = A T^b exp[ -E / (RT) ]
 
