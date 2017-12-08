@@ -610,7 +610,7 @@ class ReactionSystem():
         Examples
         --------
         >>> reader = XMLReader("tests/rxns_reversible.xml")
-        >>> reaction_system = reader.get_reaction_systems()
+        >>> reaction_system = reader.get_reaction_systems()[0]
         >>> det_sim = reaction_system.setup_reaction_simulator('deterministic', concs, 800, [0, 0.1], dt=0.1)
         >>> det_sim.simulate()
         ([0, 0.1], [array([  1.00000000e-05,   2.00000000e-05,   1.00000000e-05,
