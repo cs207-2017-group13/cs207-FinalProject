@@ -611,9 +611,10 @@ class ReactionSystem():
         >>> reader = XMLReader("tests/rxns_reversible.xml")
         >>> reaction_system = reader.get_reaction_systems()
         >>> reaction_system[0].get_backward_rate_coefficients(800)
-        [  3.92875283e+16   1.71276093e+12   9.99213983e+08   1.39259837e+15
-           3.26602470e-02   4.70481489e+02   1.11384696e-01   2.22076430e-05
-           2.50630855e-07   1.23837445e+08   4.39701018e+07]
+        array([  3.92875283e+16,   1.71276093e+12,   9.99213983e+08,
+                 1.39259837e+15,   3.26602470e-02,   4.70481489e+02,
+                 1.11384696e-01,   2.22076430e-05,   2.50630855e-07,
+                 1.23837445e+08,   4.39701018e+07])
         """
         choices = ['stochastic', 'deterministic']
         if simulation_type not in choices:
