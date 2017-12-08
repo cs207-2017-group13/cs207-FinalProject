@@ -120,13 +120,13 @@ def test_progress_rate():
     result = [2.5589111307566812, 1110.2037988957545, 0.0070156249238785568]
     assert reaction_system[0].calculate_progress_rate([3., 1., 2., 3., 1.], 425) == result
 
-def test_neg_concentration():
-    reader = chemkin.XMLReader("tests/test_data1.xml")
-    reaction_system = reader.get_reaction_systems()
-    try:
-        reaction_system[0].calculate_progress_rate([3., -1., 2., -3., 1.], 425)
-    except ValueError as err:
-        assert(type(err) == ValueError)
+# def test_neg_concentration():
+#     reader = chemkin.XMLReader("tests/test_data1.xml")
+#     reaction_system = reader.get_reaction_systems()
+#     try:
+#         reaction_system[0].calculate_progress_rate([3., -1., 2., -3., 1.], 425)
+#     except ValueError as err:
+#         assert(type(err) == ValueError)
 
 def test_neg_stoich_coeff():
     reader = chemkin.XMLReader("tests/rxns_negative_coeff.xml")

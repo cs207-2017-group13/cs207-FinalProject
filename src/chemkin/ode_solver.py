@@ -7,16 +7,16 @@ class ODE_solver:
     Implemented three ode solvers: backward euler method,
     Runge-Kutta-Fehlberg, and backward differentiation formula.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     func :   ordinary differential equation to be integrated
     y0 :     initial value of the variable y
     t_span : time span, first element indicating the initial time,
             second element indicating the stopping time
     dt:     size of time step
 
-    Methods:
-    --------
+    Methods
+    -------
     backward_euler()
     backward_euler_step()
     rk45()
@@ -33,19 +33,19 @@ class ODE_solver:
     def backward_euler(self, epsilon = 1e-06):
         """Solve the ODE using backward euler method.
 
-        INPUTS
-        ------
+        Parameters
+        ----------
         epsilon : float
                  tolerance of error of the zero value
 
-        RETURNS
+        Returns
         -------
         self.t :  array
                  all times evaluated
         self.y :  array
                  variable values at each time t
 
-        EXAMPLES
+        Examples
         --------
         >>> func = lambda t, y: 2*t
         >>> ode = ODE_solver(func, 0.8, [1, 2], 0.5)
@@ -67,17 +67,17 @@ class ODE_solver:
            using backward euler method.
            
 
-        INPUTS
-        ------
+        Parameters
+        ----------
         epsilon : float
                  tolerance of error of the zero value
 
-        RETURNS
+        Returns
         -------
         message : "Success"
                  indicating if the integration is successful
 
-        EXAMPLES
+        Examples
         --------
         >>> func = lambda t, y: 2*t
         >>> ode = ODE_solver(func, 0.8, [1, 2], 0.1)
@@ -115,19 +115,19 @@ class ODE_solver:
     def rk45(self, epsilon = 1e-06):
         """Solve the ODE using Runge-Kutta-Fehlberg method.
 
-        INPUTS
-        ------
+        Parameters
+        ----------
         epsilon : float
                  tolerance of error of the zero value
 
-        RETURNS
+        Returns
         -------
         self.t  : array
                  all times evaluated
         self.y  : array
                  variable values at each time t
 
-        EXAMPLES
+        Examples
         --------
         >>> func = lambda t, y: 2*t
         >>> ode = ODE_solver(func, 0.8, [1, 2], 0.1)
@@ -147,17 +147,17 @@ class ODE_solver:
         """Solve the ODE one step/time forward 
             using Runge-Kutta-Fehlberg method.
 
-        INPUTS
-        ------
+        Parameters
+        ----------
         epsilon : float
                  tolerance of error of the zero value
 
-        RETURNS
+        Returns
         -------
         message : "Success"
                  indicating if the integration is successful
 
-        EXAMPLES
+        Examples
         --------
         >>> func = lambda t, y: 2*t
         >>> ode = ODE_solver(func, 0.8, [1, 2], 0.1)
@@ -225,19 +225,19 @@ class ODE_solver:
     def BDF(self, epsilon = 1e-06):
         """Solve the ODE using backward differentiation formula.
 
-        INPUTS
-        ------
+        Parameters
+        ----------
         epsilon : float
                  tolerance of error of the zero value
 
-        RETURNS
+        Returns
         -------
         self.t :  array
                  all times evaluated
         self.y :  array
                  variable values at each time t
 
-        EXAMPLES
+        Examples
         --------
         >>> func = lambda t, y: 2*t
         >>> obj = ODE_solver(func, 0.8, [1, 2], 0.5)
