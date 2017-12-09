@@ -9,6 +9,10 @@ import chemkin.ode_solver as ode_solver
 AVOGADRO = 6.022e23
 
 
+class PropensityZeroException:
+    pass
+
+
 class ReactionSimulator():
     def plot(self):
         # plot abundances over times
@@ -85,9 +89,9 @@ class StochasticSimulator(ReactionSimulator):
 
         """
         n_species = len(self.reaction_system)
-        state_change_vector = np.zeros(n_species, dtype=int)
         state_change_matrix = []
         for reaction in self.reaction_system.elementary_reactions:
+            state_change_vector = np.zeros(n_species, dtype=int)
             for i, species in enumerate(self.reaction_system.species):
                 state_change_vector[i] = (
                     reaction.get_products().get(species, 0)
@@ -143,23 +147,29 @@ class StochasticSimulator(ReactionSimulator):
                     propensity *= species_abundance
                 elif change == -2:
                     propensity *= species_abundance * (species_abundance - 1)
-            reaction_propensities.append(stochastic_constant)
+            reaction_propensities.append(propensity)
         return np.array(reaction_propensities)
 
     def simulate(self, seed=None):
         np.random.seed(seed)
         while self.times[-1] < self.t_span[-1]:
-            self._advance_simulation()
+            try:
+                self._advance_simulation()
+            except PropensityZeroException:
+                pass
         return
 
     # this is the simplest algorithm
     def _advance_simulation(self):
         reaction_propensities = self.calculate_reaction_propensities()
+        print(reaction_propensities)
         propensity_cumsum = np.cumsum(reaction_propensities)
         propensity_sum = propensity_cumsum[-1]
+        if propensity_sum == 0.:
+            raise PropensityZeroException
         r1 = np.random.rand()
         r2 = np.random.rand()*propensity_sum
-        self.times.append((1/propensity_sum) * np.log(1/r1))
+        self.times.append(self.times[-1] + ((1/propensity_sum) * np.log(1/r1)))
         reaction_index = np.where(propensity_cumsum > r2)[0][0]
         state_change_vector = self.state_change_matrix[reaction_index]
         self.abundances.append(self.abundances[-1] + state_change_vector)
