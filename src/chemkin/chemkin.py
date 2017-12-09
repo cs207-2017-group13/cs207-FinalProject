@@ -1,11 +1,7 @@
 import xml.etree.ElementTree as ET
 import numpy as np
-
 import chemkin.thermodynamics as thermodynamics
 import chemkin.simulator as simulator
-# import thermodynamics
-# import simulator
-
 
 class ElementaryReaction():
     """Class representing a single elementary reaction.
@@ -397,10 +393,10 @@ class ReactionSystem():
         for jdx, rj in enumerate(progress):
             for idx, xi in enumerate(concs):
                 nu_ij = self.reactant_coefficients[idx, jdx]
-                # if xi < 0.0:
-                #     raise ValueError(
-                #         "x{0} = {1:18.16e}: Negative concentrations are "
-                #         "prohibited!".format(idx, xi))
+                if xi < 0.0:
+                    raise ValueError(
+                        "x{0} = {1:18.16e}: Negative concentrations are "
+                        "prohibited!".format(idx, xi))
                 if nu_ij < 0:
                     raise ValueError(
                         "nu_{0}{1} = {2}:  Negative stoichiometric "

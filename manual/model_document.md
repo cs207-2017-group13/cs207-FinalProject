@@ -141,12 +141,12 @@ $C_{p,i}$: specific heat at constant pressure (given by the NASA polynomial)
 
 There are two main methods for modeling the time evolution of a system of chemically reacting species: deterministic modeling, using ordinary differential equations and treating chemical abundances as continuous variables, and stochastic modeling, which accounts for the discrete nature of chemical species and the random nature of reactions. The latter case becomes relevant when chemical abundances []
 
-### Deterministic
 The clients could call the chemkin package and obtained the right-hand-side of an ODE. They can then use it as the righ-hand-side of the ODE, or in a neural net code to learn new reaction pathways.
 
 We offered two options for the user after obtaining the right-hand-side of an ODE. The user could choose to solve the ODE with the deterministic simulator or simulate the abundances of all species using the stochastic simulator. The simulation result will be presented by plots showing the trajectories of species abundances over time.
 
-For deterministic simulator, we implemented three ODE solvers, backward euler method, backward differentiation formula and Runge-Kutta-Fehlberg method. To solve ODE problems in chemical kinetics, however, Runge-Kutta-Fehlberg method (rk45) is NOT recommended as the functions we are dealing with are usually stiff. It is recommended that the user sets the step size to be small (eg. 0.01) to achieve higher simulation accuracy when using the backward euler method and the backward differentiation. If the abundances of species become negative in the simulation process, the simulation will raise a `ValueError` and stop as abundances should never be negative. 
+### Deterministic
+For deterministic simulator, we implemented three ODE solvers, backward euler method, backward differentiation formula and Runge-Kutta-Fehlberg method. To solve ODE problems in chemical kinetics, however, Runge-Kutta-Fehlberg method (rk45) is NOT recommended as the functions we are dealing with are usually stiff. It is recommended that the user sets the step size to be small (eg. 0.01) to achieve higher simulation accuracy when using the backward euler method and the backward differentiation. If the abundances of species become negative in the simulation process, the simulation will set the negative abundances back to zero as abundances should never be negative. 
 
 ### Stochastic
 For stochastic simulator, we implemented the Gillespie algorithm. The principle behind the algorithm is that waiting times between reaction events are exponentially distributed; thus the time until the next reaction is drawn from an exponential distribution (the simulation is advanced in time by this amount). The particular reaction event that occurs is randomly selected from among the possible reactions in proportion to their probabilities.
@@ -202,7 +202,8 @@ This class contains one method: `get_reaction_systems()`.
 
 Example:
 ```python
-reader = XMLReader("tests/rxns.xml")
+import chemkin.chemkin as chemkin
+reader = chemkin.XMLReader("tests/rxns.xml")
 reaction_systems = reader.get_reaction_systems()
 ```
 `reaction_systems` is a list containing multiple `ReactionSystem` instances. The length of `reaction_systems` is the number of reaction systems, and the length of each list element is the number of reactions in a reaction system.
@@ -235,7 +236,8 @@ When b = 0, the above formula corresponds to the Arrhenius equation.
 Example:
 
 ```python
-elementary_reaction = ElementaryReaction(reaction_properties)
+import chemkin.chemkin as chemkin
+elementary_reaction = chemkin.ElementaryReaction(reaction_properties)
 reactants = elementary_reaction.get_reactants()
 products = elementary_reaction.get_products()
 rate_coeff = elementary_reaction.calculate_rate_coefficient(1000)
@@ -253,12 +255,17 @@ This class has five methods, and two special methods:
  - `calculate_progress_rate(concs, temperature)`: Returns the progress rate of a system of elementary reactions
  - `calculate_reaction_rate(concs, temperature)`: Returns the reaction rate of a system of elementary reactions
  - `get_rate_coefficients()`: Calculate reaction rate coefficients
+ - `get_backward_rate_coefficients()`: Calculate rate coefficients for reactions in the reverse direction (0 for irreversible reactions)
  - `build_reactant_coefficient_matrix()`: Build a reactant coefficients matrix for the reaction system
  - `build_product_coefficient_matrix()`: Build a product coefficients matrix for the reaction system
  - `check_reversible`: Check if each elementary reaction is reversible
+ - `setup_reaction_simulator(self, simulation_type, abundances, temperature, t_span, dt=0.01, system_volume=1e-15)`: Quantitative modeling of chemical reactions by either deterministic simulator or stochastic simulator
 
 Example:
 ```python
+import chemkin.chemkin as chemkin
+reader = chemkin.XMLReader("tests/rxns.xml")
+reaction_system = reader.get_reaction_systems()
 len(reaction_system[0])
 concs = [1., 2., 1., 3., 1.]
 reaction_system[0].build_reactant_coefficient_matrix()
@@ -266,6 +273,8 @@ reaction_system[0].build_product_coefficient_matrix()
 print(reaction_system[0])
 reaction_system[0].calculate_progress_rate(concs, 300)
 reaction_system[0].calculate_reaction_rate(concs, 300)
+reaction_system[0].get_rate_coefficients()
+reaction_system[0].get_backward_rate_coefficients()
 ```
 
 
@@ -281,6 +290,8 @@ This class has four methods:
 
 Example:
 ```python
+import chemkin.chemkin as chemkin
+import chemkin.thermodynamics as thermodynamics
 reader = chemkin.XMLReader("tests/rxns_reversible.xml")
 reaction_system = reader.get_reaction_systems()[0]
 nu = reaction_system.product_coefficients - reaction_system.reactant_coefficients
@@ -304,6 +315,8 @@ This class has two methods:
 
 Example:
 ```python
+import chemkin.chemkin as chemkin
+import chemkin.thermodynamics as thermodynamics
 reader = chemkin.XMLReader("tests/rxns_reversible.xml")
 reaction_system = reader.get_reaction_systems()[0]
 nu = reaction_system.product_coefficients - reaction_system.reactant_coefficients
@@ -322,36 +335,22 @@ This class has three special methods:
  - `__get__(obj, objtype)`: Support instance methods
 
 
-## `ODE_solver` class: Solve ordinary differential equation with three methods
+# New Feature
 
-Implemented three ode solvers: backward euler method, Runge-Kutta-Fehlberg, and backward differentiation formula. Backward euler method and backward differentiation formula can be used to solve stiff ODE problems, while Runge-Kutta-Fehlberg moethod is more accurate for non-stiff problems. For the purposed of solving ODE problems in chemical kinetics, our default method is backward differentiation formula.
+## `ReactionSimulator` class: Base class for simulations.
+This class is a base class for `DeterministicSimulator` and `StochasticSimulator`.
 
-This class has five methods:
- - `backward_euler()`: Solve the ODE using backward euler method. 
- - `backward_euler_step()`: Solve the ODE one step/time forward using backward euler method. We use fixed point iterations to find the optimal root.
- - `rk45()`: Solve the ODE using Runge-Kutta-Fehlberg method.
- - `rk45_step()`: Solve the ODE one step/time forward using Runge-Kutta-Fehlberg method.
- - `BDF()`: Solve the ODE using backward differentiation formula.
-
-Example:
-```python
-func = lambda t, y: 2*t
-obj = ODE_solver(func, 0.8, [1, 2], 0.1)
-obj.backward_euler()
-obj.backward_euler_step()
-obj.rk45()
-obj.rk45_step()
-obj.BDF()
-```
+It has one method:
+ - `plot()`: Shows a plot of the abundances of species over time.
 
 
 ## `DeterministicSimulator` class: Class for deterministic simulation
 
-This class is inherited from the `ReactionSimulator` class. It simulate species abundances deterministically.
+This class inherits from the `ReactionSimulator` class. It simulate species abundances deterministically.
 
 This class has two methods:
- - simulate(method='bdf', epsilon = 1e-06): We implemented three methods to solve the ordinary differential equation. Backward differentiation formula and backward eulerare good for stiff functions, and rk45 is accurate for non-stiff functions. BDF is the most suitable for solving ODE problems in chemical kinetics, so our default method is set as BDF.
- - diff_func(t, y): In order for the ode solver to work, we need a function with t (time) and y as parameters. However, the original calculate reaction rate function is a function of y and temperature. We need to transform the original function.
+ - `simulate(method='bdf', epsilon = 1e-06)`: We implemented three methods to solve the ordinary differential equation. Backward differentiation formula and backward eulerare good for stiff functions, and rk45 is accurate for non-stiff functions. BDF is the most suitable for solving ODE problems in chemical kinetics, so our default method is set as BDF.
+ - `diff_func(t, y)`: In order for the ode solver to work, we need a function with t (time) and y as parameters. However, the original calculate reaction rate function is a function of y and temperature. We need to transform the original function.
 
 Example:
 ```python
@@ -363,3 +362,30 @@ reaction_system = reader.get_reaction_systems()[0]
 det_sim = simulator.DeterministicSimulator(reaction_system, concs, 800, [0, 1], dt=0.01)
 det_sim.simulate()
 ```
+
+
+## `ODE_solver` class: Solve ordinary differential equation with three methods
+
+Implemented three ode solvers: backward euler method, Runge-Kutta-Fehlberg, and backward differentiation formula. Backward euler method and backward differentiation formula can be used to solve stiff ODE problems, while Runge-Kutta-Fehlberg moethod is more accurate for non-stiff problems. Notably, Runge-Kutta-Fehlberg moethod will adapt its step size according to the error. 
+
+For the purpose of solving ODE problems in chemical kinetics, our default method is backward differentiation formula with step size 0.01. If the abundances of species become negative in the simulation process, the simulation will set the negative abundances back to zero as abundances should never be negative. 
+
+This class has five methods:
+ - `backward_euler()`: Solve the ODE using backward euler method. 
+ - `backward_euler_step()`: Solve the ODE one step/time forward using backward euler method. We use fixed point iterations to find the optimal root.
+ - `rk45()`: Solve the ODE using Runge-Kutta-Fehlberg method.
+ - `rk45_step()`: Solve the ODE one step/time forward using Runge-Kutta-Fehlberg method.
+ - `BDF()`: Solve the ODE using backward differentiation formula.
+
+Example:
+```python
+import chemkin.ode_solver as ode_solver
+func = lambda t, y: 2*t
+obj = ode_solver.ODE_solver(func, 0.8, [1, 2], 0.1)
+obj.backward_euler()
+obj.backward_euler_step()
+obj.rk45()
+obj.rk45_step()
+obj.BDF()
+```
+
