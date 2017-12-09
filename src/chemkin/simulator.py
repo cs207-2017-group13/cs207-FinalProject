@@ -7,7 +7,7 @@ import chemkin.ode_solver as ode_solver
 AVOGADRO = 6.022e23
 
 
-class PropensityZeroException:
+class PropensityZeroException(Exception):
     pass
 
 
@@ -47,29 +47,31 @@ class StochasticSimulator(ReactionSimulator):
     Parameters
     ----------
     reaction_system : ReactionSystem
-        Containing all the methods and attributes of 
-        `ReactionSystem` class
+        `ReactionSystem` instance with all the details regarding
+        reaction to simulate.
     initial_abundances : list
-        Initial abundances of each species inside
-        the reaction_system
+        Initial abundances of each species inside the
+        reaction_system. Abundances should be discrete numbers
+        (integers).
     temperature : float
-        Temperature when the reaction take place
+        Temperature at which the reaction take place.
     t_span : tuple
-        Time span of the reactions users want to 
-        simulate
+        Time span to simulate: (begin, end)
     system_volume : float
-        blah blahx
+        The volume of the reaction system, in liters.
 
     Methods
     -------
     calculate_state_change_matrix()
-        blah
+        Determine how abundances change with each reaction event.
     calculate_stochastic_constants(temperature)
-        blah
+        Determine stochastic rate constants from deterministic rate
+        constants.
     calculate_reaction_propensities()
-        blah
+        Determine the propensity of each reaction, the probability of
+        the reaction to occur in the next interval [t, t+dt).
     simulate()
-        blah
+        Run stochastic simulation between `t_span[0]` and `t_span[1]`.
 
     Examples
     --------
@@ -84,8 +86,7 @@ class StochasticSimulator(ReactionSimulator):
         self.temperature = temperature
         self.system_volume = system_volume
         self.state_change_matrix = self.calculate_state_change_matrix()
-        self.stochastic_constants = self.calculate_stochastic_constants(
-            temperature)
+        self.stochastic_constants = self.calculate_stochastic_constants()
         # self.reaction_propensities = self.calculate_reaction_propensities()
 
     def calculate_state_change_matrix(self):
@@ -115,16 +116,28 @@ class StochasticSimulator(ReactionSimulator):
                 state_change_matrix.append(-1*state_change_vector)
         return np.array(state_change_matrix)
 
-    def calculate_stochastic_constants(self, temperature):
-        """Compute stochastic rate constants.
+    def calculate_stochastic_constants(self):
+        """Compute stochastic rate constants (coefficients).
 
-        stochastic constant * abundance * dt gives probability.
+        Stochastic rate constants are calculated from deterministicc
+        reaction rate constants. First-order stochastic rate constants
+        are equivalent to stochastic rate constants, but second-order
+        rate constants must be divided by the system volume and
+        converted from moles.
+
+        Reactions of other orders are not elementary reactions and are
+        not supported.
+
+        Returns
+        -------
+        stochastic_constants : list
+            Stochastic constants, one for each reaction.
 
         """
         stochastic_constants = []
         # First, obtain deterministic rate constants
         rate_constants = self.reaction_system.get_rate_coefficients(
-            temperature)
+            self.temperature)
         backward_rate_constants = (
             self.reaction_system.get_backward_rate_coefficients(
                 self.temperature))
@@ -145,8 +158,17 @@ class StochasticSimulator(ReactionSimulator):
         return stochastic_constants
 
     def calculate_reaction_propensities(self):
-        """
-        Reaction propensities are determined by
+        """Determine probabilities for each reaction.
+
+        The reaction propensity * dt gives the probability that a
+        particular reaction will occur in the time interval [t, t+dt).
+
+        See `manual/model_document.pdf` for scientific notes.
+
+        Returns
+        -------
+        reaction_propensities : np.ndarray (1D)
+            Reaction propensities, one for each reaction.
 
         """
         reaction_propensities = []
@@ -165,6 +187,13 @@ class StochasticSimulator(ReactionSimulator):
         return np.array(reaction_propensities)
 
     def simulate(self, seed=None):
+        """Run stochastic simulation.
+
+        Reaction runs from time `t_span[0]` to `t_span[1]`. Times are
+        put in `self.times`, and abundances at each time are put in
+        `self.abundances`.
+
+        """
         np.random.seed(seed)
         while self.times[-1] < self.t_span[-1]:
             try:
@@ -175,6 +204,7 @@ class StochasticSimulator(ReactionSimulator):
 
     # this is the simplest algorithm
     def _advance_simulation(self):
+        """Run a single stochastic simulation step."""
         reaction_propensities = self.calculate_reaction_propensities()
         print(reaction_propensities)
         propensity_cumsum = np.cumsum(reaction_propensities)
@@ -196,9 +226,9 @@ class DeterministicSimulator(ReactionSimulator):
 
     Parameters
     ----------
-    reaction_system :    `ReactionSystem` class object
-                        Containing all the methods and attributes of
-                        `ReactionSystem` class
+    reaction_system : `ReactionSystem` class object
+        Containing all the methods and attributes of
+        `ReactionSystem` class
     initial_abundances : list
                         Initial abundances of each species inside
                         the reaction_system
@@ -306,4 +336,4 @@ class DeterministicSimulator(ReactionSimulator):
 
 if __name__ == "__main__":
     import doctest
-    doctest.testmod()       
+    doctest.testmod()
