@@ -1,11 +1,7 @@
 import xml.etree.ElementTree as ET
 import numpy as np
-
 import chemkin.thermodynamics as thermodynamics
 import chemkin.simulator as simulator
-# import thermodynamics
-# import simulator
-
 
 class ElementaryReaction():
     """Class representing a single elementary reaction.
