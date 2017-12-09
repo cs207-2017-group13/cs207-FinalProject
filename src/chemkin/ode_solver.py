@@ -73,7 +73,7 @@ class ODE_solver:
         >>> func = lambda t, y: 2*t
         >>> ode = ODE_solver(func, 0.8, [1, 2], 0.5)
         >>> ode.backward_euler()
-        ([1, 1.5, 2.0], [0.8, 2.3, 4.3])
+        ([1, 1.5, 2.0], [0.8, 2.2999999999999998, 4.2999999999999998])
         """
         while (self.t[-1]+self.dt) <= self.t_span[-1]:
             message = self.backward_euler_step(epsilon)
