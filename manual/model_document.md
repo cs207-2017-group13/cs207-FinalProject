@@ -363,16 +363,23 @@ It has one method:
 
 This class inherits from base class `ReactionSimulator`. It carries out stochastic reaction simulations using the Gillespie stochastic simulation algorithm. Note that a reversible elementary reaction represents two different reactions in a stochastic simulation.
 
-It has four methods:
+It has five methods:
  - `calculate_state_change_matrix()`: Determine how abundances change with each reaction event.
  - `calculate_stochastic_constants(temperature)`: Determine stochastic rate constants from deterministic rate constants.
  - `calculate_reaction_propensities()`: Determine the propensity of each reaction, the probability of the reaction to occur in the next interval [t, t+dt).
  - `simulate()`: Run stochastic simulation between `t_span[0]` and `t_span[1]`.
+ - `plot()`: Shows a plot of the abundances of species over time.
 
 Example:
 ```python
 import chemkin.chemkin as chemkin
 import chemkin.simulator as simulator
+abundances = np.array([10, 10, 10, 10, 10])
+reader = chemkin.XMLReader("tests/rxns.xml")
+reaction_system = reader.get_reaction_systems()[0]
+stoch_sim = simulator.StochasticSimulator(reaction_system, abundances, 800, [0, 1], 1e-15)
+stoch_sim.simulate()
+stoch_sim.plot()
 ```
  
 
@@ -380,9 +387,10 @@ import chemkin.simulator as simulator
 
 This class inherits from the `ReactionSimulator` class. It calls the `ODE_solver` class to numerically integrate reaction rates forward in time, and simulates the concentration of species deterministically.
 
-This class has two methods:
+This class has three methods:
  - `simulate(method='bdf', epsilon = 1e-06)`: We implemented three methods to solve the ordinary differential equation. Backward differentiation formula and backward eulerare good for stiff functions, and rk45 is accurate for non-stiff functions. BDF is the most suitable for solving ODE problems in chemical kinetics, so our default method is set as BDF.
  - `diff_func(t, y)`: In order for the ode solver to work, we need a function with t (time) and y as parameters. However, the original calculate reaction rate function is a function of y and temperature. We need to transform the original function.
+ - `plot()`: Shows a plot of the concentrations of species over time.
 
 Example:
 ```python
@@ -393,6 +401,7 @@ reader = chemkin.XMLReader("tests/rxns.xml")
 reaction_system = reader.get_reaction_systems()[0]
 det_sim = simulator.DeterministicSimulator(reaction_system, concs, 800, [0, 1], dt=0.01)
 det_sim.simulate()
+det_sim.plot()
 ```
 
 
