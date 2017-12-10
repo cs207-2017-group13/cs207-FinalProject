@@ -127,13 +127,14 @@ if option == 'y':
 							det_sim = reaction_systems[reactionChoice-1].setup_reaction_simulator('deterministic', abundance, temp, t_span)
 
 						if det_choice == '1':
-							error_tolerance  = input('Please enter tolerance of error. Default value is `1E-06` : ')
+							error_tolerance  = input('Please enter tolerance of error. Default value is `1E-06`  : ')
 							if error_tolerance:
 								error_tolerance = float(error_tolerance)
 								print('\nSolution : \n', det_sim.simulate('bdf', error_tolerance),'\n')
-							print('\nSolution : \n', det_sim.simulate('bdf'),'\n')
+							else:
+								print('\nSolution : \n', det_sim.simulate('bdf'),'\n')
 							det_plot= input('Do you want to see the plot of concentrations over time (y/n) : ' )
-							if det_plot:
+							if det_plot =='y':
 								det_sim.plot()
 							else:
 								pass
@@ -143,9 +144,10 @@ if option == 'y':
 							if error_tolerance:
 								error_tolerance = float(error_tolerance)
 								print('\nSolution: \n', det_sim.simulate('backward_euler', error_tolerance),'\n')
-							print('\nSolution: \n', det_sim.simulate('backward_euler'),'\n')
+							else:
+								print('\nSolution: \n', det_sim.simulate('backward_euler'),'\n')
 							det_plot= input('Do you want to see the plot of concentrations over time (y/n) : ' )
-							if det_plot:
+							if det_plot =='y':
 								det_sim.plot()
 							else:
 								pass
@@ -155,9 +157,10 @@ if option == 'y':
 							if error_tolerance:
 								error_tolerance = float(error_tolerance)
 								print('\nSolution : \n', det_sim.simulate('rk45', error_tolerance),'\n')
-							print('\nSolution : \n', det_sim.simulate('rk45', error_tolerance),'\n')
+							else:
+								print('\nSolution : \n', det_sim.simulate('rk45'),'\n')
 							det_plot= input('Do you want to see the plot of concentrations over time (y/n) : ' )
-							if det_plot:
+							if det_plot =='y':
 								det_sim.plot()
 							else:
 								pass
@@ -181,7 +184,7 @@ if option == 'y':
 
 					stoc_sim.simulate()
 					stoc_plot= input('Do you want to see the plot of concentrations over time (y/n) : ' )
-					if stoc_plot:
+					if stoc_plot == 'y':
 						stoc_sim.plot()
 					else:
 						pass
