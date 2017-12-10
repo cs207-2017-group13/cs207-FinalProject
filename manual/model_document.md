@@ -18,6 +18,7 @@
     - [Dependencies](#dependencies)
     - [Contributing to the development version](#contributing-to-the-development-version)
 - [Basic Usage and Examples](#basic-usage-and-examples)
+    - [`process_reaction_system` binary: Executable binary of the library](#processreactionsystem-binary-executable-binary-of-the-library)
     - [`XMLReader` class: Read and parse XML input file](#xmlreader-class-read-and-parse-xml-input-file)
     - [`ElementaryReaction` class: Class for each elementary reaction](#elementaryreaction-class-class-for-each-elementary-reaction)
     - [`ReactionSystem` class: Class for a system of reactions](#reactionsystem-class-class-for-a-system-of-reactions)
@@ -26,6 +27,7 @@
     - [`memoized` class: Caches a function's return value each time it is called](#memoized-class-caches-a-functions-return-value-each-time-it-is-called)
 - [New Feature](#new-feature)
     - [`ReactionSimulator` class: Base class for simulations.](#reactionsimulator-class-base-class-for-simulations)
+    - [`StochasticSimulator` class: Class for stochastic simulation](#stochasticsimulator-class-class-for-stochastic-simulation)
     - [`DeterministicSimulator` class: Class for deterministic simulation](#deterministicsimulator-class-class-for-deterministic-simulation)
     - [`ODE_solver` class: Solve ordinary differential equation with three methods](#odesolver-class-solve-ordinary-differential-equation-with-three-methods)
 
@@ -81,7 +83,7 @@ Given the particular nature of a chemical reaction, the reaction rate coefficien
 k &= AT^b\exp[-E^\ddag/RT]
 \end{align}
 
-where $A$ is the pre-exponential factor, $b$ gives the temperature dependent of the pre-exponential factor ($b=0$ indicating no dependence), and $R$ is the universal gas constant (8.314 J K^{-1} mol^{-1}).
+where $A$ is the pre-exponential factor, $b$ gives the temperature dependent of the pre-exponential factor ($b=0$ indicating no dependence), and $R$ is the universal gas constant (8.314 J $\text{K}^{-1} \text{mol}^{-1}$).
 
 The forward and reverse reaction rate coefficients for a chemical reaction $j$ are related to each other through the reaction equilibrium constant, $K$:
 
@@ -277,8 +279,7 @@ elementary_reaction = chemkin.ElementaryReaction(reaction_properties)
 reactants = elementary_reaction.get_reactants()
 products = elementary_reaction.get_products()
 rate_coeff = elementary_reaction.calculate_rate_coefficient(1000)
-repr(elementary_reaction)
- ```
+```
 
 
 ## `ReactionSystem` class: Class for a system of reactions
@@ -423,7 +424,8 @@ import chemkin.simulator as simulator
 abundances = np.array([10, 10, 10, 10, 10])
 reader = chemkin.XMLReader("tests/rxns.xml")
 reaction_system = reader.get_reaction_systems()[0]
-stoch_sim = simulator.StochasticSimulator(reaction_system, abundances, 800, [0, 1], 1e-15)
+stoch_sim = simulator.StochasticSimulator(
+	reaction_system, abundances, 800, [0, 1], 1e-15)
 stoch_sim.simulate()
 stoch_sim.plot_simulation()
 ```
@@ -448,7 +450,8 @@ import chemkin.simulator as simulator
 concs = np.array([1., 2., 1., 3., 1.])*1e-05
 reader = chemkin.XMLReader("tests/rxns.xml")
 reaction_system = reader.get_reaction_systems()[0]
-det_sim = simulator.DeterministicSimulator(reaction_system, concs, 800, [0, 1], dt=0.01)
+det_sim = simulator.DeterministicSimulator(
+    reaction_system, concs, 800, [0, 1], dt=0.01)
 det_sim.simulate()
 det_sim.plot_simulation()
 ```

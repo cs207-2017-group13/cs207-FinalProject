@@ -2,6 +2,7 @@ from scipy.integrate import ode
 from numpy.linalg import norm
 import numpy as np
 
+
 class ODE_solver:
     """ODE Solver class
 

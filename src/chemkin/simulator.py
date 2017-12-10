@@ -220,7 +220,7 @@ class StochasticSimulator(ReactionSimulator):
                 self._advance_simulation()
             except PropensityZeroException:
                 break
-        return
+        return self.times, self.abundances
 
     def _advance_simulation(self):
         """Run a single stochastic simulation step.
