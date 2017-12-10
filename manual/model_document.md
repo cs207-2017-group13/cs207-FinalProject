@@ -201,11 +201,20 @@ Users can run the test suite by calling pytest from the main directory, e.g.
 Our package depends on `scipy`, `numpy`, and `matplotlib` packages.
 
 ## Contributing to the development version
-``chemical-kinetics`` is hosted on Github and gladly accepts 
+``chemical-kinetics`` is hosted on Github and gladly accepts contribution.
 
 
 Basic Usage and Examples
 ========================
+
+## `process_reaction_system` binary: Executable binary of the library
+
+Once the library is installed, `process_reaction_system` binary file helps the user start working on it. The user also gets an option to work on an interactive interface or continue working on the terminal to access the functionalities of the `chemical-kinetics` library.
+
+Example:
+```python
+process_reaction_system <location of test file>
+```
 
 ## `XMLReader` class: Read and parse XML input file
 
@@ -227,11 +236,17 @@ reaction_systems = reader.get_reaction_systems()
 Takes a dictionary of properties from the XMLReader class for each elementary reaction. Calculates the rate coefficient for each elementary reaction and passes it to the ReactionSystem class. It also returns a dictionary of recatants and products to the ReactionSystem class.
 
 This class has thee public methods, two private methods a special method:
+
  - `__repr__()`: Returns a string containing basic information about the elementary reaction
+
  - `get_reactants()`: Returns a dictionary with reactants as key and the stoichiometric coeff of reactants as value for each elementary reaction.
+
  - `get_products()`:  Returns a dictionary with products as key and the stoichiometric coeff of products as value for each elementary reaction.
+
  - `calculate_rate_coefficient(T)`: Calculates and returns the rate coeffiecient of the reaction based on the type of rate coefficient required.
+
  - `_constant_rate(k=1.0)`: Returns a constant reaction rate coefficient with default value as 1.0
+
  - `_k_arrhenius(A, E, T, b=0.0, R=8.314)`: Returns a reaction rate coefficient according to the Arrhenius equation. The Arrhenius equation relates the rate constant, k, of a chemical reaction to parameters A (pre-exponential factor), E (activation energy), T (absolute temperature), and b (exponential indicating temperature-dependence of pre-exponential factor)::
       
 A nonzero value for b gives the modified Arrhenius equation.
@@ -263,15 +278,25 @@ repr(elementary_reaction)
 Takes a list of ElementaryReaction instances and a list of species. Builds stoichiometric coefficient matrices for the reactants and products and calculates the corresponding progress rates and reaction rates.
 
 This class has five methods, and two special methods:
+
  - `__repr__`: Returns a string containing basic information for the reaction system
+
  - `__len__`: Returns the number of species in the reaction system
+
  - `calculate_progress_rate(concs, temperature)`: Returns the progress rate of a system of elementary reactions
+
  - `calculate_reaction_rate(concs, temperature)`: Returns the reaction rate of a system of elementary reactions
+
  - `get_rate_coefficients()`: Calculate reaction rate coefficients
+
  - `get_backward_rate_coefficients()`: Calculate rate coefficients for reactions in the reverse direction (0 for irreversible reactions)
+
  - `build_reactant_coefficient_matrix()`: Build a reactant coefficients matrix for the reaction system
+
  - `build_product_coefficient_matrix()`: Build a product coefficients matrix for the reaction system
+
  - `check_reversible`: Check if each elementary reaction is reversible
+
  - `setup_reaction_simulator(self, simulation_type, abundances, temperature, t_span, dt=0.01, system_volume=1e-15)`: Quantitative modeling of chemical reactions by either deterministic simulator or stochastic simulator
 
 Example:
@@ -296,9 +321,13 @@ reaction_system[0].get_backward_rate_coefficients()
 Construct with Rxnset class object, the default pressure of the reactor and the default ideal gas constant. The values of pressure of the reactor and ideal gas constant can be changed. It calculates backward reaction rate using the temperature passed into the functions and the corresponding NASA polynomial coefficients.
 
 This class has four methods:
+
  - `Cp_over_R(T)`: Returns specific heat of each species given by the NASA polynomials
+
  - `H_over_RT(T)`: Returns the enthalpy of each species given by the NASA polynomials
+
  - `S_over_R(T)`: Returns the entropy of each species given by the NASA polynomials
+
  - `backward_coeffs(kf, T)`: Returns the backward reaction rate coefficient for reach reaction
 
 Example:
@@ -323,7 +352,9 @@ thermo.backward_coeffs(kf, 800)
 This class reads the NASA polynomial coefficients for all species in the reaction system from the SQL database which contains coefficients for all species. It stores the coefficients and temperature ranges in a dictionary of dictionaries where the name of species is the key. For each reaction system, the class just need to read from the database once, and check the range the given temperature is in every time the temperature of the reaction system changes afterwards. If the `get_nasa_coefficients` function is called twice for the same reaction system and the same temperature, the cached value is returned.
 
 This class has two methods:
+
  - `get_nasa_coefficients(T)`: Returns the corresponding NASA polynomial coefficients for all species at the given temperature
+
  - `read_nasa_coefficients()`: Return NASA polynomial coefficients for all species involved in the reaction system
 
 Example:
@@ -343,8 +374,11 @@ rxnset.get_nasa_coefficients(800)
 Decorator class. Caches a function's return value each time it is called. If called later with the same arguments, the cached value is returned (not reevaluated).
 
 This class has three special methods:
+
  - `__call__(*args)`: Cached a function's return value
+
  - `__repr__`: Return the function's docstring
+
  - `__get__(obj, objtype)`: Support instance methods
 
 
@@ -357,19 +391,21 @@ We elaborated the motivations for implementing a deterministic simulator and a s
 
 This class is a base class for `DeterministicSimulator` and `StochasticSimulator`.
 
-It has one method:
- - `prepare_plot()`: Prepares a plot of the abundances/concentrations of species over time. The inherited class can call this functions, add additional features to the plot and show the plot.
-
 
 ## `StochasticSimulator` class: Class for stochastic simulation
 
 This class inherits from base class `ReactionSimulator`. It carries out stochastic reaction simulations using the Gillespie stochastic simulation algorithm. Note that a reversible elementary reaction represents two different reactions in a stochastic simulation.
 
 It has five methods:
+
  - `calculate_state_change_matrix()`: Determine how abundances change with each reaction event.
+
  - `calculate_stochastic_constants(temperature)`: Determine stochastic rate constants from deterministic rate constants.
+
  - `calculate_reaction_propensities()`: Determine the propensity of each reaction, the probability of the reaction to occur in the next interval [t, t+dt).
+
  - `simulate()`: Run stochastic simulation between `t_span[0]` and `t_span[1]`.
+
  - `plot_simulation(show=True, savefig=None)`: Shows or saves a plot of the abundances of species over time.
 
 Example:
@@ -390,8 +426,11 @@ stoch_sim.plot_simulation()
 This class inherits from the `ReactionSimulator` class. It calls the `ODE_solver` class to numerically integrate reaction rates forward in time, and simulates the concentration of species deterministically.
 
 This class has three methods:
+
  - `simulate(method='bdf', epsilon = 1e-06)`: We implemented three methods to solve the ordinary differential equation. Backward differentiation formula and backward eulerare good for stiff functions, and rk45 is accurate for non-stiff functions. BDF is the most suitable for solving ODE problems in chemical kinetics, so our default method is set as BDF.
+
  - `diff_func(t, y)`: In order for the ode solver to work, we need a function with t (time) and y as parameters. However, the original calculate reaction rate function is a function of y and temperature. We need to transform the original function.
+
  - `plot_simulation(show=True, savefig=None)`: Shows or saves a plot of the concentrations of species over time.
 
 Example:
@@ -414,10 +453,15 @@ Implemented three ode solvers: backward euler method, Runge-Kutta-Fehlberg, and 
 For the purpose of solving ODE problems in chemical kinetics, our default method is backward differentiation formula with step size 0.01. If the abundances of species become negative in the simulation process, the simulation will set the negative abundances back to zero as abundances should never be negative. 
 
 This class has five methods:
+
  - `backward_euler()`: Solve the ODE using backward euler method. 
+
  - `backward_euler_step()`: Solve the ODE one step/time forward using backward euler method. We use fixed point iterations to find the optimal root.
+
  - `rk45()`: Solve the ODE using Runge-Kutta-Fehlberg method.
+
  - `rk45_step()`: Solve the ODE one step/time forward using Runge-Kutta-Fehlberg method.
+
  - `BDF()`: Solve the ODE using backward differentiation formula.
 
 Example:
