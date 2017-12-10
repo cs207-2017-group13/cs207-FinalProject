@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib
 import matplotlib.pyplot as plt
 import chemkin.ode_solver as ode_solver
 
@@ -193,18 +192,24 @@ class StochasticSimulator(ReactionSimulator):
         put in `self.times`, and abundances at each time are put in
         `self.abundances`.
 
+        Simulation will also stop when reaction propensities are all
+        zero. This can happen in a system with irreversible reactions
+        in which no reactants are remaining.
+
         """
         np.random.seed(seed)
         while self.times[-1] < self.t_span[-1]:
             try:
                 self._advance_simulation()
             except PropensityZeroException:
-                pass
+                break
         return
 
-    # this is the simplest algorithm
     def _advance_simulation(self):
-        """Run a single stochastic simulation step."""
+        """Run a single stochastic simulation step.
+
+        Uses the basic Gillespie stochastic simulation algorithm.
+        """
         reaction_propensities = self.calculate_reaction_propensities()
         print(reaction_propensities)
         propensity_cumsum = np.cumsum(reaction_propensities)

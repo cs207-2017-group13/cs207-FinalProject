@@ -30,7 +30,8 @@
 <!-- markdown-toc end -->
 
 
-# Introduction
+Introduction
+============
 
 The subject of chemical kinetics studies the rates of chemical processes. Analyzing how reaction rates change with respect to reactant abundances, temperature, pressure, and other conditions gives insight into reaction mechanisms.
 
@@ -38,7 +39,8 @@ The present library, ``chemical-kinetics``, is a Python 3 library for mathematic
 
 Reaction systems are specified in a standard XML format. The user may choose to use the provided interactive interface or program using the library directly.
 
-# Scientific background
+Scientific background
+=====================
 
 A chemical equation describes a chemical reaction, relating the stoichiochetric ratios of reactants and products. For example, the following is the equation for the combustion of hydrogen gas:
 
@@ -50,9 +52,9 @@ A chemical equation may describe an overall net reaction, indicating the ratio o
 
 Laboratory and computational experiments studying chemical kinetics have several motivations, including...
 
-- Determining reaction mechanisms; proposed mechanisms can be validated and tested.
-- Determining rate-determining steps, the reaction step that controls the overall reaction rate.
-- Finding equilibrium: the concentrations that represent reaction equilibrium and how quickly equilibrium is reached.
+- Determining reaction mechanisms; hypothesized mechanisms can be validated and tested.
+- Finding rate-determining steps, the reaction step that controls the overall reaction rate.
+- Measuring equilibrium: at what concentrations is reaction equilibrium reached and how quickly is that state reached.
 
 ## Calculating reaction rates
 In a system of $N$ chemical species undergoing $M$ *elementary* reactions, the reaction rate of species $i$, $f_i$, is computed by
@@ -75,7 +77,7 @@ Given the particular nature of a chemical reaction, the reaction rate coefficien
 k &= AT^b\exp[-E^\ddag/RT]
 \end{align}
 
-where $A$ is the pre-exponential factor, $b$ gives the temperature dependent of the pre-exponential factor ($b=0$ indicating no dependence), and $R$ is the universal gas constant.
+where $A$ is the pre-exponential factor, $b$ gives the temperature dependent of the pre-exponential factor ($b=0$ indicating no dependence), and $R$ is the universal gas constant (8.314 J K^{-1} mol^{-1}).
 
 The forward and reverse reaction rate coefficients for a chemical reaction $j$ are related to each other through the reaction equilibrium constant, $K$:
 
@@ -103,7 +105,7 @@ Entropy and enthalpy are thermodynamic quantities that are defined as follows, w
   S_{i} &= \int_{T_{0}}^{T}{\frac{C_{p,i}\left(T\right)}{T} \ \mathrm{d}T}, \qquad i = 1, \ldots, N
 \end{align}
 
-Instead of determining the heat capacity of each chemical species from first principles, we approximate the heat capacity using the 7th order NASA polynomials (whose straighforward yields entropy and enthalpy):
+Instead of determining the heat capacity of each chemical species from first principles, we approximate the heat capacity using the 7th order NASA polynomials, which are polynomial fits for the temperature dependence of the heat capacity and whose straighforward integration yields entropy and enthalpy:
 
 $$\frac{C_{p,i}}{R} = a_{i1} + a_{i2}T + a_{i3}T^{2} + a_{i4}T^{3} + a_{i5}T^{4}$$
 
@@ -115,41 +117,45 @@ for species $i = 1,\dots, N$.
 
 ### Summary of notation
 
-$\nu_{ij}^{\prime}$ : Stoichiometric coefficients of reactants,
+$\nu_{ij}^{\prime}$: Stoichiometric coefficients of reactants,
 
-$\nu_{ij}^{\prime\prime}$ : Stoichiometric coefficients of products,
+$\nu_{ij}^{\prime\prime}$: Stoichiometric coefficients of products,
 
-$\omega_{j}$ : Progress rate of reaction $j$,
+$\nu_{ij}$: Net stoichiometric coefficient: $\nu_{ij}'' - \nu_{ij}'$
 
-$x_{i}$ : Concentration of specie $i$,
+$\omega_{j}$: Progress rate of reaction $j$,
 
-$k_{j}^{\left(f\right)}$: forward reaction rate coefficient for reaction $j$,
+$x_{i}$: Concentration of species $i$,
 
-$k_{j}^{\left(b\right)}$: backward reaction rate coefficient for reaction $j$,
+$k_{j}^{\left(f\right)}$: Forward reaction rate coefficient for reaction $j$,
 
-$K_{j}$: *equilibrium coefficient* for reaction $j$,
+$k_{j}^{\left(b\right)}$: Backward reaction rate coefficient for reaction $j$,
 
-$p_{0}$: pressure of the reactor (usually $10^{5}$ Pa),
+$K_{j}$: Equilibrium constant for reaction $j$,
+
+$p_{0}$: pressure of the reactor,
 
 $\Delta S_{j}$: the entropy change of reaction $j$,
 
 $\Delta H_{j}$: the enthalpy change of reaction $j$,
 
-$C_{p,i}$: specific heat at constant pressure (given by the NASA polynomial)
+$C_{p,i}$: specific heat at constant pressure for reactant $i$.
 
 ## Quantitative modeling of chemical reactions
 
-There are two main methods for modeling the time evolution of a system of chemically reacting species: deterministic modeling, using ordinary differential equations and treating chemical abundances as continuous variables, and stochastic modeling, which accounts for the discrete nature of chemical species and the random nature of reactions. The latter case becomes relevant when chemical abundances []
+There are two main methods for modeling the time evolution of a system of chemically reacting species: deterministic modeling, using ordinary differential equations and treating chemical abundances as continuous variables, and stochastic modeling, which accounts for the discrete nature of chemical species and the random nature of reactions. The latter case becomes relevant when chemical abundances are countable, and the time interval between reactions can be modeled as a stochastic variable.
 
-The clients could call the chemkin package and obtained the right-hand-side of an ODE. They can then use it as the righ-hand-side of the ODE, or in a neural net code to learn new reaction pathways.
+``chemical-kinetics`` offers both deterministic and stochastic simulation of reaction systems. Necessary inputs include description of the system of reactions, temperature, and the initial reactant concentrations or abundances. The methodology used for these simulations is described in this section.
 
-We offered two options for the user after obtaining the right-hand-side of an ODE. The user could choose to solve the ODE with the deterministic simulator or simulate the abundances of all species using the stochastic simulator. The simulation result will be presented by plots showing the trajectories of species abundances over time.
+### Deterministic modeling
+Deterministic modeling of system of chemical reactions occurs by numerically integrating reaction rates forward in time. The calculations to obtain instantaneous reaction rates are described in the preceding section.
 
-### Deterministic
-For deterministic simulator, we implemented three ODE solvers, backward euler method, backward differentiation formula and Runge-Kutta-Fehlberg method. To solve ODE problems in chemical kinetics, however, Runge-Kutta-Fehlberg method (rk45) is NOT recommended as the functions we are dealing with are usually stiff. It is recommended that the user sets the step size to be small (eg. 0.01) to achieve higher simulation accuracy when using the backward euler method and the backward differentiation. If the abundances of species become negative in the simulation process, the simulation will set the negative abundances back to zero as abundances should never be negative. 
+For deterministic simulations, there are three ODE solvers available: the backward euler method, the backward differentiation formula, and the Runge-Kutta-Fehlberg method. The third method, Runge-Kutta-Fehlberg (rk45), is **not** recommended however, as the equations involved with are usually stiff. 
 
-### Stochastic
-For stochastic simulator, we implemented the Gillespie algorithm. The principle behind the algorithm is that waiting times between reaction events are exponentially distributed; thus the time until the next reaction is drawn from an exponential distribution (the simulation is advanced in time by this amount). The particular reaction event that occurs is randomly selected from among the possible reactions in proportion to their probabilities.
+It is recommended that the user sets the step size to be small (eg. 0.01) to achieve higher simulation accuracy when using the backward euler method and the backward differentiation formula. If the abundances of species become negative in the simulation process, the simulation will set the negative abundances back to zero as abundances should never be negative. 
+
+### Stochastic modeling
+Stochastic simulation of chemical abundances uses the Gillespie stochastic simulation algorithm. The principle behind the algorithm is that waiting times between reaction events are exponentially distributed; thus the time until the next reaction is drawn from an exponential distribution (the simulation is advanced in time by this amount). The particular reaction event that occurs is randomly selected from among the possible reactions in proportion to their probabilities.
 
 The following is a summary of the simulation process:
 1. Generate two random numbers $r_{1}$, $r_{2}$ uniformly distribution in (0,1).
@@ -168,8 +174,8 @@ To elaborate, the propensity function for a chemical reaction describes the prob
 The quantity of species `A` present at time `t` is given by `A(t)`. The propensity function for the above reaction is $A(t)(A(t)-1)k$. In a more complex reaction system, each elementary reaction will have its own propensity, and it is necessary to calculate the propensity of all
 elementary reactions in order to find the total "propensity" for a reaction to occur, in order to draw time $\tau$ until the next reaction from an exponential distribution.
 
-# Installation
-
+Installation
+============
 
 A latest version of `chemical-kinetics` can downloaded from Github [here](https://github.com/cs207-2017-group13/cs207-FinalProject).
 
@@ -181,18 +187,19 @@ Obtain the latest version from github, change to the directory, and install usin
 	pip3 install ./
 
 ### Testing
-sers can run the test suite by calling pytest from the main directory, i.e. 
+Users can run the test suite by calling pytest from the main directory, e.g.
 
     pytest --cov=src
 
 ## Dependencies
-Our package depends on `scipy`, `numpy`, `xml`, and `matplotlib` packages.
+Our package depends on `scipy`, `numpy`, and `matplotlib` packages.
 
 ## Contributing to the development version
 (Fork and pull request)
 
 
-# Basic Usage and Examples
+Basic Usage and Examples
+========================
 
 ## `XMLReader` class: Read and parse XML input file
 
