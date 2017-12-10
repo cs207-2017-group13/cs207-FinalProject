@@ -111,7 +111,7 @@ if option == 'y':
 						print(' 3) Runge-Kutta-Fehlberg')
 						print(' 4) Go to Previous Menu')
 						print(' 5) Exit')
-						det_choice = input('\nPlease input your choice  solver : ')
+						det_choice = input('\nPlease input your choice : ')
 						
 						if det_choice not in ['1','2','3','4','5']:
 							print('\n\033[1m' + 'Please enter valid choice.'+'\033[0m\n')
@@ -146,7 +146,7 @@ if option == 'y':
 								print('\nSolution : \n', det_sim.simulate('bdf'),'\n')
 							det_plot= input('Do you want to see the plot of concentrations over time (y/n) : ' )
 							if det_plot =='y':
-								det_sim.plot()
+								det_sim.plot_simulation()
 							else:
 								pass
 
@@ -159,7 +159,7 @@ if option == 'y':
 								print('\nSolution: \n', det_sim.simulate('backward_euler'),'\n')
 							det_plot= input('Do you want to see the plot of concentrations over time (y/n) : ' )
 							if det_plot =='y':
-								det_sim.plot()
+								det_sim.plot_simulation()
 							else:
 								pass
 
@@ -172,7 +172,7 @@ if option == 'y':
 								print('\nSolution : \n', det_sim.simulate('rk45'),'\n')
 							det_plot= input('Do you want to see the plot of concentrations over time (y/n) : ' )
 							if det_plot =='y':
-								det_sim.plot()
+								det_sim.plot_simulation()
 							else:
 								pass
 
@@ -192,11 +192,12 @@ if option == 'y':
 						stoc_sim = reaction_systems[reactionChoice-1].setup_reaction_simulator('stochastic', abundance, temp, t_span, system_volume=system_volume)
 					else:
 						stoc_sim = reaction_systems[reactionChoice-1].setup_reaction_simulator('stochastic', abundance, temp, t_span)
-
+					print('\nSolution :')	
 					stoc_sim.simulate()
+					print('\n')
 					stoc_plot= input('Do you want to see the plot of concentrations over time (y/n) : ' )
 					if stoc_plot == 'y':
-						stoc_sim.plot()
+						stoc_sim.plot_simulation()
 					else:
 						pass
 
