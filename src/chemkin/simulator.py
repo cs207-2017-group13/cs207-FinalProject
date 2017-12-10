@@ -240,7 +240,6 @@ class StochasticSimulator(ReactionSimulator):
         Uses the basic Gillespie stochastic simulation algorithm.
         """
         reaction_propensities = self.calculate_reaction_propensities()
-        print(reaction_propensities)
         propensity_cumsum = np.cumsum(reaction_propensities)
         propensity_sum = propensity_cumsum[-1]
         if propensity_sum == 0.:

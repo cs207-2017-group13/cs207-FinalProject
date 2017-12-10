@@ -6,6 +6,8 @@ before_install:
     - pip install scipy
     - pip install pytest pytest-cov
     - pip install coveralls
+env:
+    - MPLBACKEND="agg"
 install:
     - pip install -e .
 script:
