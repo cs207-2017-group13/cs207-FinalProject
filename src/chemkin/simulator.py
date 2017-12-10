@@ -380,6 +380,18 @@ class DeterministicSimulator(ReactionSimulator):
             y = [0 if i<0 else i for i in y]
         return self.reaction_system.calculate_reaction_rate(y, self.temperature)
 
+    def plot_simulation(self, show=True, savefig=None):
+        """Plot concentrations versus time.
+
+        """
+        figure, axes = self.prepare_plot()
+        axes.set_ylabel("Concentrations")
+        if show:
+            plt.show()
+        if savefig:
+            figure.savefig(savefig)
+        return figure, axes
+
 
 if __name__ == "__main__":
     import doctest
