@@ -62,6 +62,7 @@ def test_stochastic_simulator():
     abundances = [10]*5
     temperature = 400.
     t_span = (0, 0.001)
+    system_volume = 1e-15
     stochastic_simulator = simulator.StochasticSimulator(
-        reaction_system, abundances, temperature, t_span)
+        reaction_system, abundances, temperature, t_span, system_volume)
     stochastic_simulator.simulate()
