@@ -17,8 +17,21 @@ class ReactionSimulator():
     -------
     prepare_plot()
     """
+    def _validate_arguments(self):
+        """Ensure simulation parameters agree with `ReactionSystem`.
+
+        """
+        if self.temperature <= 0:
+            raise ValueError("Temperature must be positive.")
+        if len(self.abundances[0]) != len(self.reaction_system.species):
+            raise ValueError("Number of provided abundances (%d) does not "
+                             "match number of chemical species (%d)." % (
+                                 len(self.abundances[0]),
+                                 len(self.reaction_system.species[0])))
+        assert self.t_span[1] < self.t_span[0]
+
     def prepare_plot(self):
-        """Plot abundances/concentrations of species over times.
+        """Setup plot objects. Helper function.
 
         Returns
         -------
@@ -74,10 +87,14 @@ class StochasticSimulator(ReactionSimulator):
     Examples
     --------
     >>> # From `ReactionSystem`
-    >>> reader = XMLReader("tests/rxns.xml")
+    >>> reader = chemkin.chemkin.XMLReader("tests/rxns.xml")
     >>> reaction_system = reader.get_reaction_systems()[0]
     >>> stochastic_simulator = reaction_system.setup_reaction_simulator(
-    ... "stochastic", [10, 10, 10, 10, 10], (0, 30000))
+    ... "stochastic", [10, 10, 10, 10, 10], 800., (0, 30000))
+
+    >>> # From constructor
+    >>> stochastic_simulator = StochasticSimulator(reaction_system,
+    ... [10, 10, 10, 10, 10], 800., (0, 30000), 1e-15)
 
     """
     def __init__(self, reaction_system, initial_abundances, temperature,
@@ -87,7 +104,9 @@ class StochasticSimulator(ReactionSimulator):
         self.times = [t_span[0]]
         self.t_span = t_span
         self.temperature = temperature
+        assert isinstance(system_volume, float)
         self.system_volume = system_volume
+        self._validate_arguments()
         self.state_change_matrix = self.calculate_state_change_matrix()
         self.stochastic_constants = self.calculate_stochastic_constants()
         # self.reaction_propensities = self.calculate_reaction_propensities()
@@ -200,6 +219,11 @@ class StochasticSimulator(ReactionSimulator):
         zero. This can happen in a system with irreversible reactions
         in which no reactants are remaining.
 
+        Parameters
+        ----------
+        seed : int
+            Sets numpy RNG seed. Default of `None` will set seed
+            randomly.
         """
         np.random.seed(seed)
         while self.times[-1] < self.t_span[-1]:
@@ -228,13 +252,16 @@ class StochasticSimulator(ReactionSimulator):
         self.abundances.append(self.abundances[-1] + state_change_vector)
 
     def plot_simulation(self, show=True, savefig=None):
+        """Plot abundances versus time.
+
+        """
         figure, axes = self.prepare_plot()
         axes.set_ylabel("Abundances")
         if show:
             plt.show()
         if savefig:
             figure.savefig(savefig)
-        return
+        return figure, axes
 
 
 class DeterministicSimulator(ReactionSimulator):
@@ -266,15 +293,13 @@ class DeterministicSimulator(ReactionSimulator):
     def __init__(self, reaction_system, initial_abundances, temperature,
                  t_span, dt=0.01):
         self.reaction_system = reaction_system
-        if temperature <=0:
-            raise ValueError("Temperature must be positive.")
         self.temperature = temperature
-        if len(initial_abundances) != len(self.reaction_system.species):
-            raise ValueError("Invalid initial species abundances.")
-        self.times = [t_span[0]]
-        self.abundances = [initial_abundances]
         self.t_span = t_span
+        self.times = [self.t_span[0]]
+        self.abundances = [initial_abundances]
+        assert isinstance(dt, float)
         self.dt = dt
+        self._validate_arguments()
         self.ode_integrator = ode_solver.ODE_solver(
             self.diff_func, initial_abundances, t_span, self.dt, False)
 

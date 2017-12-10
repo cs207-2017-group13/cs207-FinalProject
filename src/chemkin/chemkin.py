@@ -3,6 +3,7 @@ import numpy as np
 import chemkin.thermodynamics as thermodynamics
 import chemkin.simulator as simulator
 
+
 class ElementaryReaction():
     """Class representing a single elementary reaction.
 
@@ -329,10 +330,25 @@ class ReactionSystem():
         info : str
               Containing information on species and stoichiometric coefficients
         """
-        info = '''Species: {} \nStoichiometric coefficients of reactants: {} \n
-            Stoichiometric coefficients of products: {}'''.format(
-                self.species,
-                self.reactant_coefficients, self.product_coefficients)
+        info = "Species: {}".format(self.species)
+        for i, (reaction, reactant_row, product_row) in enumerate(
+                zip(self.elementary_reactions,
+                    np.rollaxis(self.reactant_coefficients, -1),
+                    np.rollaxis(self.product_coefficients, -1))):
+            reaction_str = "\nRxn %d\t: " % (i+1)
+            for species, coefficient in zip(
+                    self.species, reactant_row):
+                if coefficient != 0:
+                    reaction_str += "%.0f %s + " % (coefficient, species)
+            if reaction.reversible:
+                reaction_str = reaction_str[:-2] + " <=>  "
+            else:
+                reaction_str = reaction_str[:-2] + " -->  "
+            for species, coefficient in zip(
+                    self.species, product_row):
+                if coefficient != 0:
+                    reaction_str += "%.0f %s + " % (coefficient, species)
+            info += reaction_str[:-2]
         return info
 
     def __len__(self):
@@ -578,37 +594,42 @@ class ReactionSystem():
         reversible = [i.reversible for i in self.elementary_reactions]
         return reversible
 
-    def setup_reaction_simulator(self, simulation_type, abundances, temperature,
-                                t_span, dt=0.01, system_volume=1e-15):
-        """Deterministic simulation or stochastic simulation
+    def setup_reaction_simulator(self, simulation_type, abundances,
+                                 temperature, t_span, dt=0.01,
+                                 system_volume=1e-15):
+        """Build a simulator instance for reaction simulations.
 
         Parameters
         ----------
-        simulation_type : string
-                          Type of simulation, deterministic or stochastic
-        abundances :      array_like
-                          Abundances of all species
-        temperature :     array_like
-                          Temperatures
-        t_span :          tuple of floats
-                          Time span of the reactions users want to 
-                          simulate
-        dt :              float
-                          Size of time steps users want to simulate
+        simulation_type : str
+            Type of simulation. "deterministic" or "stochastic"
+        abundances : array_like
+            Abundances of all species
+        temperature : float
+            Simulation temperature
+        t_span : 2-tuple
+            Time span of the reactions users want to simulate, from `t_span[0]`
+            to ``t_span[1]``.
+        dt : float
+            Size of time steps users want to simulate. Relevant
+            only for deterministic simulations.
         system_volume : float
-                        System volume
+            Volume of reaction system. Relevant only for stochastic
+            simulations.
 
         Returns
         -------
-        kb : np.ndarray
-            Backward rate cofficients
+        simulator : `ReactionSimulator`
+            `ReactionSimulator` instance. Either child class
+            `DeterministicSimulator` or `StochasticSimulator`.
 
         Examples
         --------
         >>> reader = XMLReader("tests/rxns.xml")
         >>> reaction_system = reader.get_reaction_systems()[0]
         >>> concs = np.array([1., 2., 1., 3., 1.])*1e-05
-        >>> det_sim = reaction_system.setup_reaction_simulator('deterministic', concs, 800, [0, 0.1], dt=0.1)
+        >>> det_sim = reaction_system.setup_reaction_simulator(
+        ... 'deterministic', concs, 800, [0, 0.1], dt=0.1)
         >>> det_sim.simulate()
         ([0, 0.1], [array([  1.00000000e-05,   2.00000000e-05,   1.00000000e-05,
                  3.00000000e-05,   1.00000000e-05]), array([  1.31232803e-05,   1.68767197e-05,   1.33004078e-05,
@@ -763,7 +784,7 @@ class XMLReader():
         return reaction_systems
 
     def __repr__(self):
-        return "%s(%s)" % (self.__class__.__name__, self.xml_file)
+        return "%s(%r)" % (self.__class__.__name__, self.xml_file)
 
 
 if __name__ == "__main__":

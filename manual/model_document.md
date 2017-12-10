@@ -10,8 +10,8 @@
     - [Calculating reaction rates](#calculating-reaction-rates)
         - [Summary of notation](#summary-of-notation)
     - [Quantitative modeling of chemical reactions](#quantitative-modeling-of-chemical-reactions)
-        - [Deterministic](#deterministic)
-        - [Stochastic](#stochastic)
+        - [Deterministic modeling](#deterministic-modeling)
+        - [Stochastic modeling](#stochastic-modeling)
 - [Installation](#installation)
     - [Installation instructions](#installation-instructions)
         - [Testing](#testing)
@@ -24,8 +24,10 @@
     - [`Thermochem` class: Class for calculating the backward reaction rate](#thermochem-class-class-for-calculating-the-backward-reaction-rate)
     - [`Rxnset` class: Read and store NASA polynomial coefficients](#rxnset-class-read-and-store-nasa-polynomial-coefficients)
     - [`memoized` class: Caches a function's return value each time it is called](#memoized-class-caches-a-functions-return-value-each-time-it-is-called)
-    - [`ODE_solver` class: Solve ordinary differential equation with three methods](#odesolver-class-solve-ordinary-differential-equation-with-three-methods)
+- [New Feature](#new-feature)
+    - [`ReactionSimulator` class: Base class for simulations.](#reactionsimulator-class-base-class-for-simulations)
     - [`DeterministicSimulator` class: Class for deterministic simulation](#deterministicsimulator-class-class-for-deterministic-simulation)
+    - [`ODE_solver` class: Solve ordinary differential equation with three methods](#odesolver-class-solve-ordinary-differential-equation-with-three-methods)
 
 <!-- markdown-toc end -->
 
