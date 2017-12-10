@@ -15,8 +15,8 @@ reaction_systems = xmlfile.get_reaction_systems()
 length = len(reaction_systems)
 option = input('Do you wish to continue with the UI (y/n) : ')
 if option == 'y':
-	choice = '0'
-	while(choice != '5'):
+	main_menu_choice = '0'
+	while(main_menu_choice != '5'):
 
 		print('\n\033[1m' + '\033[4m'+'Main Menu'+'\033[0m'+'\033[0m')
 		print(' 1) Get Reaction System Information')
@@ -24,9 +24,9 @@ if option == 'y':
 		print(' 3) Reaction Simulation')
 		print(' 4) Switch to IPython terminal')
 		print(' 5) Exit')
-		choice = input('Please enter your choice : ')
+		main_menu_choice = input('Please enter your choice : ')
 
-		if choice == '1':
+		if main_menu_choice == '1':
 			reactionChoice = input('\nThere are {} reaction/s in the XML file. Please enter the number corresponding to the'
 			 ' reaction you want to work on : '.format(length))
 			reactionChoice = int(reactionChoice)
@@ -59,7 +59,7 @@ if option == 'y':
 				
 				
 				elif reaction_info_choice == '6':
-					choice = '5'
+					main_menu_choice = '5'
 					break
 
 				else:
@@ -69,7 +69,7 @@ if option == 'y':
 						print('\n\033[1m' + 'Please enter valid choice.'+'\033[0m\n')
 
 
-		elif choice == '2':
+		elif main_menu_choice == '2':
 			reactionChoice = input('\nThere are {} reaction/s in the XML file. Please enter the number corresponding to the'
 			 ' reaction you want to work on : '.format(length))
 			reactionChoice = int(reactionChoice)
@@ -80,7 +80,7 @@ if option == 'y':
 			conc = np.fromstring(conc, dtype=int, sep=',')
 			print('\nReaction Rate: \n', reaction_systems[reactionChoice-1].calculate_reaction_rate(conc,temp),'\n')
 
-		elif choice == '3':
+		elif main_menu_choice == '3':
 			reactionChoice = input('\nThere are {} reaction/s in the XML file. Please enter the number corresponding to the'
 			 ' reaction you want to work on : '.format(length))
 			reactionChoice = int(reactionChoice)
@@ -88,28 +88,39 @@ if option == 'y':
 
 			sim_choice = '0'
 			while(sim_choice != '3'):
+				if sim_choice == '4':
+					main_menu_choice = '5'
+					break
 
 				print('\n\033[1m' + '\033[4m'+'Reaction Simulation Menu'+'\033[0m'+'\033[0m')
 				print(' 1) Deterministic')
 				print(' 2) Stochastic')
 				print(' 3) Go to Previous Menu')
+				print(' 4) Exit')
 
 				sim_choice = input('Please enter your choice : ')
 
+
 				if sim_choice == '1':
 					det_choice = '0'
+
 					while(det_choice != '4'):
 						print('\n\033[1m' + '\033[4m'+'Deterministic Simulation Menu'+'\033[0m'+'\033[0m')
 						print(' 1) Backward Differentiation Formula.')
 						print(' 2) Backward Euler')
 						print(' 3) Runge-Kutta-Fehlberg')
 						print(' 4) Go to Previous Menu')
+						print(' 5) Exit')
 						det_choice = input('\nPlease input your choice  solver : ')
 						
-						if det_choice not in ['1','2','3','4']:
+						if det_choice not in ['1','2','3','4','5']:
 							print('\n\033[1m' + 'Please enter valid choice.'+'\033[0m\n')
 
 						if det_choice == '4':
+							break
+
+						if det_choice == '5':
+							sim_choice = '4'
 							break
 						
 
@@ -171,7 +182,7 @@ if option == 'y':
 					print('\n\033[1m' + '\033[4m'+'Stochastic Simulation Menu'+'\033[0m'+'\033[0m')
 					abundance = input('\nPlease enter initial abundances for each of the {} species in the reaction in the form {} : '.format(species, '`1E-05, 2E-05, ...`'))
 					abundance = np.fromstring(abundance, dtype=float, sep=',')
-					temp = input('Please endter temperature : ')
+					temp = input('Please enter temperature : ')
 					temp = float(temp)
 					t_span = input('Please enter comma separate time span (start time, end time) of the reactions to be simulated : ')
 					t_span = np.fromstring(t_span, dtype=float, sep=',')
@@ -194,11 +205,10 @@ if option == 'y':
 					print('\n\033[1m' + 'Please enter valid choice.'+'\033[0m\n')
 
 
-
-		elif choice == '4':
+		elif main_menu_choice == '4':
 			embed(header="Available name: reaction_systems\n"
 	      		  "  (a list of `ReactionSystem`s)")
-		elif choice != '1' and choice != '2' and choice != '3' and choice != '4' and choice != '5':
+		elif main_menu_choice not in ['1','2','3','4','5']:
 			print('\n\033[1m' + 'Please enter valid choice.'+'\033[0m\n')
 
 
