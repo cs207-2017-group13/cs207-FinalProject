@@ -297,7 +297,10 @@ class DeterministicSimulator(ReactionSimulator):
         self.t_span = t_span
         self.times = [self.t_span[0]]
         self.abundances = [initial_abundances]
-        assert isinstance(dt, float)
+        try:
+            dt = float(dt)
+        except:
+            raise ValueError("Could not convert dt=%s to float" % dt)
         self.dt = dt
         self._validate_arguments()
         self.ode_integrator = ode_solver.ODE_solver(
