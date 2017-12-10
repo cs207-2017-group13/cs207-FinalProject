@@ -152,7 +152,9 @@ Deterministic modeling of system of chemical reactions occurs by numerically int
 
 For deterministic simulations, there are three ODE solvers available: the backward euler method, the backward differentiation formula, and the Runge-Kutta-Fehlberg method. The third method, Runge-Kutta-Fehlberg (rk45), is **not** recommended however, as the equations involved with are usually stiff. 
 
-It is recommended that the user sets the step size to be small (eg. 0.01) to achieve higher simulation accuracy when using the backward euler method and the backward differentiation formula. If the abundances of species become negative in the simulation process, the simulation will set the negative abundances back to zero as abundances should never be negative. 
+It is recommended that the user sets the step size to be small (eg. 0.01) to achieve higher simulation accuracy when using the backward euler method and the backward differentiation formula. 
+
+Note, if numerical integration leads to negative chemical species conentrations, such concentrations will be truncated to 0, since chemical concentrations cannot be negative.
 
 ### Stochastic modeling
 Stochastic simulation of chemical abundances uses the Gillespie stochastic simulation algorithm. The principle behind the algorithm is that waiting times between reaction events are exponentially distributed; thus the time until the next reaction is drawn from an exponential distribution (the simulation is advanced in time by this amount). The particular reaction event that occurs is randomly selected from among the possible reactions in proportion to their probabilities.
@@ -169,7 +171,9 @@ The following is a summary of the simulation process:
 5. The $j$th reaction takes place. Update the numbers of chemical species accordingly.
 6. Continue simulation by returning to step 1.
 
-To elaborate, the propensity function for a chemical reaction describes the probability of a particular reaction happening. For instance, consider the following bimolecular reaction:
+To elaborate, the propensity function for a chemical reaction describes the probability of a particular reaction happening. 
+
+For instance, consider the following bimolecular reaction:
  $$ A + A \rightarrow B;\quad rate\;k \qquad (1) $$
 The quantity of species `A` present at time `t` is given by `A(t)`. The propensity function for the above reaction is $A(t)(A(t)-1)k$. In a more complex reaction system, each elementary reaction will have its own propensity, and it is necessary to calculate the propensity of all
 elementary reactions in order to find the total "propensity" for a reaction to occur, in order to draw time $\tau$ until the next reaction from an exponential distribution.
@@ -195,7 +199,7 @@ Users can run the test suite by calling pytest from the main directory, e.g.
 Our package depends on `scipy`, `numpy`, and `matplotlib` packages.
 
 ## Contributing to the development version
-(Fork and pull request)
+``chemical-kinetics`` is hosted on Github and gladly accepts 
 
 
 Basic Usage and Examples
