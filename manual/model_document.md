@@ -346,18 +346,39 @@ This class has three special methods:
  - `__get__(obj, objtype)`: Support instance methods
 
 
-# New Feature
+New Feature
+===========
+
+We elaborated the motivations for implementing a deterministic simulator and a stochastic simulator in the section of `Scientific Background`. We added two modules containing four classes as shown below:
 
 ## `ReactionSimulator` class: Base class for simulations.
+
 This class is a base class for `DeterministicSimulator` and `StochasticSimulator`.
 
 It has one method:
- - `plot()`: Shows a plot of the abundances of species over time.
+ - `prepare_plot()`: Prepares a plot of the abundances/concentrations of species over time. The inherited class can call this functions, add additional features to the plot and show the plot.
 
+
+## `StochasticSimulator` class: Class for stochastic simulation
+
+This class inherits from base class `ReactionSimulator`. It carries out stochastic reaction simulations using the Gillespie stochastic simulation algorithm. Note that a reversible elementary reaction represents two different reactions in a stochastic simulation.
+
+It has four methods:
+ - `calculate_state_change_matrix()`: Determine how abundances change with each reaction event.
+ - `calculate_stochastic_constants(temperature)`: Determine stochastic rate constants from deterministic rate constants.
+ - `calculate_reaction_propensities()`: Determine the propensity of each reaction, the probability of the reaction to occur in the next interval [t, t+dt).
+ - `simulate()`: Run stochastic simulation between `t_span[0]` and `t_span[1]`.
+
+Example:
+```python
+import chemkin.chemkin as chemkin
+import chemkin.simulator as simulator
+```
+ 
 
 ## `DeterministicSimulator` class: Class for deterministic simulation
 
-This class inherits from the `ReactionSimulator` class. It simulate species abundances deterministically.
+This class inherits from the `ReactionSimulator` class. It calls the `ODE_solver` class to numerically integrate reaction rates forward in time, and simulates the concentration of species deterministically.
 
 This class has two methods:
  - `simulate(method='bdf', epsilon = 1e-06)`: We implemented three methods to solve the ordinary differential equation. Backward differentiation formula and backward eulerare good for stiff functions, and rk45 is accurate for non-stiff functions. BDF is the most suitable for solving ODE problems in chemical kinetics, so our default method is set as BDF.
