@@ -260,7 +260,7 @@ class StochasticSimulator(ReactionSimulator):
 
         """
         figure, axes = plt.subplots()
-        axes.step(self.times, self.abundances)
+        axes.step(self.times, self.abundances, where="post")
         axes.set_xlabel("Time")
         axes.set_ylabel("Abundances")
         axes.legend(self.reaction_system.species, loc='center right')

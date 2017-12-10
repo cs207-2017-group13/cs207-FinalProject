@@ -11,6 +11,6 @@ env:
 install:
     - pip install -e .
 script:
-    - pytest --cov=src --ignore=src/bin
+    - pytest --cov=src --ignore=src/bin --ignore=examples
 after_success:
     - coveralls
