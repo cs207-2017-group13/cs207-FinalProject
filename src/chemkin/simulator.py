@@ -34,22 +34,6 @@ class ReactionSimulator():
                                  len(self.reaction_system.species[0])))
         assert self.t_span[1] > self.t_span[0]
 
-    def prepare_plot(self):
-        """Setup plot objects. Helper function.
-
-        Returns
-        -------
-        plot : plot of abundances/concentrations of species
-               over times
-        """
-        figure, axes = plt.subplots()
-        axes.plot(self.times, self.abundances)
-        axes.set_xlabel("Time")
-        axes.legend(self.reaction_system.species, loc='best')
-        # file_name = "examples/figures/"+name+".png"
-        # plt.savefig(file_name, dpi=125)
-        return figure, axes
-
 
 class StochasticSimulator(ReactionSimulator):
     """Carries out stochastic reaction simulations.
@@ -281,18 +265,16 @@ class DeterministicSimulator(ReactionSimulator):
     Parameters
     ----------
     reaction_system : `ReactionSystem` class object
-        Containing all the methods and attributes of
-        `ReactionSystem` class
+        `ReactionSystem` instance with all the details regarding
+        reaction to simulate.
     initial_abundances : list
-                        Initial abundances of each species inside
-                        the reaction_system
-    temperature :        float
-                        Temperature when the reaction take place
-    t_span :             tuple of floats
-                        Time span of the reactions users want to 
-                        simulate
-    dt :                 float
-                        size of time steps users want to simulate
+        Initial abundances (concentrations) of each species.
+    temperature : float
+        Temperature when the reaction take place.
+    t_span : tuple
+        Time span to simulate: (begin, end)
+    dt : float
+        Simulation time step size.
 
     Methods
     -------
@@ -326,19 +308,18 @@ class DeterministicSimulator(ReactionSimulator):
 
         Parameters
         ----------
-        method :  string
-                 default as 'bdf'-- backward differentiation formula
-                 name of the ODE solver
+        method : str
+            Solver method. Defaults to 'bdf' -- backward
+            differentiation formula.
         epsilon : float
-                 default as 1e-06
-                 tolerance of error
+            Tolerance of error. Default is 1e-06
 
         Returns
         -------
-        self.times :      array
-                         time of evaluations
-        self.abundances : array
-                         abundances of species at every time step
+        self.times : list
+            Times.
+        self.abundances : list
+            Abundances of species at every time step
 
         Examples
         --------
@@ -376,13 +357,14 @@ class DeterministicSimulator(ReactionSimulator):
         Parameters
         ----------
         t : float
-          time
-        y : array
-           value of the variable we would like to integrate
+            Time.
+        y : array_like
+            Value of the variable we would like to integrate.
 
         Returns
         -------
-        function : right hand side of the ODE function
+        function
+            right hand side of the ODE function
         '''
         if (y<0).any():
             y = [0 if i<0 else i for i in y]
