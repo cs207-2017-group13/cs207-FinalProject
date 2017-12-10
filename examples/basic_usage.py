@@ -1,4 +1,5 @@
 import chemkin.chemkin as chemkin
+import numpy as np
 
 # irreversible reactions
 concs = np.array([1., 2., 1., 3., 1.])*1e-05
