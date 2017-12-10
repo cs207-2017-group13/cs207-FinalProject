@@ -87,6 +87,7 @@ class StochasticSimulator(ReactionSimulator):
     Examples
     --------
     >>> # From `ReactionSystem`
+    >>> import chemkin.chemkin
     >>> reader = chemkin.chemkin.XMLReader("tests/rxns.xml")
     >>> reaction_system = reader.get_reaction_systems()[0]
     >>> stochastic_simulator = reaction_system.setup_reaction_simulator(
@@ -306,7 +307,7 @@ class DeterministicSimulator(ReactionSimulator):
         self.ode_integrator = ode_solver.ODE_solver(
             self.diff_func, initial_abundances, t_span, self.dt, False)
 
-    def simulate(self, method='bdf', epsilon = 1e-06):
+    def simulate(self, method='bdf', epsilon=1e-06):
         """Simulate species abundances deterministically.
 
         We implemented three methods to solve the ordinary differential 
