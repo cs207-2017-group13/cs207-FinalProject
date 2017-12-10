@@ -255,12 +255,17 @@ class StochasticSimulator(ReactionSimulator):
         state_change_vector = self.state_change_matrix[reaction_index]
         self.abundances.append(self.abundances[-1] + state_change_vector)
 
-    def plot_simulation(self, show=True, savefig=None):
+    def plot_simulation(self, show=True, savefig=None, title=None):
         """Plot abundances versus time.
 
         """
-        figure, axes = self.prepare_plot()
+        figure, axes = plt.subplots()
+        axes.step(self.times, self.abundances)
+        axes.set_xlabel("Time")
         axes.set_ylabel("Abundances")
+        axes.legend(self.reaction_system.species, loc='center right')
+        if title:
+            axes.set_title(title)
         if show:
             plt.show()
         if savefig:
@@ -383,12 +388,17 @@ class DeterministicSimulator(ReactionSimulator):
             y = [0 if i<0 else i for i in y]
         return self.reaction_system.calculate_reaction_rate(y, self.temperature)
 
-    def plot_simulation(self, show=True, savefig=None):
+    def plot_simulation(self, show=True, savefig=None, title=None):
         """Plot concentrations versus time.
 
         """
-        figure, axes = self.prepare_plot()
+        figure, axes = plt.subplots()
+        axes.step(self.times, self.abundances)
+        axes.set_xlabel("Time")
         axes.set_ylabel("Concentrations")
+        axes.legend(self.reaction_system.species, loc='center right')
+        if title:
+            axes.set_title(title)
         if show:
             plt.show()
         if savefig:
