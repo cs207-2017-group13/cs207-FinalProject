@@ -55,7 +55,9 @@ A chemical equation may describe an overall net reaction, indicating the ratio o
 Laboratory and computational experiments studying chemical kinetics have several motivations, including...
 
 - Determining reaction mechanisms; hypothesized mechanisms can be validated and tested.
+
 - Finding rate-determining steps, the reaction step that controls the overall reaction rate.
+
 - Measuring equilibrium: at what concentrations is reaction equilibrium reached and how quickly is that state reached.
 
 ## Calculating reaction rates
@@ -162,15 +164,21 @@ Note, if numerical integration leads to negative chemical species conentrations,
 Stochastic simulation of chemical abundances uses the Gillespie stochastic simulation algorithm. The principle behind the algorithm is that waiting times between reaction events are exponentially distributed; thus the time until the next reaction is drawn from an exponential distribution (the simulation is advanced in time by this amount). The particular reaction event that occurs is randomly selected from among the possible reactions in proportion to their probabilities.
 
 The following is a summary of the simulation process:
+
 1. Generate two random numbers $r_{1}$, $r_{2}$ uniformly distribution in (0,1).
+
 2. Compute the propensity function of each reaction and compute
    $$ \alpha_0 = \sum_{i=1}^{q} \alpha_{i}(t) $$
+
 3. Compute the time interval until the next chemical reaction via
    $$ \tau = \frac{1}{\alpha_{0}}\ln[1/r_{1}] $$
+
 4. Compute which reaction occurs. Find j such that
    $$ r_{2} \geq \frac{1}{\alpha_{0}} \sum_{i=1}^{j-1} \alpha_{i} $$
    $$ r_{2} < \frac{1}{\alpha_{0}} \sum_{i=1}^{j} \alpha_{i} $$
+
 5. The $j$th reaction takes place. Update the numbers of chemical species accordingly.
+
 6. Continue simulation by returning to step 1.
 
 To elaborate, the propensity function for a chemical reaction describes the probability of a particular reaction happening. 
