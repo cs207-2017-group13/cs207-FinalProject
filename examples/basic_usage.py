@@ -8,7 +8,7 @@ reaction_system = reader.get_reaction_systems()[0]
 react_rate = reaction_system.calculate_reaction_rate(concs, 800)
 
 # reversible reactions
-abundances = np.array([10., 10., 10., 10., 10.])
+abundances = np.array([10., 10., 10., 10., 10., 10., 10., 10.])
 concs = abundances/6.02e23/1e-15
 reader = chemkin.XMLReader("tests/rxns_reversible.xml")
 reaction_system = reader.get_reaction_systems()[0]
