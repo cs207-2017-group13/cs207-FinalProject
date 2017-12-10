@@ -11,28 +11,27 @@ class PropensityZeroException(Exception):
 
 
 class ReactionSimulator():
-    """Base class of simulators
+    """Base class of simulators.
 
     Methods
     -------
-    plot()
+    prepare_plot()
     """
-    def plot(self):
-        """Plot abundances/concentrations of species
-           over times
+    def prepare_plot(self):
+        """Plot abundances/concentrations of species over times.
 
         Returns
         -------
         plot : plot of abundances/concentrations of species
                over times
         """
-        plt.plot(self.times, self.abundances)
-        plt.xlabel("Time")
-        plt.ylabel("Concentration")
-        plt.legend(self.reaction_system.species, loc='best')
+        figure, axes = plt.subplots()
+        axes.plot(self.times, self.abundances)
+        axes.set_xlabel("Time")
+        axes.legend(self.reaction_system.species, loc='best')
         # file_name = "examples/figures/"+name+".png"
         # plt.savefig(file_name, dpi=125)
-        plt.show()
+        return figure, axes
 
 
 class StochasticSimulator(ReactionSimulator):
@@ -74,6 +73,11 @@ class StochasticSimulator(ReactionSimulator):
 
     Examples
     --------
+    >>> # From `ReactionSystem`
+    >>> reader = XMLReader("tests/rxns.xml")
+    >>> reaction_system = reader.get_reaction_systems()[0]
+    >>> stochastic_simulator = reaction_system.setup_reaction_simulator(
+    ... "stochastic", [10, 10, 10, 10, 10], (0, 30000))
 
     """
     def __init__(self, reaction_system, initial_abundances, temperature,
@@ -222,6 +226,15 @@ class StochasticSimulator(ReactionSimulator):
         reaction_index = np.where(propensity_cumsum > r2)[0][0]
         state_change_vector = self.state_change_matrix[reaction_index]
         self.abundances.append(self.abundances[-1] + state_change_vector)
+
+    def plot_simulation(self, show=True, savefig=None):
+        figure, axes = self.prepare_plot()
+        axes.set_ylabel("Abundances")
+        if show:
+            plt.show()
+        if savefig:
+            figure.savefig(savefig)
+        return
 
 
 class DeterministicSimulator(ReactionSimulator):
