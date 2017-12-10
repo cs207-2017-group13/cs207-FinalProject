@@ -28,7 +28,7 @@ class ReactionSimulator():
                              "match number of chemical species (%d)." % (
                                  len(self.abundances[0]),
                                  len(self.reaction_system.species[0])))
-        assert self.t_span[1] < self.t_span[0]
+        assert self.t_span[1] > self.t_span[0]
 
     def prepare_plot(self):
         """Setup plot objects. Helper function.
