@@ -21,6 +21,10 @@ class ReactionSimulator():
         """Ensure simulation parameters agree with `ReactionSystem`.
 
         """
+        try:
+            float(self.temperature)
+        except:
+            raise ValueError("Temperature not a number: %s" % self.temperature)
         if self.temperature <= 0:
             raise ValueError("Temperature must be positive.")
         if len(self.abundances[0]) != len(self.reaction_system.species):
