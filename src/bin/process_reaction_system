@@ -7,214 +7,238 @@ import argparse
 import numpy as np
 import chemkin.chemkin as chemkin
 
+
+def read_input(prompt, type=str):
+    try:
+        user_input = input(prompt)
+    except EOFError:
+        pass
+    return user_input
+
+
+def print_bold_underlined(text):
+    print('\n\033[1m' + '\033[4m' + text + '\033[0m'+'\033[0m')
+
+
+def start_ipython():
+    print("Starting IPython")
+    print("Available names are")
+    tmp = globals().copy()
+    [print(k,'  :  ',v,' type:' , type(v)) for k,v in tmp.items() if not k.startswith('_') and k!='tmp' and k!='In' and k!='Out' and not hasattr(v, '__call__')]
+    embed()
+
 parser = argparse.ArgumentParser()
 parser.add_argument("xmlfile")
 args = parser.parse_args()
 xmlfile = chemkin.XMLReader(args.xmlfile)
 reaction_systems = xmlfile.get_reaction_systems()
-length = len(reaction_systems)
-option = input('Do you wish to continue with the UI (y/n) : ')
+
+
+option = input('Do you wish to continue with the UI (y/n)\n'
+               '("N" will leave you in IPython interpreter) : ')
+
 if option == 'y':
-	main_menu_choice = '0'
-	while(main_menu_choice != '5'):
+    print("User-provided XML file has %d reaction systems :" % (
+        len(reaction_systems)))
+    for i, system in enumerate(reaction_systems):
+        print("System %d :" % (i+1))
+        print(system.get_info())
+        print()
 
-		print('\n\033[1m' + '\033[4m'+'Main Menu'+'\033[0m'+'\033[0m')
-		print(' 1) Get Reaction System Information')
-		print(' 2) Calculate Reaction Rate')
-		print(' 3) Reaction Simulation')
-		print(' 4) Switch to IPython terminal')
-		print(' 5) Exit')
-		main_menu_choice = input('Please enter your choice : ')
+    while True:
+        selection = read_input("Please select a reaction system by number : ")
+        try:
+            selection = int(selection)
+            assert selection <= len(reaction_systems)
+            assert selection > 0
+        except:
+            continue
+        break
+    reaction_system = reaction_systems[selection-1]
+    n_species = len(reaction_system)
 
-		if main_menu_choice == '1':
-			reactionChoice = input('\nThere are {} reaction/s in the XML file. Please enter the number corresponding to the'
-			 ' reaction you want to work on : '.format(length))
-			reactionChoice = int(reactionChoice)
-			reaction_info_choice = '0'
-			while(reaction_info_choice != '5'):
-				print('\n\033[1m' + '\033[4m'+'Reaction Info Menu'+'\033[0m'+'\033[0m')
-				print(' 1) Get Reactant Coefficients')
-				print(' 2) Get Product Coefficients')
-				print(' 3) Get Rate Coefficient (k)')
-				print(' 4) Get Progress Rate')
-				print(' 5) Go to Previous Menu')
-				print(' 6) Exit')
+    main_menu_choice = '0'
+    while(main_menu_choice != '5'):
 
-				reaction_info_choice = input('Please enter your choice : ')
-				if reaction_info_choice == '1':
-					print('\nReactant Coefficients: \n' , reaction_systems[reactionChoice-1].reactant_coefficients,'\n')
-				elif reaction_info_choice == '2':
-					print('\nProduct Coefficients: \n' , reaction_systems[reactionChoice-1].product_coefficients,'\n')
-				elif reaction_info_choice == '3':
-					temp = input('Please enter temperature : ')
-					temp = int(temp)
-					print('\nRate Coefficient: \n', reaction_systems[reactionChoice-1].get_rate_coefficients(temp),'\n')
-				elif reaction_info_choice == '4':
-					temp = input('Please enter temperature : ')
-					temp = int(temp)
-					species = len(reaction_systems[reactionChoice-1].reactant_coefficients)
-					conc = input('Please enter comma sepearated concentrations for each of the {} species in the reaction : '.format(species))
-					conc = np.fromstring(conc, dtype=int, sep=',')
-					print('\nProgress Rate: \n', reaction_systems[reactionChoice-1].calculate_progress_rate(conc,temp),'\n')
-				
-				
-				elif reaction_info_choice == '6':
-					main_menu_choice = '5'
-					break
+        print_bold_underlined('Main Menu')
+        print(' 1) Get Reaction System Information')
+        print(' 2) Calculate Reaction Rate')
+        print(' 3) Reaction Simulation')
+        print(' 4) Switch to IPython terminal')
+        print(' 5) Exit')
+        main_menu_choice = input('Please enter your choice : ')
 
-				else:
-					if reaction_info_choice == '5':
-						pass
-					else:
-						print('\n\033[1m' + 'Please enter valid choice.'+'\033[0m\n')
+        if main_menu_choice == '1':
+            reaction_info_choice = '0'
+            while(reaction_info_choice != '6'):
+                print_bold_underlined('Reaction Info Menu')
+                print(' 1) Print Info')
+                print(' 2) Get Reactant Coefficients')
+                print(' 3) Get Product Coefficients')
+                print(' 4) Get Rate Coefficients (k)')
+                print(' 5) Get Progress Rates')
+                print(' 6) Go to Previous Menu')
+                print(' 7) Exit')
 
+                reaction_info_choice = input('Please enter your choice : ')
+                if reaction_info_choice == '1':
+                    print(reaction_system.get_info())
+                elif reaction_info_choice == '2':
+                    print('\nReactant Coefficients: \n', reaction_system.reactant_coefficients, '\n')
+                elif reaction_info_choice == '3':
+                    print('\nProduct Coefficients: \n', reaction_system.product_coefficients, '\n')
+                elif reaction_info_choice == '4':
+                    temp = input('Please enter temperature : ')
+                    temp = int(temp)
+                    print('\nRate Coefficient: \n', reaction_system.get_rate_coefficients(temp), '\n')
+                elif reaction_info_choice == '5':
+                    temp = input('Please enter temperature : ')
+                    temp = int(temp)
+                    conc = input('Please enter comma sepearated concentrations for each of the {} species in the reaction : '.format(n_species))
+                    conc = np.fromstring(conc, dtype=int, sep=',')
+                    print('\nProgress Rate: \n', reaction_system.calculate_progress_rate(conc,temp),'\n')
+                elif reaction_info_choice == '6':
+                    # if 6, continue and let loop break
+                    pass
+                elif reaction_info_choice == '7':
+                    main_menu_choice = '5'
+                    break
+                else:
+                    print('\n\033[1m' + 'Please enter valid choice.'+'\033[0m\n')
 
-		elif main_menu_choice == '2':
-			reactionChoice = input('\nThere are {} reaction/s in the XML file. Please enter the number corresponding to the'
-			 ' reaction you want to work on : '.format(length))
-			reactionChoice = int(reactionChoice)
-			temp = input('Please enter temperature : ')
-			temp = int(temp)
-			species = len(reaction_systems[reactionChoice-1].reactant_coefficients)
-			conc = input('Please enter comma sepearated concentrations for each of the {} species in the reaction : '.format(species))
-			conc = np.fromstring(conc, dtype=int, sep=',')
-			print('\nReaction Rate: \n', reaction_systems[reactionChoice-1].calculate_reaction_rate(conc,temp),'\n')
+        # Reaction rates
+        elif main_menu_choice == '2':
+            temp = input('Please enter temperature : ')
+            temp = float(temp)
+            conc = input('Please enter comma-separated concentrations for each of the {} species in the reaction : '.format(n_species))
+            conc = np.fromstring(conc, dtype=int, sep=',')
+            print('\nReaction Rate: \n', reaction_system.calculate_reaction_rate(conc, temp), '\n')
 
-		elif main_menu_choice == '3':
-			reactionChoice = input('\nThere are {} reaction/s in the XML file. Please enter the number corresponding to the'
-			 ' reaction you want to work on : '.format(length))
-			reactionChoice = int(reactionChoice)
-			species = len(reaction_systems[reactionChoice-1].reactant_coefficients)
+        # Reaction simulation
+        elif main_menu_choice == '3':
+            sim_choice = '0'
+            while sim_choice != '3':
+                if sim_choice == '4':
+                    main_menu_choice = '5'
+                    break
 
-			sim_choice = '0'
-			while(sim_choice != '3'):
-				if sim_choice == '4':
-					main_menu_choice = '5'
-					break
+                print_bold_underlined('Reaction Simulation Menu')
+                print(' 1) Setup Deterministic Simulation')
+                print(' 2) Setup Stochastic Simulation')
+                print(' 3) Go to Previous Menu')
+                print(' 4) Exit')
 
-				print('\n\033[1m' + '\033[4m'+'Reaction Simulation Menu'+'\033[0m'+'\033[0m')
-				print(' 1) Deterministic')
-				print(' 2) Stochastic')
-				print(' 3) Go to Previous Menu')
-				print(' 4) Exit')
+                sim_choice = input('Please enter your choice : ')
 
-				sim_choice = input('Please enter your choice : ')
+                if sim_choice == '1':
+                    det_choice = '0'
 
+                    while(det_choice != '4'):
+                        print_bold_underlined('Solver Methods')
+                        print(' 1) Backward Differentiation Formula.')
+                        print(' 2) Backward Euler')
+                        print(' 3) Runge-Kutta-Fehlberg')
+                        print(' 4) Go to Previous Menu')
+                        print(' 5) Exit')
+                        det_choice = input('\nPlease input your choice : ')
 
-				if sim_choice == '1':
-					det_choice = '0'
+                        if det_choice not in ['1','2','3','4','5']:
+                            print('\n\033[1m' + 'Please enter valid choice.'+'\033[0m\n')
 
-					while(det_choice != '4'):
-						print('\n\033[1m' + '\033[4m'+'Deterministic Simulation Menu'+'\033[0m'+'\033[0m')
-						print(' 1) Backward Differentiation Formula.')
-						print(' 2) Backward Euler')
-						print(' 3) Runge-Kutta-Fehlberg')
-						print(' 4) Go to Previous Menu')
-						print(' 5) Exit')
-						det_choice = input('\nPlease input your choice : ')
-						
-						if det_choice not in ['1','2','3','4','5']:
-							print('\n\033[1m' + 'Please enter valid choice.'+'\033[0m\n')
+                        if det_choice == '4':
+                            break
 
-						if det_choice == '4':
-							break
+                        if det_choice == '5':
+                            sim_choice = '4'
+                            break
 
-						if det_choice == '5':
-							sim_choice = '4'
-							break
-						
+                        abundance = input('\nPlease enter initial concentrations for each of the {} species in the reaction in the form {} : '.format(n_species, '`1E-05, 2E-05, ...`'))
+                        abundance = np.fromstring(abundance, dtype=float, sep=',')
+                        temp = input('Please enter temperature : ')
+                        temp = float(temp)
+                        t_span = input('Please enter comma-separated time span (start time, end time) of the reactions to be simulated : ')
+                        t_span = np.fromstring(t_span, dtype=float, sep=',')
+                        dt = input('Please enter size of time steps.\n'
+                                   '(Press enter to continue with default of 0.01 s) : ')
+                        if dt:
+                            dt = float(dt)
+                        else:
+                            dt = 0.01
+                        det_sim = reaction_system.setup_reaction_simulator('deterministic', abundance, temp, t_span, dt=dt)
 
-						abundance = input('\nPlease enter initial abundances for each of the {} species in the reaction in the form {} : '.format(species, '`1E-05, 2E-05, ...`'))
-						abundance = np.fromstring(abundance, dtype=float, sep=',')
-						temp = input('Please enter temperature : ')
-						temp = float(temp)
-						t_span = input('Please enter comma separate time span (start time, end time) of the reactions to be simulated : ')
-						t_span = np.fromstring(t_span, dtype=float, sep=',')
-						dt = input('Please enter size of time steps. Default is 0.01 : ')
-						if dt:
-							dt = float(dt)
-							det_sim = reaction_systems[reactionChoice-1].setup_reaction_simulator('deterministic', abundance, temp, t_span, dt=dt)
-						else:
-							det_sim = reaction_systems[reactionChoice-1].setup_reaction_simulator('deterministic', abundance, temp, t_span)
+                        error_tolerance  = input('Please enter error tolerance.\n'
+                                                 '(Press enter to continue with default value of `1E-06` : ')
+                        if error_tolerance:
+                            error_tolerance = float(error_tolerance)
 
-						if det_choice == '1':
-							error_tolerance  = input('Please enter tolerance of error. Default value is `1E-06`  : ')
-							if error_tolerance:
-								error_tolerance = float(error_tolerance)
-								print('\nSolution : \n', det_sim.simulate('bdf', error_tolerance),'\n')
-							else:
-								print('\nSolution : \n', det_sim.simulate('bdf'),'\n')
-							det_plot= input('Do you want to see the plot of concentrations over time (y/n) : ' )
-							if det_plot =='y':
-								det_sim.plot_simulation()
-							else:
-								pass
+                        print("\nSimulation run starting")
 
-						elif det_choice == '2':
-							error_tolerance  = input('Please enter tolerance of error. Default value is `1E-06` : ')
-							if error_tolerance:
-								error_tolerance = float(error_tolerance)
-								print('\nSolution: \n', det_sim.simulate('backward_euler', error_tolerance),'\n')
-							else:
-								print('\nSolution: \n', det_sim.simulate('backward_euler'),'\n')
-							det_plot= input('Do you want to see the plot of concentrations over time (y/n) : ' )
-							if det_plot =='y':
-								det_sim.plot_simulation()
-							else:
-								pass
+                        if det_choice == '1':
+                            if error_tolerance:
+                                det_sim.simulate('bdf', error_tolerance)
+                            else:
+                                det_sim.simulate('bdf')
 
-						elif det_choice == '3':
-							error_tolerance  = input('Please enter tolerance of error. Default value is `1E-06` : ')
-							if error_tolerance:
-								error_tolerance = float(error_tolerance)
-								print('\nSolution : \n', det_sim.simulate('rk45', error_tolerance),'\n')
-							else:
-								print('\nSolution : \n', det_sim.simulate('rk45'),'\n')
-							det_plot= input('Do you want to see the plot of concentrations over time (y/n) : ' )
-							if det_plot =='y':
-								det_sim.plot_simulation()
-							else:
-								pass
+                        elif det_choice == '2':
+                            if error_tolerance:
+                                det_sim.simulate('backward_euler', error_tolerance)
+                            else:
+                                det_sim.simulate('backward_euler')
+                        elif det_choice == '3':
+                            if error_tolerance:
+                                det_sim.simulate('rk45', error_tolerance)
+                            else:
+                                det_sim.simulate('rk45')
+                        
+                        print("\nSimulation run done")
+                        file_path = input('Please enter the file path where you want to save simulation data : ')
+                        if file_path:
+                            det_sim.save_data(file_path)
+                        else:
+                         print('Enter a non empty file path.')
+                        det_plot = input('Do you want to see the plot of concentrations over time (y/n) : ' )
+                        if det_plot == 'y':
+                            det_sim.plot_simulation()
 
+                elif sim_choice == '2':
+                    print_bold_underlined('Stochastic Simulation Menu')
+                    abundance = input('\nPlease enter initial abundances (integer) for each of the {} species in the reaction : '.format(n_species))
+                    abundance = np.fromstring(abundance, dtype=int, sep=',')
+                    temp = input('Please enter temperature : ')
+                    temp = float(temp)
+                    t_span = input('Please enter comma-separated time span (start time, end time) for simulation : ')
+                    t_span = np.fromstring(t_span, dtype=float, sep=',')
+                    system_volume = input('Please enter System Volume.\n'
+                                          '(Press enter to accept default value of `1e-15`) : ')
+                    if system_volume:
+                        system_volume = float(system_volume)
+                        stoc_sim = reaction_system.setup_reaction_simulator('stochastic', abundance, temp, t_span, system_volume=system_volume)
+                    else:
+                        stoc_sim = reaction_system.setup_reaction_simulator('stochastic', abundance, temp, t_span)
+                    print("\nSimulation run starting")
+                    stoc_sim.simulate()
+                    print("\nSimulation run done")
+                    print('\n')
+                    file_path = input('Please enter the file path where you want to save simulation data : ')
+                    if file_path:
+                        stoc_sim.save_data(file_path)
+                    else:
+                        print('Enter a non empty file path.')
+                        
+                    stoc_plot = input('Do you want to see the plot of concentrations over time (y/n) : ')
+                    if stoc_plot == 'y':
+                        stoc_sim.plot_simulation()
+                    else:
+                        pass
 
+                elif sim_choice not in ['1', '2','3','4']:
+                    print('\n\033[1m' + 'Please enter valid choice.'+'\033[0m\n')
 
-				elif sim_choice == '2':
-					print('\n\033[1m' + '\033[4m'+'Stochastic Simulation Menu'+'\033[0m'+'\033[0m')
-					abundance = input('\nPlease enter initial abundances for each of the {} species in the reaction in the form {} : '.format(species, '`1E-05, 2E-05, ...`'))
-					abundance = np.fromstring(abundance, dtype=float, sep=',')
-					temp = input('Please enter temperature : ')
-					temp = float(temp)
-					t_span = input('Please enter comma separate time span (start time, end time) of the reactions to be simulated : ')
-					t_span = np.fromstring(t_span, dtype=float, sep=',')
-					system_volume = input('Please enter System Volume. Default value is `1e-15` : ')
-					if system_volume:
-						system_volume = float(system_volume)
-						stoc_sim = reaction_systems[reactionChoice-1].setup_reaction_simulator('stochastic', abundance, temp, t_span, system_volume=system_volume)
-					else:
-						stoc_sim = reaction_systems[reactionChoice-1].setup_reaction_simulator('stochastic', abundance, temp, t_span)
-					print('\nSolution :')	
-					stoc_sim.simulate()
-					print('\n')
-					stoc_plot= input('Do you want to see the plot of concentrations over time (y/n) : ' )
-					if stoc_plot == 'y':
-						stoc_sim.plot_simulation()
-					else:
-						pass
-
-
-				elif sim_choice not in ['1', '2','3','4']:
-					print('\n\033[1m' + 'Please enter valid choice.'+'\033[0m\n')
-
-
-		elif main_menu_choice == '4':
-			embed(header="Available name: reaction_systems\n"
-	      		  "  (a list of `ReactionSystem`s)")
-		elif main_menu_choice not in ['1','2','3','4','5']:
-			print('\n\033[1m' + 'Please enter valid choice.'+'\033[0m\n')
-
-
+        elif main_menu_choice == '4':
+            start_ipython()
+            exit(0)
+        elif main_menu_choice not in ['1','2','3','4','5']:
+            print('\n\033[1m' + 'Please enter valid choice.'+'\033[0m\n')
 else:
-	embed(header="Available name: reaction_systems\n"
-	      "  (a list of `ReactionSystem`s)")
-
-	
+    start_ipython()
+    
