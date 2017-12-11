@@ -427,7 +427,7 @@ class DeterministicSimulator(ReactionSimulator):
             Axes object of the plot.
         """
         figure, axes = plt.subplots()
-        axes.step(self.times, self.abundances)
+        axes.plot(self.times, self.abundances)
         axes.set_xlabel("Time")
         axes.set_ylabel("Concentrations")
         axes.legend(self.reaction_system.species, loc='center right')
