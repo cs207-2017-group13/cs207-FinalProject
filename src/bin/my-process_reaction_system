@@ -8,7 +8,7 @@ import numpy as np
 import chemkin.chemkin as chemkin
 
 
-def read_input(prompt):
+def read_input(prompt, type=str):
     try:
         user_input = input(prompt)
     except EOFError:
