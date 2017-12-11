@@ -17,18 +17,18 @@
         - [Testing](#testing)
     - [Dependencies](#dependencies)
     - [Contributing to the development version](#contributing-to-the-development-version)
-- [Basic Usage and Examples](#basic-usage-and-examples)
+- [Basic Usage and Library Class Descriptions](#basic-usage-and-library-class-descriptions)
     - [`process_reaction_system` executable: Menu-based user interface](#processreactionsystem-executable-menu-based-user-interface)
-    - [`XMLReader` class: Read and parse XML input file](#xmlreader-class-read-and-parse-xml-input-file)
-    - [`ElementaryReaction` class: Represents elementary reactions](#elementaryreaction-class-represents-elementary-reactions)
-    - [`ReactionSystem` class: Represents a system of reactions](#reactionsystem-class-represents-a-system-of-reactions)
-    - [`Thermochem` class: Class for calculating the backward reaction rate](#thermochem-class-class-for-calculating-the-backward-reaction-rate)
-    - [`Rxnset` class: Read and store NASA polynomial coefficients](#rxnset-class-read-and-store-nasa-polynomial-coefficients)
-- [New Feature](#new-feature)
-    - [`ReactionSimulator` class: Base class for simulations.](#reactionsimulator-class-base-class-for-simulations)
-    - [`StochasticSimulator` class: Class for stochastic simulation](#stochasticsimulator-class-class-for-stochastic-simulation)
-    - [`DeterministicSimulator` class: Class for deterministic simulation](#deterministicsimulator-class-class-for-deterministic-simulation)
-    - [`ODE_solver` class: Solve ordinary differential equation with three methods](#odesolver-class-solve-ordinary-differential-equation-with-three-methods)
+    - [`chemkin.chemkin.XMLReader`: Read and parse XML input file](#chemkinchemkinxmlreader-read-and-parse-xml-input-file)
+    - [`chemkin.chemkin.ElementaryReaction`: Represents elementary reactions](#chemkinchemkinelementaryreaction-represents-elementary-reactions)
+    - [`chemkin.chemkin.ReactionSystem`: Represents a system of reactions](#chemkinchemkinreactionsystem-represents-a-system-of-reactions)
+    - [`chemkin.thermodynamics.Thermochem`: Class for calculating the backward reaction rate](#chemkinthermodynamicsthermochem-class-for-calculating-the-backward-reaction-rate)
+    - [`chemkin.thermodynamics.Rxnset`: Read and store NASA polynomial coefficients](#chemkinthermodynamicsrxnset-read-and-store-nasa-polynomial-coefficients)
+- [Simulation classes (new feature for final project)](#simulation-classes-new-feature-for-final-project)
+    - [`chemkin.simulator.ReactionSimulator`: Base class for simulations.](#chemkinsimulatorreactionsimulator-base-class-for-simulations)
+    - [`chemkin.simulator.StochasticSimulator`: Class for stochastic simulation](#chemkinsimulatorstochasticsimulator-class-for-stochastic-simulation)
+    - [`chemkin.simulator.DeterministicSimulator`: Class for deterministic simulation](#chemkinsimulatordeterministicsimulator-class-for-deterministic-simulation)
+    - [`chemkin.ode_solver.ODE_solver`: Solve ordinary differential equation with three methods](#chemkinodesolverodesolver-solve-ordinary-differential-equation-with-three-methods)
 
 <!-- markdown-toc end -->
 
@@ -213,25 +213,29 @@ Our package depends on `scipy`, `numpy`, and `matplotlib` packages.
 ``chemical-kinetics`` is hosted on Github and gladly accepts contributions.
 
 
-Basic Usage and Examples
-========================
+Basic Usage and Library Class Descriptions
+==========================================
 
 In this section, usage of ``chemical-kinetics`` is demonstrated. The various classes built into the library are enumerated.
 
+The ``chemical-kinetics`` library top-level module is ``chemkin``. All classes and functions are contained in ``chemkin``.
+
+Users have two ways of using ``chemical-kinetics`` currently: through an interface provided by the executable ``process_reaction_system`` and by accessing the classes and functions of the library directly. For an example of the latter, please see ``examples/reversible_reaction_simulation.py``.
+
+Note that input data on reaction systems must be provided in the standard CTML XML format. See ``examples`` as well as ``tests`` for examples of the XML format.
+
 ## `process_reaction_system` executable: Menu-based user interface
 
-Once the library is installed, `process_reaction_system` executable is available as an interface to our library. In addition to the menu-based interface, it is also an option to start an IPython notebook at any time to continue working programmatically.
+Once the library is installed, `process_reaction_system` executable is available as an interface to our library. In addition to using the menu-based interface, it is also an option to start an IPython notebook at any time to continue working programmatically.
 
 Example:
 ```python
 process_reaction_system <path to input XML file>
 ```
 
-## `XMLReader` class: Read and parse XML input file
+## `chemkin.chemkin.XMLReader`: Read and parse XML input file
 
-The user should have an XML input file containing all the chemical reactions. `XMLReader` will read in the file and parse the file with the `xml.etree` library. It will output a list of dictionaries containing all the elements needed to calculate reaction rate coefficients, progress rates and reaction rates. It will create `ElementaryReaction` objects inside the `get_reaction_systems` function, and then put all `ElementaryReaction` objects in a reaction system into a list. It will then create `ReactionSystem` objects.
-
-This class contains one method: `get_reaction_systems()`.
+The user should have an XML input file containing all the chemical reactions. `XMLReader` will read and parse the input file. The user only needs to use the `get_reaction_systems` method. `XMLReader` creates a `ReactionSystem` instance for each system of reactions in the XML input file. Each `ReactionSystem` instance holds a list of `ElementaryReaction` instances, each one representing an elementary reaction.
 
 Example:
 ```python
@@ -239,16 +243,19 @@ import chemkin.chemkin as chemkin
 reader = chemkin.XMLReader("tests/rxns.xml")
 reaction_systems = reader.get_reaction_systems()
 ```
-`reaction_systems` is a list containing multiple `ReactionSystem` instances. The length of `reaction_systems` is the number of reaction systems, and the length of each list element is the number of reactions in a reaction system.
+
+`reaction_systems` is a list containing multiple `ReactionSystem` instances. The length of `reaction_systems` is the number of reaction systems.
 
 
-## `ElementaryReaction` class: Represents elementary reactions
+## `chemkin.chemkin.ElementaryReaction`: Represents elementary reactions
 
-Takes a dictionary of properties from the XMLReader class for each elementary reaction. Calculates the rate coefficient for each elementary reaction and passes it to the ReactionSystem class. It also returns a dictionary of recatants and products to the ReactionSystem class.
+Takes a dictionary of properties from the `XMLReader` class for each elementary reaction. This class calculates the rate coefficients and returns stoichiometric coefficients. Instances of this class are contained by the `ReactionSystem` class.
 
-This class has thee public methods, two private methods a special method:
+This class has thee public methods, two private methods, and a special method:
 
- - `__repr__()`: Returns a string containing basic information about the elementary reaction
+ - `__repr__()`: Returns representation of the class
+ 
+ - `get_info()`: Returns a `str` with reaction information.
 
  - `get_reactants()`: Returns a dictionary with reactants as key and the stoichiometric coeff of reactants as value for each elementary reaction.
 
@@ -283,15 +290,17 @@ rate_coeff = elementary_reaction.calculate_rate_coefficient(1000)
 ```
 
 
-## `ReactionSystem` class: Represents a system of reactions
+## `chemkin.chemkin.ReactionSystem`: Represents a system of reactions
 
-Takes a list of ElementaryReaction instances and a list of species. Builds stoichiometric coefficient matrices for the reactants and products and calculates the corresponding progress rates and reaction rates.
+Takes a list of `ElementaryReaction` instances and a list of chemical species. Builds stoichiometric coefficient matrices for the reactants and products and calculates the corresponding progress rates and reaction rates.
 
-This class has five methods, and two special methods:
+This class has several methods, including two special methods:
 
- - `__repr__`: Returns a string containing basic information for the reaction system
+ - `__repr__`: Returns representation of the class
 
  - `__len__`: Returns the number of species in the reaction system
+
+ - `get_info()`: Returns a string containing basic information for the reaction system
 
  - `calculate_progress_rate(concs, temperature)`: Returns the progress rate of a system of elementary reactions
 
@@ -305,7 +314,7 @@ This class has five methods, and two special methods:
 
  - `build_product_coefficient_matrix()`: Build a product coefficients matrix for the reaction system
 
- - `check_reversible`: Check if each elementary reaction is reversible
+ - `check_reversible()`: Check if each elementary reaction is reversible
 
  - `setup_reaction_simulator(self, simulation_type, abundances, temperature, t_span, dt=0.01, system_volume=1e-15)`: Quantitative modeling of chemical reactions by either deterministic simulator or stochastic simulator
 
@@ -313,22 +322,25 @@ Example:
 ```python
 import chemkin.chemkin as chemkin
 reader = chemkin.XMLReader("tests/rxns.xml")
-reaction_system = reader.get_reaction_systems()
-len(reaction_system[0])
-concs = [1., 2., 1., 3., 1.]
-reaction_system[0].build_reactant_coefficient_matrix()
-reaction_system[0].build_product_coefficient_matrix()
-print(reaction_system[0])
-reaction_system[0].calculate_progress_rate(concs, 300)
-reaction_system[0].calculate_reaction_rate(concs, 300)
-reaction_system[0].get_rate_coefficients()
-reaction_system[0].get_backward_rate_coefficients()
+reaction_system = reader.get_reaction_systems()[0]
+len(reaction_system)  # Gives number of chemical species
+
+concentrations = [1., 2., 1., 3., 1.]
+temperature = 300.
+
+print(reaction_system.get_info())
+reaction_system.calculate_progress_rate(concentrations, temperature)
+reaction_system.calculate_reaction_rate(concentrations, temperature)
+reaction_system.get_rate_coefficients()
+reaction_system.get_backward_rate_coefficients()
 ```
 
 
-## `Thermochem` class: Class for calculating the backward reaction rate
+## `chemkin.thermodynamics.Thermochem`: Class for calculating the backward reaction rate
 
-Construct with Rxnset class object, the default pressure of the reactor and the default ideal gas constant. The values of pressure of the reactor and ideal gas constant can be changed. It calculates backward reaction rate using the temperature passed into the functions and the corresponding NASA polynomial coefficients.
+Construct with `Rxnset` class instance, the pressure of the reactor, and the ideal gas constant. This class is responsible for calculating backward reaction rate using NASA polynomials.
+
+This is a helper class. Users should use `ReactionSystem` to obtain backward coefficients.
 
 This class has four methods:
 
@@ -357,9 +369,11 @@ thermo.backward_coeffs(kf, 800)
 ```
 
 
-## `Rxnset` class: Read and store NASA polynomial coefficients 
+## `chemkin.thermodynamics.Rxnset`: Read and store NASA polynomial coefficients 
 
-This class reads the NASA polynomial coefficients for all species in the reaction system from the SQL database which contains coefficients for all species. It stores the coefficients and temperature ranges in a dictionary of dictionaries where the name of species is the key. For each reaction system, the class just need to read from the database once, and check the range the given temperature is in every time the temperature of the reaction system changes afterwards. If the `get_nasa_coefficients` function is called twice for the same reaction system and the same temperature, the cached value is returned.
+This class reads the NASA polynomial coefficients for all species in the reaction system from the SQL database which contains coefficients for all relevant chemical species. It stores the coefficients and temperature ranges in a dictionary of dictionaries where the name of species is the key. 
+
+If the `get_nasa_coefficients` function is called twice for the same reaction system and the same temperature, cached values are returned, avoiding reading from the database unnecessarily.
 
 This class has two methods:
 
@@ -379,17 +393,16 @@ rxnset.get_nasa_coefficients(800)
 ```
 
 
-New Feature
-===========
+Simulation classes (new feature for final project)
+===================================================
 
-We elaborated the motivations for implementing a deterministic simulator and a stochastic simulator in the section of `Scientific Background`. We added two modules containing four classes as shown below:
+We elaborated the motivations for implementing a deterministic simulator and a stochastic simulator in the section of `Scientific Background`. To implement such simulators, we added two modules containing four classes as shown below:
 
-## `ReactionSimulator` class: Base class for simulations.
+## `chemkin.simulator.ReactionSimulator`: Base class for simulations.
 
 This class is a base class for `DeterministicSimulator` and `StochasticSimulator`. Common methods like validating arguments and saving data are implemented.
 
-
-## `StochasticSimulator` class: Class for stochastic simulation
+## `chemkin.simulator.StochasticSimulator`: Class for stochastic simulation
 
 This class inherits from base class `ReactionSimulator`. It carries out stochastic reaction simulations using the Gillespie stochastic simulation algorithm. Note that a reversible elementary reaction represents two different reactions in a stochastic simulation.
 
@@ -404,6 +417,8 @@ It has five methods:
  - `simulate()`: Run stochastic simulation between `t_span[0]` and `t_span[1]`.
 
  - `plot_simulation(show=True, savefig=None)`: Shows or saves a plot of the abundances of species over time.
+ 
+ - `save_data(path)`: Save simulation data to `path` as text.
 
 Example:
 ```python
@@ -412,14 +427,14 @@ import chemkin.simulator as simulator
 abundances = np.array([10, 10, 10, 10, 10])
 reader = chemkin.XMLReader("tests/rxns.xml")
 reaction_system = reader.get_reaction_systems()[0]
-stoch_sim = simulator.StochasticSimulator(
+stoch_simulator = simulator.StochasticSimulator(
 	reaction_system, abundances, 800, [0, 1], 1e-15)
-stoch_sim.simulate()
-stoch_sim.plot_simulation()
+stoch_simulator.simulate()
+stoch_simulator.plot_simulation()
 ```
  
 
-## `DeterministicSimulator` class: Class for deterministic simulation
+## `chemkin.simulator.DeterministicSimulator`: Class for deterministic simulation
 
 This class inherits from the `ReactionSimulator` class. It calls the `ODE_solver` class to numerically integrate reaction rates forward in time, and simulates the concentration of species deterministically.
 
@@ -430,22 +445,24 @@ This class has three methods:
  - `diff_func(t, y)`: In order for the ode solver to work, we need a function with t (time) and y as parameters. However, the original calculate reaction rate function is a function of y and temperature. We need to transform the original function.
 
  - `plot_simulation(show=True, savefig=None)`: Shows or saves a plot of the concentrations of species over time.
+ 
+ - `save_data(path)`: Save simulation data to `path` as text.
 
 Example:
 ```python
 import chemkin.chemkin as chemkin
 import chemkin.simulator as simulator
-concs = np.array([1., 2., 1., 3., 1.])*1e-05
+concentrations = np.array([1., 2., 1., 3., 1.])*1e-05
 reader = chemkin.XMLReader("tests/rxns.xml")
 reaction_system = reader.get_reaction_systems()[0]
-det_sim = simulator.DeterministicSimulator(
-    reaction_system, concs, 800, [0, 1], dt=0.01)
-det_sim.simulate()
-det_sim.plot_simulation()
+deterministic_simulator = simulator.DeterministicSimulator(
+    reaction_system, concentrations, 800, [0, 1], dt=0.01)
+deterministic_simulator.simulate()
+deterministic_simulator.plot_simulation()
 ```
 
 
-## `ODE_solver` class: Solve ordinary differential equation with three methods
+## `chemkin.ode_solver.ODE_solver`: Solve ordinary differential equation with three methods
 
 Implemented three ode solvers: backward euler method, Runge-Kutta-Fehlberg, and backward differentiation formula. Backward euler method and backward differentiation formula can be used to solve stiff ODE problems, while Runge-Kutta-Fehlberg moethod is more accurate for non-stiff problems. Notably, Runge-Kutta-Fehlberg moethod will adapt its step size according to the error. 
 
