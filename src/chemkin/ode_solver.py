@@ -80,6 +80,7 @@ class ODE_solver:
             message = self.backward_euler_step(epsilon)
             if message == "Failure":
                 print("Fixed point iteration does not converge.")
+                break
         if self.t[-1] < self.t_span[-1]:
             message = self.backward_euler_step(epsilon)
             if message == "Failure":
@@ -172,6 +173,10 @@ class ODE_solver:
         """
         while (self.t[-1]+self.dt) <= self.t_span[-1]:
             message = self.rk45_step(epsilon)
+            if message == "Failure":
+                print("This ODE system should not be solved by RK45.",
+                " Try backward euler with small step size.")
+                break
         if self.t[-1] < self.t_span[-1]:
             message = self.rk45_step(epsilon)
         if message == "Failure":

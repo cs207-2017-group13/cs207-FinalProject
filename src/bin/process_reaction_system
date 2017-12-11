@@ -164,7 +164,7 @@ if option == 'y':
                             dt = float(dt)
                         else:
                             dt = 0.01
-                        det_sim = reaction_system.setup_reaction_simulator('deterministic', abundance, temp, t_span, dt=dt)
+                        #det_sim = reaction_system.setup_reaction_simulator('deterministic', abundance, temp, t_span, dt=dt)
 
                         error_tolerance  = input('Please enter error tolerance.\n'
                                                  '(Press enter to continue with default value of `1E-06` : ')
@@ -174,28 +174,39 @@ if option == 'y':
                         print("\nSimulation run starting")
 
                         if det_choice == '1':
+                            det_sim = reaction_system.setup_reaction_simulator('deterministic', abundance, temp, t_span, dt=dt)
                             if error_tolerance:
                                 det_sim.simulate('bdf', error_tolerance)
                             else:
                                 det_sim.simulate('bdf')
 
                         elif det_choice == '2':
+                            det_sim = reaction_system.setup_reaction_simulator('deterministic', abundance, temp, t_span, dt=dt)
                             if error_tolerance:
                                 det_sim.simulate('backward_euler', error_tolerance)
                             else:
                                 det_sim.simulate('backward_euler')
                         elif det_choice == '3':
+                            det_sim = reaction_system.setup_reaction_simulator('deterministic', abundance, temp, t_span, dt=dt)
                             if error_tolerance:
                                 det_sim.simulate('rk45', error_tolerance)
                             else:
                                 det_sim.simulate('rk45')
                         
                         print("\nSimulation run done")
-                        file_path = input('Please enter the file path where you want to save simulation data : ')
-                        if file_path:
-                            det_sim.save_data(file_path)
-                        else:
-                         print('Enter a non empty file path.')
+                        save_file = input('Do you want to save the simulation data? (y/n) ')
+                        if save_file == 'y':
+                            invalid = True
+                            while  invalid:
+                                file_path = input('Please enter the file path where you want to save simulation data : ')
+                                if file_path:
+                                    det_sim.save_data(file_path)
+                                    invalid = False
+                                    break
+                                else:
+                                    print('Enter a non empty file path.\n')
+                        elif save_file == 'n':
+                            pass
                         det_plot = input('Do you want to see the plot of concentrations over time (y/n) : ' )
                         if det_plot == 'y':
                             det_sim.plot_simulation()
@@ -219,11 +230,19 @@ if option == 'y':
                     stoc_sim.simulate()
                     print("\nSimulation run done")
                     print('\n')
-                    file_path = input('Please enter the file path where you want to save simulation data : ')
-                    if file_path:
-                        stoc_sim.save_data(file_path)
-                    else:
-                        print('Enter a non empty file path.')
+                    save_file = input('Do you want to save the simulation data? (y/n) ')
+                    if save_file == 'y':
+                        invalid = True
+                        while  invalid:
+                            file_path = input('Please enter the file path where you want to save simulation data : ')
+                            if file_path:
+                                stoc_sim.save_data(file_path)
+                                invalid = False
+                                break
+                            else:
+                                print('Enter a non empty file path.\n')
+                    elif save_file == 'n':
+                        pass
                         
                     stoc_plot = input('Do you want to see the plot of concentrations over time (y/n) : ')
                     if stoc_plot == 'y':
