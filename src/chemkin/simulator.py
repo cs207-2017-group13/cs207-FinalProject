@@ -15,12 +15,31 @@ class ReactionSimulator():
 
     Methods
     -------
-    prepare_plot()
+    save_data(path)
+
     """
-    def _validate_arguments(self):
-        """Ensure simulation parameters agree with `ReactionSystem`.
+    def save_data(self, path):
+        """Save simulation data to file.
+
+        Simulation data will be saved as space-separated text file.
+
+        Parameters
+        ----------
+        path : str
+            Location to save data.
 
         """
+        data = np.concatenate([np.array([self.times]).T,
+                               np.array(self.abundances)], axis=1)
+        header = ",".join(["Times"] + self.reaction_system.species)
+        if isinstance(self.abundances[0][0], int):
+            format = ["%.8e"] + ["%d"] * len(self.reaction_system)
+        else:
+            format = ["%.8e"] + ["%.3e"] * len(self.reaction_system)
+        np.savetxt(path, data, fmt=format, header=header)
+
+    def _validate_arguments(self):
+        """Ensure simulation parameters agree with `ReactionSystem`."""
         try:
             float(self.temperature)
         except:
@@ -242,6 +261,22 @@ class StochasticSimulator(ReactionSimulator):
     def plot_simulation(self, show=True, savefig=None, title=None):
         """Plot abundances versus time.
 
+        Parameters
+        ----------
+        show : bool
+            Show the plot. Will block until plot is closed.
+        savefig : str
+            Save copy of figure to path. File extension will determine
+            file type.
+        title : str
+            Add a title to the figure.
+
+        Returns
+        -------
+        figure : matplotlib figure
+            Figure object of the plot
+        axes : matplotlib axes
+            Axes object of the plot.
         """
         figure, axes = plt.subplots()
         axes.step(self.times, self.abundances, where="post")
@@ -366,13 +401,30 @@ class DeterministicSimulator(ReactionSimulator):
         function
             right hand side of the ODE function
         '''
-        if (y<0).any():
-            y = [0 if i<0 else i for i in y]
-        return self.reaction_system.calculate_reaction_rate(y, self.temperature)
+        if (y < 0).any():
+            y = [0 if i < 0 else i for i in y]
+        return self.reaction_system.calculate_reaction_rate(
+            y, self.temperature)
 
     def plot_simulation(self, show=True, savefig=None, title=None):
         """Plot concentrations versus time.
 
+        Parameters
+        ----------
+        show : bool
+            Show the plot. Will block until plot is closed.
+        savefig : str
+            Save copy of figure to path. File extension will determine
+            file type.
+        title : str
+            Add a title to the figure.
+
+        Returns
+        -------
+        figure : matplotlib figure
+            Figure object of the plot
+        axes : matplotlib axes
+            Axes object of the plot.
         """
         figure, axes = plt.subplots()
         axes.step(self.times, self.abundances)
