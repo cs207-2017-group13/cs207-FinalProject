@@ -18,13 +18,12 @@
     - [Dependencies](#dependencies)
     - [Contributing to the development version](#contributing-to-the-development-version)
 - [Basic Usage and Examples](#basic-usage-and-examples)
-    - [`process_reaction_system` binary: Executable binary of the library](#processreactionsystem-binary-executable-binary-of-the-library)
+    - [`process_reaction_system` executable: Menu-based user interface](#processreactionsystem-executable-menu-based-user-interface)
     - [`XMLReader` class: Read and parse XML input file](#xmlreader-class-read-and-parse-xml-input-file)
-    - [`ElementaryReaction` class: Class for each elementary reaction](#elementaryreaction-class-class-for-each-elementary-reaction)
-    - [`ReactionSystem` class: Class for a system of reactions](#reactionsystem-class-class-for-a-system-of-reactions)
+    - [`ElementaryReaction` class: Represents elementary reactions](#elementaryreaction-class-represents-elementary-reactions)
+    - [`ReactionSystem` class: Represents a system of reactions](#reactionsystem-class-represents-a-system-of-reactions)
     - [`Thermochem` class: Class for calculating the backward reaction rate](#thermochem-class-class-for-calculating-the-backward-reaction-rate)
     - [`Rxnset` class: Read and store NASA polynomial coefficients](#rxnset-class-read-and-store-nasa-polynomial-coefficients)
-    - [`memoized` class: Caches a function's return value each time it is called](#memoized-class-caches-a-functions-return-value-each-time-it-is-called)
 - [New Feature](#new-feature)
     - [`ReactionSimulator` class: Base class for simulations.](#reactionsimulator-class-base-class-for-simulations)
     - [`StochasticSimulator` class: Class for stochastic simulation](#stochasticsimulator-class-class-for-stochastic-simulation)
@@ -211,19 +210,21 @@ Users can run the test suite by calling pytest from the main directory, e.g.
 Our package depends on `scipy`, `numpy`, and `matplotlib` packages.
 
 ## Contributing to the development version
-``chemical-kinetics`` is hosted on Github and gladly accepts contribution.
+``chemical-kinetics`` is hosted on Github and gladly accepts contributions.
 
 
 Basic Usage and Examples
 ========================
 
-## `process_reaction_system` binary: Executable binary of the library
+In this section, usage of ``chemical-kinetics`` is demonstrated. The various classes built into the library are enumerated.
 
-Once the library is installed, `process_reaction_system` binary file helps the user start working on it. The user also gets an option to work on an interactive interface or continue working on the terminal to access the functionalities of the `chemical-kinetics` library.
+## `process_reaction_system` executable: Menu-based user interface
+
+Once the library is installed, `process_reaction_system` executable is available as an interface to our library. In addition to the menu-based interface, it is also an option to start an IPython notebook at any time to continue working programmatically.
 
 Example:
 ```python
-process_reaction_system <location of test file>
+process_reaction_system <path to input XML file>
 ```
 
 ## `XMLReader` class: Read and parse XML input file
@@ -241,7 +242,7 @@ reaction_systems = reader.get_reaction_systems()
 `reaction_systems` is a list containing multiple `ReactionSystem` instances. The length of `reaction_systems` is the number of reaction systems, and the length of each list element is the number of reactions in a reaction system.
 
 
-## `ElementaryReaction` class: Class for each elementary reaction
+## `ElementaryReaction` class: Represents elementary reactions
 
 Takes a dictionary of properties from the XMLReader class for each elementary reaction. Calculates the rate coefficient for each elementary reaction and passes it to the ReactionSystem class. It also returns a dictionary of recatants and products to the ReactionSystem class.
 
@@ -282,7 +283,7 @@ rate_coeff = elementary_reaction.calculate_rate_coefficient(1000)
 ```
 
 
-## `ReactionSystem` class: Class for a system of reactions
+## `ReactionSystem` class: Represents a system of reactions
 
 Takes a list of ElementaryReaction instances and a list of species. Builds stoichiometric coefficient matrices for the reactants and products and calculates the corresponding progress rates and reaction rates.
 
@@ -378,19 +379,6 @@ rxnset.get_nasa_coefficients(800)
 ```
 
 
-## `memoized` class: Caches a function's return value each time it is called
-
-Decorator class. Caches a function's return value each time it is called. If called later with the same arguments, the cached value is returned (not reevaluated).
-
-This class has three special methods:
-
- - `__call__(*args)`: Cached a function's return value
-
- - `__repr__`: Return the function's docstring
-
- - `__get__(obj, objtype)`: Support instance methods
-
-
 New Feature
 ===========
 
@@ -398,7 +386,7 @@ We elaborated the motivations for implementing a deterministic simulator and a s
 
 ## `ReactionSimulator` class: Base class for simulations.
 
-This class is a base class for `DeterministicSimulator` and `StochasticSimulator`.
+This class is a base class for `DeterministicSimulator` and `StochasticSimulator`. Common methods like validating arguments and saving data are implemented.
 
 
 ## `StochasticSimulator` class: Class for stochastic simulation
