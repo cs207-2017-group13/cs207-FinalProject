@@ -46,11 +46,11 @@ class ReactionSimulator():
             raise ValueError("Temperature not a number: %s" % self.temperature)
         if self.temperature <= 0:
             raise ValueError("Temperature must be positive.")
-        if len(self.abundances[0]) != len(self.reaction_system.species):
+        if len(self.abundances[0]) != len(self.reaction_system):
             raise ValueError("Number of provided abundances (%d) does not "
                              "match number of chemical species (%d)." % (
                                  len(self.abundances[0]),
-                                 len(self.reaction_system.species[0])))
+                                 len(self.reaction_system)))
         assert self.t_span[1] > self.t_span[0]
 
 
